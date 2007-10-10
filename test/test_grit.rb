@@ -10,9 +10,13 @@ class TestGrit < Test::Unit::TestCase
   end
   
   def test_heads
+    @g.expects(:git).returns("634396b2f541a9f2d58b00be1a07f0c358b999b3 refs/heads/master \
+    initial grit setup\0Tom Preston-Werner <tom@mojombo.com> 1191997100 -0700")
+    
     heads = @g.heads
     head = heads.first
     assert_equal Grit::Head, head.class
+    
     assert_equal '634396b2f541a9f2d58b00be1a07f0c358b999b3', head.id
     assert_equal 'refs/heads/master', head.name
     assert_equal 'initial grit setup', head.message

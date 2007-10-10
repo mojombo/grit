@@ -34,7 +34,7 @@ class Grit
   # Returns Grit::Head[]
   def heads
     output = git("for-each-ref",
-                 "--count=1",
+                 # "--count=1",
                  "--sort=-committerdate",
                  "--format='%(objectname) %(refname) %(subject)%00%(committer)'",
                  "refs/heads")
