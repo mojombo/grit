@@ -31,4 +31,12 @@ class TestRepo < Test::Unit::TestCase
     assert_equal 'Tom Preston-Werner <tom@mojombo.com>', head.committer
     assert_equal Time.at(1191997100), head.date
   end
+  
+  # branches
+  
+  def test_branches
+    branches = @g.branches
+    
+    assert_equal ['master'], branches
+  end
 end

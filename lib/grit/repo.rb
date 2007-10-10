@@ -48,6 +48,10 @@ module Grit
     
       heads
     end
+    
+    def branches
+      Git.branch.split("\n").map { |b| b.sub(/\*/, '').lstrip }
+    end
   end # Repo
   
 end # Grit
