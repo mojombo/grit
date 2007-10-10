@@ -1,4 +1,10 @@
 class Grit
+  class << self
+    attr_accessor :git_binary
+  end
+  
+  self.git_binary = "/usr/bin/env git"
+  
   attr_accessor :path
   
   # Create a new Grit instance
@@ -20,5 +26,35 @@ class Grit
   # Return the project's description. Taken verbatim from REPO/description
   def description
     File.open(File.join(self.path, 'description')).read.chomp
+  end
+  
+  # Return an array of Head objects representing the available heads in
+  # this repo
+  #
+  # Returns Grit::Head[]
+  def heads
+    output = git("for-each-ref",
+                 "--count=1",
+                 "--sort=-committerdate",
+                 "--format='%(objectname) %(refname) %(subject)%00%(committer)'",
+                 "refs/heads")
+                 
+    heads = []
+    
+    output.split("\n").each do |line|
+      ref_info, committer_info = line.split("\0")
+      id, name, message = ref_info.split(" ", 3)
+      m, committer, epoch, tz = *committer_info.match(/^(.*) ([0-9]+) (.*)$/)
+      date = Time.at(epoch.to_i)
+      heads << Head.new(id, name, message, committer, date)
+    end
+    
+    heads
+  end
+  
+  # private
+  
+  def git(cmd, *args)
+    `#{Grit.git_binary} #{cmd} #{args.join(' ')}`.chomp
   end
 end

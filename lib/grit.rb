@@ -5,6 +5,8 @@ $:.unshift File.dirname(__FILE__)     # For use/testing when no gem is installed
 # stdlib
 
 # internal requires
+require 'grit/errors'
+require 'grit/head'
 require 'grit/grit'
 
 class Grit
