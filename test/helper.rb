@@ -5,3 +5,5 @@ require 'test/unit'
 require 'mocha'
 
 GRIT_REPO = File.join(File.dirname(__FILE__), *%w[..])
+
+include Grit

@@ -6,10 +6,11 @@ $:.unshift File.dirname(__FILE__)     # For use/testing when no gem is installed
 
 # internal requires
 require 'grit/errors'
+require 'grit/git'
 require 'grit/head'
 require 'grit/commit'
-require 'grit/grit'
+require 'grit/repo'
 
-class Grit
+module Grit
   VERSION = '1.0.0'
 end
