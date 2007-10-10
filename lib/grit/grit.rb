@@ -5,6 +5,7 @@ class Grit
   
   self.git_binary = "/usr/bin/env git"
   
+  # The path of the git repo as a String
   attr_accessor :path
   
   # Create a new Grit instance
@@ -13,6 +14,8 @@ class Grit
   # Examples
   #   g = Grit.new("/Users/tom/dev/grit")
   #   g = Grit.new("/Users/tom/public/grit.git")
+  #
+  # Returns Grit
   def initialize(path)
     if File.exist?(File.join(path, '.git'))
       self.path = File.join(path, '.git')
@@ -24,6 +27,8 @@ class Grit
   end
   
   # Return the project's description. Taken verbatim from REPO/description
+  #
+  # Returns String
   def description
     File.open(File.join(self.path, 'description')).read.chomp
   end
@@ -54,6 +59,12 @@ class Grit
   
   # private
   
+  # Run the given git command with the specified arguments and return
+  # the result as a chomped String
+  #   +cmd+ is the command
+  #   +args+ is the list of arguments (to be joined by spaces)
+  #
+  # Returns String
   def git(cmd, *args)
     `#{Grit.git_binary} #{cmd} #{args.join(' ')}`.chomp
   end
