@@ -1,0 +1,7 @@
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+bin/grit
+lib/grit.rb
+test/test_grit.rb
