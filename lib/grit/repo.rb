@@ -64,6 +64,25 @@ module Grit
                  
       Commit.list_from_string(output)
     end
+    
+    # The Commit object for the specified id
+    #   +id+ is the SHA1 identifier of the commit
+    #
+    # Returns Grit::Commit
+    def commit(id)
+      output = @git.rev_list(
+                 "--pretty=raw",
+                 "--max-count=1",
+                 id)
+                 
+      Commit.list_from_string(output).first
+    end
+    
+    def tree(treeish = 'master', paths = [])
+      output = @git.ls_tree(treeish, paths.join(" "))
+      
+      puts output
+    end
   end # Repo
   
 end # Grit

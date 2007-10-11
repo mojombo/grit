@@ -63,4 +63,18 @@ class TestRepo < Test::Unit::TestCase
     assert_equal ["6e64c55896aabb9a7d8e9f8f296f426d21a78c2c", "7f874954efb9ba35210445be456c74e037ba6af2"], c.parents
     assert_equal "Merge branch 'site'", c.message
   end
+  
+  # commit
+  
+  def test_commit
+    commit = @g.commit('634396b2f541a9f2d58b00be1a07f0c358b999b3')
+    
+    assert_equal "634396b2f541a9f2d58b00be1a07f0c358b999b3", commit.id
+  end
+  
+  # tree
+  
+  def test_tree
+    # @g.tree('master', ['bin/', 'test/'])
+  end
 end
