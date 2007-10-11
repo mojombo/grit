@@ -42,13 +42,7 @@ module Grit
                  "--format='%(objectname) %(refname) %(subject)%00%(committer)'",
                  "refs/heads")
                  
-      heads = []
-    
-      output.split("\n").each do |line|
-        heads << Head.from_string(line)
-      end
-    
-      heads
+      Head.list_from_string(output)
     end
     
     def branches

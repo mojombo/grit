@@ -15,6 +15,16 @@ module Grit
       self.date = date
     end
     
+    def self.list_from_string(text)
+      heads = []
+      
+      text.split("\n").each do |line|
+        heads << self.from_string(line)
+      end
+      
+      heads
+    end
+    
     # Create a new Head instance from the given string.
     #   +line+ is the formatted head information
     #
