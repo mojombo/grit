@@ -22,8 +22,8 @@ module Grit
     end
     
     def self.list_from_string(text)
-      # remove surrounding whitespace from each line and remove empty lines
-      lines = text.split("\n").map { |l| l.strip }.select { |l| !l.empty? }
+      # remove empty lines
+      lines = text.split("\n").select { |l| !l.strip.empty? }
       
       commits = []
       
@@ -37,7 +37,9 @@ module Grit
         author, authored_date = self.actor(lines.shift)
         committer, committed_date = self.actor(lines.shift)
         
-        message = lines.shift
+        messages = []
+        messages << lines.shift.strip while lines.first =~ /^    /
+        message = messages.first || ''
         
         commits << Commit.new(id, parents, tree, author, authored_date, committer, committed_date, message)
       end

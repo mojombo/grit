@@ -24,14 +24,14 @@ module Grit
       @git = Git.new(self.path)
     end
   
-    # Return the project's description. Taken verbatim from REPO/description
+    # The project's description. Taken verbatim from REPO/description
     #
     # Returns String
     def description
       File.open(File.join(self.path, 'description')).read.chomp
     end
   
-    # Return an array of Head objects representing the available heads in
+    # An array of Head objects representing the available heads in
     # this repo
     #
     # Returns Grit::Head[]
@@ -49,10 +49,17 @@ module Grit
       @git.branch('--no-color').split("\n").map { |b| b.sub(/\*/, '').lstrip }
     end
     
-    def commits(num = 1, start = 'master')
+    # An array of Commit objects representing the history of a given branch/commit
+    #   +start+ is the branch/commit name (default 'master')
+    #   +max_count+ is the maximum number of commits to return (default 1)
+    #   +skip+ is the number of commits to skip (default 0)
+    #
+    # Returns Grit::Commit[]
+    def commits(start = 'master', max_count = 1, skip = 0)
       output = @git.rev_list(
                  "--pretty=raw",
-                 "-n #{num}", 
+                 "--max-count=#{max_count}",
+                 "--skip=#{skip}",
                  start)
                  
       Commit.list_from_string(output)

@@ -44,7 +44,7 @@ class TestRepo < Test::Unit::TestCase
   def test_commits
     Git.any_instance.expects(:rev_list).returns(fixture('rev_list'))
     
-    commits = @g.commits(10)
+    commits = @g.commits('master', 10)
     
     c = commits.first
     assert_equal '4c8124ffcf4039d292442eeccabdeca5af5c5017', c.id
