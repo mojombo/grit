@@ -20,6 +20,8 @@ module Grit
       else
         raise InvalidGitRepositoryError.new(path) unless File.exist?(path)
       end
+      
+      @git = Git.new(self.path)
     end
   
     # Return the project's description. Taken verbatim from REPO/description
@@ -34,7 +36,7 @@ module Grit
     #
     # Returns Grit::Head[]
     def heads
-      output = Git.for_each_ref(
+      output = @git.for_each_ref(
                  "--sort=-committerdate",
                  # "--count=1",
                  "--format='%(objectname) %(refname) %(subject)%00%(committer)'",
@@ -50,7 +52,16 @@ module Grit
     end
     
     def branches
-      Git.branch.split("\n").map { |b| b.sub(/\*/, '').lstrip }
+      @git.branch('--no-color').split("\n").map { |b| b.sub(/\*/, '').lstrip }
+    end
+    
+    def commits(num = 1, start = 'master')
+      output = @git.rev_list(
+                 "--pretty=raw",
+                 "-n #{num}", 
+                 start)
+                 
+      Commit.list_from_string(output)
     end
   end # Repo
   

@@ -20,8 +20,7 @@ class TestRepo < Test::Unit::TestCase
   end
   
   def test_heads_should_populate_head_data
-    Git.expects(:for_each_ref).returns("634396b2f541a9f2d58b00be1a07f0c358b999b3 refs/heads/master \
-    initial grit setup\0Tom Preston-Werner <tom@mojombo.com> 1191997100 -0700")
+    Git.any_instance.expects(:for_each_ref).returns(fixture('for_each_ref'))
     
     head = @g.heads.first
     
@@ -38,5 +37,23 @@ class TestRepo < Test::Unit::TestCase
     branches = @g.branches
     
     assert_equal ['master'], branches
+  end
+  
+  # commits
+  
+  def test_commits
+    Git.any_instance.expects(:rev_list).returns(fixture('rev_list'))
+    
+    commits = @g.commits(10)
+    
+    c = commits.first
+    assert_equal '4c8124ffcf4039d292442eeccabdeca5af5c5017', c.id
+    assert_equal ["634396b2f541a9f2d58b00be1a07f0c358b999b3"], c.parents
+    assert_equal "672eca9b7f9e09c22dcb128c283e8c3c8d7697a4", c.tree
+    assert_equal "Tom Preston-Werner <tom@mojombo.com>", c.author
+    assert_equal Time.at(1191999972), c.authored_date
+    assert_equal "Tom Preston-Werner <tom@mojombo.com>", c.committer
+    assert_equal Time.at(1191999972), c.committed_date
+    assert_equal "implement Grit#heads", c.message
   end
 end

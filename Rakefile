@@ -1,5 +1,3 @@
-# -*- ruby -*-
-
 require 'rubygems'
 require 'hoe'
 require './lib/grit.rb'
@@ -14,4 +12,7 @@ Hoe.new('grit', Grit::VERSION) do |p|
   p.changes = p.paragraphs_of('History.txt', 0..1).join("\n\n")
 end
 
-# vim: syntax=Ruby
+desc "Open an irb session preloaded with this library"
+task :console do
+  sh "irb -rubygems -r ./lib/grit.rb"
+end
