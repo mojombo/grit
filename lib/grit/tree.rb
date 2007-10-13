@@ -1,7 +1,9 @@
 module Grit
   
   class Tree
-    attr_reader :contents
+    include Lazy
+    
+    lazy_reader :contents
     attr_reader :id
     attr_reader :mode
     attr_reader :name
@@ -28,7 +30,13 @@ module Grit
       text.split("\n").each do |line|
         @contents << content_from_string(repo, line)
       end
+      __baked__
       self
+    end
+    
+    def __bake__
+      temp = Tree.construct(@repo, @id, [])
+      @contents = temp.contents
     end
     
     # Create an unbaked Tree containing just the specified attributes
@@ -53,6 +61,11 @@ module Grit
       self
     end
     
+    # Parse a content item and create the appropriate object
+    #   +repo+ is the Repo
+    #   +text+ is the single line containing the items data in `git ls-tree` format
+    #
+    # Returns Grit::Blob or Grit::Tree
     def content_from_string(repo, text)
       mode, type, id, name = text.split(" ", 4)
       case type
