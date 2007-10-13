@@ -13,6 +13,8 @@ module Grit
       self.git_dir = git_dir
     end
     
+    # Converstion hash from Ruby style options to git command line
+    # style options
     TRANSFORM = {:max_count => "--max-count=",
                  :skip => "--skip=",
                  :pretty => "--pretty=",
@@ -22,10 +24,11 @@ module Grit
     # Run the given git command with the specified arguments and return
     # the result as a chomped String
     #   +cmd+ is the command
+    #   +options+ is a hash of Ruby style options
     #   +args+ is the list of arguments (to be joined by spaces)
     #
     # Examples
-    #   git.rev_list('--parents', '--header')
+    #   git.rev_list({:max_count => 10, :header => true}, "master")
     #
     # Returns String
     def method_missing(cmd, options, *args)
@@ -34,6 +37,11 @@ module Grit
       `#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + args).join(' ')}`.chomp
     end
     
+    # Transform Ruby style options into git command line options
+    #   +options+ is a hash of Ruby style options
+    #
+    # Returns String[]
+    #   e.g. ["--max-count=10", "--header"]
     def transform_options(options)
       args = []
       options.keys.each do |opt|

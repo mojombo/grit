@@ -16,7 +16,13 @@ module Grit
     #   +id+ is the id of the commit
     #   +parents+ is an array of commit ids (will be converted into Commit instances)
     #   +tree+ is the correspdonding tree id (will be converted into a Tree object)
-    #   +author+ is the 
+    #   +author+ is the author string
+    #   +authored_date+ is the authored Time
+    #   +committer+ is the committer string
+    #   +committed_date+ is the committed Time
+    #   +message+ is the first line of the commit message
+    #
+    # Returns Grit::Commit (baked)
     def initialize(repo, id, parents, tree, author, authored_date, committer, committed_date, message)
       @repo = repo
       @id = id
@@ -55,6 +61,8 @@ module Grit
     
     # Use the id of this instance to populate all of the other fields
     # when any of them are called.
+    #
+    # Returns nil
     def __bake__
       temp = self.class.find_all(@repo, @id, {:max_count => 1}).first
       @parents = temp.parents
@@ -64,6 +72,7 @@ module Grit
       @committer = temp.committer
       @committed_date = temp.committed_date
       @message = temp.message
+      nil
     end
     
     # Find all commits matching the given criteria.
@@ -123,6 +132,9 @@ module Grit
     
     # private
     
+    # Parse out the actor (author or committer) info
+    #
+    # Returns [String (actor name and email), Time (acted at time)]
     def self.actor(line)
       m, actor, epoch = *line.match(/^.+? (.*) (\d+) .*$/)
       [actor, Time.at(epoch.to_i)]

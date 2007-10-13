@@ -6,7 +6,7 @@ module Grit
     
     # The git command line interface object
     attr_accessor :git
-  
+    
     # Create a new Repo instance
     #   +path+ is the path to either the root git directory or the bare git repo
     #
@@ -14,7 +14,7 @@ module Grit
     #   g = Repo.new("/Users/tom/dev/grit")
     #   g = Repo.new("/Users/tom/public/grit.git")
     #
-    # Returns Repo
+    # Returns Grit::Repo
     def initialize(path)
       if File.exist?(File.join(path, '.git'))
         self.path = File.join(path, '.git')
@@ -26,18 +26,18 @@ module Grit
       
       self.git = Git.new(self.path)
     end
-  
+    
     # The project's description. Taken verbatim from GIT_REPO/description
     #
     # Returns String
     def description
       File.open(File.join(self.path, 'description')).read.chomp
     end
-  
+    
     # An array of Head objects representing the available heads in
     # this repo
     #
-    # Returns Grit::Head[]
+    # Returns Grit::Head[] (baked)
     def heads
       Head.find_all(self)
     end
@@ -49,7 +49,7 @@ module Grit
     #   +max_count+ is the maximum number of commits to return (default 10)
     #   +skip+ is the number of commits to skip (default 0)
     #
-    # Returns Grit::Commit[]
+    # Returns Grit::Commit[] (baked)
     def commits(start = 'master', max_count = 10, skip = 0)
       options = {:max_count => max_count,
                  :skip => skip}
@@ -57,16 +57,21 @@ module Grit
       Commit.find_all(self, start, options)
     end
     
-    # The Commit object for the specified ref
+    # The Commit object for the specified id
     #   +id+ is the SHA1 identifier of the commit
     #
-    # Returns Grit::Commit
+    # Returns Grit::Commit (baked)
     def commit(id)
       options = {:max_count => 1}
       
       Commit.find_all(self, id, options).first
     end
     
+    # The Tree object for the given treeish reference
+    #   +treeish+ is the reference
+    #   +paths+ is an optional Array of directory paths to restrict the tree
+    #
+    # Returns Grit::Tree (baked)
     def tree(treeish = 'master', paths = [])
       output = @git.ls_tree(treeish, paths.join(" "))
       
