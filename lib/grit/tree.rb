@@ -77,6 +77,11 @@ module Grit
           raise "Invalid type: #{type}"
       end
     end
+    
+    # Pretty object inspection
+    def inspect
+      %Q{#<Grit::Tree "#{@id}">}
+    end
   end # Tree
   
 end # Grit

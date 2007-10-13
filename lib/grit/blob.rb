@@ -26,6 +26,11 @@ module Grit
       end
       self
     end
+    
+    # Pretty object inspection
+    def inspect
+      %Q{#<Grit::Blob "#{@id}">}
+    end
   end # Blob
   
 end # Grit

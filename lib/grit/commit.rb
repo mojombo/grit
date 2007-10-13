@@ -130,6 +130,11 @@ module Grit
       @id
     end
     
+    # Pretty object inspection
+    def inspect
+      %Q{#<Grit::Commit "#{@id}">}
+    end
+    
     # private
     
     # Parse out the actor (author or committer) info

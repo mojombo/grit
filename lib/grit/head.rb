@@ -69,6 +69,11 @@ module Grit
       commit = Commit.create(repo, :id => id)
       self.new(name, commit)
     end
+    
+    # Pretty object inspection
+    def inspect
+      %Q{#<Grit::Head "#{@name}">}
+    end
   end # Head
   
 end # Grit
