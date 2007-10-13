@@ -27,7 +27,7 @@ module Grit
       @repo = repo
       @id = id
       @parents = parents.map { |p| Commit.create(repo, :id => p) }
-      @tree = tree
+      @tree = Tree.create(repo, :id => tree)
       @author = author
       @authored_date = authored_date
       @committer = committer

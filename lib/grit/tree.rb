@@ -18,14 +18,15 @@ module Grit
     #   +paths+ is an optional Array of directory paths to restrict the tree
     #
     # Returns Grit::Tree (baked)
-    def self.construct(repo, treeish, paths)
+    def self.construct(repo, treeish, paths = [])
       output = repo.git.ls_tree({}, treeish, paths.join(" "))
       
-      self.allocate.construct_initialize(repo, output)
+      self.allocate.construct_initialize(repo, treeish, output)
     end
     
-    def construct_initialize(repo, text)
+    def construct_initialize(repo, id, text)
       @repo = repo
+      @id = id
       @contents = []
       text.split("\n").each do |line|
         @contents << content_from_string(repo, line)

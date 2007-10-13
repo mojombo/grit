@@ -44,7 +44,7 @@ class TestRepo < Test::Unit::TestCase
     c = commits[0]
     assert_equal '4c8124ffcf4039d292442eeccabdeca5af5c5017', c.id
     assert_equal ["634396b2f541a9f2d58b00be1a07f0c358b999b3"], c.parents.map { |p| p.id }
-    assert_equal "672eca9b7f9e09c22dcb128c283e8c3c8d7697a4", c.tree
+    assert_equal "672eca9b7f9e09c22dcb128c283e8c3c8d7697a4", c.tree.id
     assert_equal "Tom Preston-Werner <tom@mojombo.com>", c.author
     assert_equal Time.at(1191999972), c.authored_date
     assert_equal "Tom Preston-Werner <tom@mojombo.com>", c.committer
