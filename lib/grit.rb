@@ -10,6 +10,7 @@ require 'grit/errors'
 require 'grit/git'
 require 'grit/head'
 require 'grit/commit'
+require 'grit/tree'
 require 'grit/repo'
 
 module Grit

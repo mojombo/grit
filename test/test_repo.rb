@@ -70,6 +70,8 @@ class TestRepo < Test::Unit::TestCase
   # tree
   
   def test_tree
-    # @g.tree('master', ['bin/', 'test/'])
+    tree = @g.tree('master')
+    
+    p tree.contents.map { |x| x && x.id }
   end
 end

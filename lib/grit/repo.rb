@@ -73,9 +73,7 @@ module Grit
     #
     # Returns Grit::Tree (baked)
     def tree(treeish = 'master', paths = [])
-      output = @git.ls_tree(treeish, paths.join(" "))
-      
-      puts output
+      Tree.construct(self, treeish, paths)
     end
   end # Repo
   
