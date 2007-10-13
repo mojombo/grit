@@ -43,7 +43,7 @@ class TestRepo < Test::Unit::TestCase
     
     c = commits[0]
     assert_equal '4c8124ffcf4039d292442eeccabdeca5af5c5017', c.id
-    assert_equal ["634396b2f541a9f2d58b00be1a07f0c358b999b3"], c.parents
+    assert_equal ["634396b2f541a9f2d58b00be1a07f0c358b999b3"], c.parents.map { |p| p.id }
     assert_equal "672eca9b7f9e09c22dcb128c283e8c3c8d7697a4", c.tree
     assert_equal "Tom Preston-Werner <tom@mojombo.com>", c.author
     assert_equal Time.at(1191999972), c.authored_date
@@ -55,7 +55,7 @@ class TestRepo < Test::Unit::TestCase
     assert_equal [], c.parents
     
     c = commits[2]
-    assert_equal ["6e64c55896aabb9a7d8e9f8f296f426d21a78c2c", "7f874954efb9ba35210445be456c74e037ba6af2"], c.parents
+    assert_equal ["6e64c55896aabb9a7d8e9f8f296f426d21a78c2c", "7f874954efb9ba35210445be456c74e037ba6af2"], c.parents.map { |p| p.id }
     assert_equal "Merge branch 'site'", c.message
   end
   

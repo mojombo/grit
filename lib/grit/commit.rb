@@ -20,7 +20,7 @@ module Grit
     def initialize(repo, id, parents, tree, author, authored_date, committer, committed_date, message)
       @repo = repo
       @id = id
-      @parents = parents
+      @parents = parents.map { |p| Commit.create(repo, :id => p) }
       @tree = tree
       @author = author
       @authored_date = authored_date
@@ -31,10 +31,20 @@ module Grit
       __baked__
     end
     
+    # Create an unbaked Commit containing just the specified attributes
+    #   +repo+ is the Repo
+    #   +atts+ is a Hash of instance variable data
+    #
+    # Returns Grit::Commit (unbaked)
     def self.create(repo, atts)
       self.allocate.create_initialize(repo, atts)
     end
     
+    # Initializer for Commit.create
+    #   +repo+ is the Repo
+    #   +atts+ is a Hash of instance variable data
+    #
+    # Returns Grit::Commit (unbaked)
     def create_initialize(repo, atts)
       @repo = repo
       atts.each do |k, v|
@@ -58,10 +68,12 @@ module Grit
     
     # Find all commits matching the given criteria.
     #   +repo+ is the Repo
+    #   +ref+ is the ref from which to begin (SHA1 or name)
     #   +options+ is a Hash of optional arguments to git
     #     :max_count is the maximum number of commits to fetch
     #     :skip is the number of commits to skip
-    #   +ref+ is the Ref from which to begin (
+    #
+    # Returns Grit::Commit[] (baked)
     def self.find_all(repo, ref, options = {})
       allowed_options = [:max_count, :skip]
       
@@ -73,6 +85,11 @@ module Grit
       self.list_from_string(repo, output)
     end
     
+    # Parse out commit information into an array of baked Commit objects
+    #   +repo+ is the Repo
+    #   +text+ is the text output from the git command (raw format)
+    #
+    # Returns Grit::Commit[] (baked)
     def self.list_from_string(repo, text)
       # remove empty lines
       lines = text.split("\n").select { |l| !l.strip.empty? }
@@ -99,6 +116,7 @@ module Grit
       commits
     end
     
+    # Convert this Commit to a String which is just the SHA1 id
     def to_s
       @id
     end
