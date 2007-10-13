@@ -3,6 +3,9 @@ module Grit
   class Repo
     # The path of the git repo as a String
     attr_accessor :path
+    
+    # The git command line interface object
+    attr_accessor :git
   
     # Create a new Repo instance
     #   +path+ is the path to either the root git directory or the bare git repo
@@ -21,10 +24,10 @@ module Grit
         raise InvalidGitRepositoryError.new(path) unless File.exist?(path)
       end
       
-      @git = Git.new(self.path)
+      self.git = Git.new(self.path)
     end
   
-    # The project's description. Taken verbatim from REPO/description
+    # The project's description. Taken verbatim from GIT_REPO/description
     #
     # Returns String
     def description
@@ -36,44 +39,32 @@ module Grit
     #
     # Returns Grit::Head[]
     def heads
-      output = @git.for_each_ref(
-                 "--sort=-committerdate",
-                 # "--count=1",
-                 "--format='%(objectname) %(refname) %(subject)%00%(committer)'",
-                 "refs/heads")
-                 
-      Head.list_from_string(output)
+      Head.find_all(self)
     end
     
     alias_method :branches, :heads
     
     # An array of Commit objects representing the history of a given branch/commit
     #   +start+ is the branch/commit name (default 'master')
-    #   +max_count+ is the maximum number of commits to return (default 1)
+    #   +max_count+ is the maximum number of commits to return (default 10)
     #   +skip+ is the number of commits to skip (default 0)
     #
     # Returns Grit::Commit[]
-    def commits(start = 'master', max_count = 1, skip = 0)
-      output = @git.rev_list(
-                 "--pretty=raw",
-                 "--max-count=#{max_count}",
-                 "--skip=#{skip}",
-                 start)
-                 
-      Commit.list_from_string(output)
+    def commits(start = 'master', max_count = 10, skip = 0)
+      options = {:max_count => max_count,
+                 :skip => skip}
+      
+      Commit.find_all(self, start, options)
     end
     
-    # The Commit object for the specified id
+    # The Commit object for the specified ref
     #   +id+ is the SHA1 identifier of the commit
     #
     # Returns Grit::Commit
     def commit(id)
-      output = @git.rev_list(
-                 "--pretty=raw",
-                 "--max-count=1",
-                 id)
-                 
-      Commit.list_from_string(output).first
+      options = {:max_count => 1}
+      
+      Commit.find_all(self, id, options).first
     end
     
     def tree(treeish = 'master', paths = [])

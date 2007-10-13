@@ -24,11 +24,8 @@ class TestRepo < Test::Unit::TestCase
     
     head = @g.heads.first
     
-    assert_equal '634396b2f541a9f2d58b00be1a07f0c358b999b3', head.id
-    assert_equal 'refs/heads/master', head.name
-    assert_equal 'initial grit setup', head.message
-    assert_equal 'Tom Preston-Werner <tom@mojombo.com>', head.committer
-    assert_equal Time.at(1191997100), head.date
+    assert_equal 'master', head.name
+    assert_equal '634396b2f541a9f2d58b00be1a07f0c358b999b3', head.commit.id
   end
   
   # branches
