@@ -45,9 +45,7 @@ module Grit
       Head.list_from_string(output)
     end
     
-    def branches
-      @git.branch('--no-color').split("\n").map { |b| b.sub(/\*/, '').lstrip }
-    end
+    alias_method :branches, :heads
     
     # An array of Commit objects representing the history of a given branch/commit
     #   +start+ is the branch/commit name (default 'master')

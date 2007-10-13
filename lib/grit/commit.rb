@@ -1,24 +1,29 @@
 module Grit
   
   class Commit
-    attr_accessor :id
-    attr_accessor :parents
-    attr_accessor :tree
-    attr_accessor :author
-    attr_accessor :authored_date
-    attr_accessor :committer
-    attr_accessor :committed_date
-    attr_accessor :message
+    attr_reader :id
+    attr_reader :parents
+    attr_reader :tree
+    attr_reader :author
+    attr_reader :authored_date
+    attr_reader :committer
+    attr_reader :committed_date
+    attr_reader :message
     
+    # Instantiate a new Commit
+    #   +id+ is the id of the commit
+    #   +parents+ is an array of commit ids (will be converted into Commit instances)
+    #   +tree+ is the correspdonding tree id (will be converted into a Tree object)
+    #   +author+ is the 
     def initialize(id, parents, tree, author, authored_date, committer, committed_date, message)
-      self.id = id
-      self.parents = parents
-      self.tree = tree
-      self.author = author
-      self.authored_date = authored_date
-      self.committer = committer
-      self.committed_date = committed_date
-      self.message = message
+      @id = id
+      @parents = parents
+      @tree = tree
+      @author = author
+      @authored_date = authored_date
+      @committer = committer
+      @committed_date = committed_date
+      @message = message
     end
     
     def self.list_from_string(text)
@@ -45,6 +50,10 @@ module Grit
       end
       
       commits
+    end
+    
+    def to_s
+      @id
     end
     
     # private

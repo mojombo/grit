@@ -34,9 +34,7 @@ class TestRepo < Test::Unit::TestCase
   # branches
   
   def test_branches
-    branches = @g.branches
-    
-    assert_equal ['master'], branches
+    # same as heads
   end
   
   # commits
