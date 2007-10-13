@@ -11,6 +11,7 @@ require 'grit/git'
 require 'grit/head'
 require 'grit/commit'
 require 'grit/tree'
+require 'grit/blob'
 require 'grit/repo'
 
 module Grit

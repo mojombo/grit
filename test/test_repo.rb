@@ -2,19 +2,19 @@ require File.dirname(__FILE__) + '/helper'
 
 class TestRepo < Test::Unit::TestCase
   def setup
-    @g = Repo.new(GRIT_REPO)
+    @r = Repo.new(GRIT_REPO)
   end
   
   # descriptions
   
   def test_description
-    assert_equal "Grit is a ruby library for interfacing with git repositories.", @g.description
+    assert_equal "Grit is a ruby library for interfacing with git repositories.", @r.description
   end
   
   # heads
   
   def test_heads_should_return_array_of_head_objects
-    @g.heads.each do |head|
+    @r.heads.each do |head|
       assert_equal Grit::Head, head.class
     end
   end
@@ -22,7 +22,7 @@ class TestRepo < Test::Unit::TestCase
   def test_heads_should_populate_head_data
     Git.any_instance.expects(:for_each_ref).returns(fixture('for_each_ref'))
     
-    head = @g.heads.first
+    head = @r.heads.first
     
     assert_equal 'master', head.name
     assert_equal '634396b2f541a9f2d58b00be1a07f0c358b999b3', head.commit.id
@@ -39,7 +39,7 @@ class TestRepo < Test::Unit::TestCase
   def test_commits
     Git.any_instance.expects(:rev_list).returns(fixture('rev_list'))
     
-    commits = @g.commits('master', 10)
+    commits = @r.commits('master', 10)
     
     c = commits[0]
     assert_equal '4c8124ffcf4039d292442eeccabdeca5af5c5017', c.id
@@ -62,7 +62,7 @@ class TestRepo < Test::Unit::TestCase
   # commit
   
   def test_commit
-    commit = @g.commit('634396b2f541a9f2d58b00be1a07f0c358b999b3')
+    commit = @r.commit('634396b2f541a9f2d58b00be1a07f0c358b999b3')
     
     assert_equal "634396b2f541a9f2d58b00be1a07f0c358b999b3", commit.id
   end
@@ -70,8 +70,10 @@ class TestRepo < Test::Unit::TestCase
   # tree
   
   def test_tree
-    tree = @g.tree('master')
+    Git.any_instance.expects(:ls_tree).returns(fixture('ls_tree_a'))
+    tree = @r.tree('master')
     
-    p tree.contents.map { |x| x && x.id }
+    assert_equal 4, tree.contents.select { |c| c.instance_of?(Blob) }.size
+    assert_equal 3, tree.contents.select { |c| c.instance_of?(Tree) }.size
   end
 end

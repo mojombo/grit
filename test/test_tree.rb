@@ -2,7 +2,23 @@ require File.dirname(__FILE__) + '/helper'
 
 class TestTree < Test::Unit::TestCase
   def setup
+    @r = Repo.new(GRIT_REPO)
     @t = Tree.allocate
+  end
+  
+  # contents
+  
+  def test_contents_should_cache
+    Git.any_instance.expects(:ls_tree).returns(
+      fixture('ls_tree_a'),
+      fixture('ls_tree_b')
+    ).times(2)
+    tree = @r.tree('master')
+    
+    child = tree.contents.last
+    
+    child.contents
+    child.contents
   end
   
   # content_from_string

@@ -10,11 +10,8 @@ class TestTreeRecursion < Test::Unit::TestCase
   
   def recurse(tree, indent = "")
     tree.contents.each do |c|
-      case c
-        when Tree
-          # puts "#{indent}#{c.name} (#{c.id})"
-          recurse(c, indent + "  ")
-      end
+      # puts "#{indent}#{c.name} (#{c.id})"
+      recurse(c, indent + "  ") if c.kind_of?(Tree)
     end
   end
 end

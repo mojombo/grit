@@ -72,7 +72,7 @@ module Grit
         when "tree"
           Tree.create(repo, :id => id, :mode => mode, :name => name)
         when "blob"
-          nil
+          Blob.create(repo, :id => id, :mode => mode, :name => name)
         else
           raise "Invalid type: #{type}"
       end

@@ -31,7 +31,7 @@ module Grit
     #   git.rev_list({:max_count => 10, :header => true}, "master")
     #
     # Returns String
-    def method_missing(cmd, options, *args)
+    def method_missing(cmd, options = {}, *args)
       opt_args = transform_options(options)
       
       `#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + args).join(' ')}`.chomp
