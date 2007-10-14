@@ -1,7 +1,31 @@
 require File.dirname(__FILE__) + '/helper'
 
 class TestCommit < Test::Unit::TestCase
-  def test_to_s
+  def setup
+    @r = Repo.new(GRIT_REPO)
+  end
+  
+  # __bake__
+  
+  def test_bake
+    Git.any_instance.expects(:rev_list).returns(fixture('rev_list_single'))
+    @c = Commit.create(@r, :id => '4c8124ffcf4039d292442eeccabdeca5af5c5017')
+    @c.author # cause bake-age
     
+    assert_equal "Tom Preston-Werner <tom@mojombo.com>", @c.author
+  end
+  
+  # to_s
+  
+  def test_to_s
+    @c = Commit.create(@r, :id => 'abc')
+    assert_equal "abc", @c.to_s
+  end
+  
+  # inspect
+  
+  def test_inspect
+    @c = Commit.create(@r, :id => 'abc')
+    assert_equal %Q{#<Grit::Commit "abc">}, @c.inspect
   end
 end

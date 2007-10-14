@@ -5,6 +5,14 @@ class TestRepo < Test::Unit::TestCase
     @r = Repo.new(GRIT_REPO)
   end
   
+  # new
+  
+  def test_new_should_raise_on_invalid_repo_location
+    assert_raise(InvalidGitRepositoryError) do
+      Repo.new("")
+    end
+  end
+  
   # descriptions
   
   def test_description

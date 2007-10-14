@@ -39,4 +39,11 @@ class TestTree < Test::Unit::TestCase
       @t.content_from_string(nil, "040000 bogus 650fa3f0c17f1edb4ae53d8dcca4ac59d86e6c44	test")
     end
   end
+  
+  # inspect
+  
+  def test_inspect
+    @t = Tree.create(@r, :id => 'abc')
+    assert_equal %Q{#<Grit::Tree "abc">}, @t.inspect
+  end
 end

@@ -19,10 +19,12 @@ module Grit
                  :skip => "--skip=",
                  :pretty => "--pretty=",
                  :sort => "--sort=",
-                 :format => "--format="}
+                 :format => "--format=",
+                 :p => "-p",
+                 :s => "-s"}
     
     # Run the given git command with the specified arguments and return
-    # the result as a chomped String
+    # the result as a String
     #   +cmd+ is the command
     #   +options+ is a hash of Ruby style options
     #   +args+ is the list of arguments (to be joined by spaces)
@@ -34,7 +36,7 @@ module Grit
     def method_missing(cmd, options = {}, *args)
       opt_args = transform_options(options)
       
-      `#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + args).join(' ')}`.chomp
+      `#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + args).join(' ')}`
     end
     
     # Transform Ruby style options into git command line options
