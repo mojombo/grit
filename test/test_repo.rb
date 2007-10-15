@@ -84,4 +84,18 @@ class TestRepo < Test::Unit::TestCase
     assert_equal 4, tree.contents.select { |c| c.instance_of?(Blob) }.size
     assert_equal 3, tree.contents.select { |c| c.instance_of?(Tree) }.size
   end
+  
+  # blob
+  
+  def test_blob
+    Git.any_instance.expects(:cat_file).returns(fixture('cat_file_blob'))
+    blob = @r.blob("abc")
+    assert_equal "Hello world", blob.data
+  end
+  
+  # inspect
+  
+  def test_inspect
+    assert_equal %Q{#<Grit::Repo "#{GRIT_REPO}/.git">}, @r.inspect
+  end
 end

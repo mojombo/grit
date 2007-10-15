@@ -34,7 +34,7 @@ module Grit
       File.open(File.join(self.path, 'description')).read.chomp
     end
     
-    # An array of Head objects representing the available heads in
+    # An array of Head objects representing the branch heads in
     # this repo
     #
     # Returns Grit::Head[] (baked)
@@ -44,7 +44,7 @@ module Grit
     
     alias_method :branches, :heads
     
-    # An array of Commit objects representing the history of a given branch/commit
+    # An array of Commit objects representing the history of a given ref/commit
     #   +start+ is the branch/commit name (default 'master')
     #   +max_count+ is the maximum number of commits to return (default 10)
     #   +skip+ is the number of commits to skip (default 0)
@@ -68,12 +68,25 @@ module Grit
     end
     
     # The Tree object for the given treeish reference
-    #   +treeish+ is the reference
-    #   +paths+ is an optional Array of directory paths to restrict the tree
+    #   +treeish+ is the reference (default 'master')
+    #   +paths+ is an optional Array of directory paths to restrict the tree (deafult [])
     #
     # Returns Grit::Tree (baked)
     def tree(treeish = 'master', paths = [])
       Tree.construct(self, treeish, paths)
+    end
+    
+    # The Blob object for the given id
+    #   +id+ is the SHA1 id of the blob
+    #
+    # Returns Grit::Blob (unbaked)
+    def blob(id)
+      Blob.create(self, :id => id)
+    end
+    
+    # Pretty object inspection
+    def inspect
+      %Q{#<Grit::Repo "#{@path}">}
     end
   end # Repo
   

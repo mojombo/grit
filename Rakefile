@@ -16,3 +16,9 @@ desc "Open an irb session preloaded with this library"
 task :console do
   sh "irb -rubygems -r ./lib/grit.rb"
 end
+
+task :coverage do
+  system("rm -fr coverage")
+  system("rcov test/test_*.rb")
+  system("open coverage/index.html")
+end

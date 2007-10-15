@@ -74,6 +74,8 @@ module Grit
           Tree.create(repo, :id => id, :mode => mode, :name => name)
         when "blob"
           Blob.create(repo, :id => id, :mode => mode, :name => name)
+        when "commit"
+          nil
         else
           raise "Invalid type: #{type}"
       end
