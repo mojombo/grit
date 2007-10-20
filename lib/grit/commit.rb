@@ -116,7 +116,7 @@ module Grit
         committer, committed_date = self.actor(lines.shift)
         
         messages = []
-        messages << lines.shift.strip while lines.first =~ /^    /
+        messages << lines.shift.strip while lines.first =~ /^ {4}/
         message = messages.first || ''
         
         commits << Commit.new(repo, id, parents, tree, author, authored_date, committer, committed_date, message)

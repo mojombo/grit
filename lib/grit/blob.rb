@@ -41,16 +41,70 @@ module Grit
       @data ||= @repo.git.cat_file({:p => true}, id)
     end
     
-    # 
+    # This blob's blame information
+    #
+    # Returns Array: [<line>, Grit::Commit]
     def self.blame(repo, commit, file)
       data = repo.git.blame({:p => true}, commit, '--', file)
       
-      p data
+      commits = {}
+      blames = []
+      info = nil
+      
+      data.split("\n").each do |line|
+        parts = line.split(/\s+/, 2)
+        case parts.first
+          when /^[0-9A-Fa-f]{40}$/
+            case line
+              when /^([0-9A-Fa-f]{40}) (\d+) (\d+) (\d+)$/
+                _, id, origin_line, final_line, group_lines = *line.match(/^([0-9A-Fa-f]{40}) (\d+) (\d+) (\d+)$/)
+                info = {:id => id}
+                blames << [nil, []]
+              when /^([0-9A-Fa-f]{40}) (\d+) (\d+)$/
+                _, id, origin_line, final_line = *line.match(/^([0-9A-Fa-f]{40}) (\d+) (\d+)$/)
+                info = {:id => id}
+            end
+          when /^(author|committer)/
+            case parts.first
+              when /^(.+)-mail$/
+                info["#{$1}_email".intern] = parts.last
+              when /^(.+)-time$/
+                info["#{$1}_date".intern] = Time.at(parts.last.to_i)
+              when /^(author|committer)$/
+                info[$1.intern] = parts.last
+            end
+          when /^filename/
+            info[:filename] = parts.last
+          when /^summary/
+            info[:summary] = parts.last
+          when ''
+            c = commits[info[:id]]
+            unless c
+              c = Commit.create(repo, :id => info[:id],
+                                      :author => info[:author],
+                                      :authored_date => info[:author_date],
+                                      :committer => info[:committer],
+                                      :committed_date => info[:committer_date],
+                                      :message => info[:summary])
+              commits[info[:id]] = c
+            end
+            _, text = *line.match(/^\t(.*)$/)
+            blames.last[0] = c
+            blames.last[1] << text
+        end
+      end
+      
+      blames
     end
     
     # Pretty object inspection
     def inspect
       %Q{#<Grit::Blob "#{@id}">}
+    end
+    
+    # private
+    
+    def self.read_
     end
   end # Blob
   
