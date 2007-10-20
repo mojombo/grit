@@ -41,9 +41,9 @@ module Grit
       @data ||= @repo.git.cat_file({:p => true}, id)
     end
     
-    # This blob's blame information
+    # The blame information for the given file at the given commit
     #
-    # Returns Array: [<line>, Grit::Commit]
+    # Returns Array: [Grit::Commit, Array: [<line>]]
     def self.blame(repo, commit, file)
       data = repo.git.blame({:p => true}, commit, '--', file)
       
@@ -91,6 +91,7 @@ module Grit
             _, text = *line.match(/^\t(.*)$/)
             blames.last[0] = c
             blames.last[1] << text
+            info = nil
         end
       end
       
