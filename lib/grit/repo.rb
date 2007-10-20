@@ -23,8 +23,10 @@ module Grit
       elsif File.exist?(path) && path =~ /\.git$/
         self.path = path
         @bare = true
+      elsif File.exist?(path)
+        raise InvalidGitRepositoryError.new(path)
       else
-        raise InvalidGitRepositoryError.new(path) unless File.exist?(path)
+        raise NoSuchPathError.new(path)
       end
       
       self.git = Git.new(self.path)

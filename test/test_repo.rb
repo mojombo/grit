@@ -9,7 +9,13 @@ class TestRepo < Test::Unit::TestCase
   
   def test_new_should_raise_on_invalid_repo_location
     assert_raise(InvalidGitRepositoryError) do
-      Repo.new("")
+      Repo.new("/tmp")
+    end
+  end
+  
+  def test_new_should_raise_on_non_existant_path
+    assert_raise(NoSuchPathError) do
+      Repo.new("/foobar")
     end
   end
   
