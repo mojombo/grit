@@ -3,6 +3,7 @@ module Grit
   class Repo
     # The path of the git repo as a String
     attr_accessor :path
+    attr_reader :bare
     
     # The git command line interface object
     attr_accessor :git
@@ -18,8 +19,10 @@ module Grit
     def initialize(path)
       if File.exist?(File.join(path, '.git'))
         self.path = File.join(path, '.git')
+        @bare = false
       elsif File.exist?(path) && path =~ /\.git$/
         self.path = path
+        @bare = true
       else
         raise InvalidGitRepositoryError.new(path) unless File.exist?(path)
       end
@@ -82,6 +85,19 @@ module Grit
     # Returns Grit::Blob (unbaked)
     def blob(id)
       Blob.create(self, :id => id)
+    end
+    
+    # Initialize a bare git repository at the given path
+    #   +path+ is the full path to the repo (traditionally ends with /<name>.git)
+    #
+    # Examples
+    #   Grit::Repo.init_bare('/var/git/myrepo.git')
+    #
+    # Returns Grit::Repo (the newly created repo)
+    def self.init_bare(path)
+      git = Git.new(path)
+      git.init
+      self.new(path)
     end
     
     # Pretty object inspection

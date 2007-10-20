@@ -93,6 +93,14 @@ class TestRepo < Test::Unit::TestCase
     assert_equal "Hello world", blob.data
   end
   
+  # init_bar
+  
+  def test_init_bare
+    Git.any_instance.expects(:init).returns(true)
+    Repo.expects(:new).with("/foo/bar.git")
+    Repo.init_bare("/foo/bar.git")
+  end
+  
   # inspect
   
   def test_inspect

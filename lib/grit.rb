@@ -15,5 +15,11 @@ require 'grit/blob'
 require 'grit/repo'
 
 module Grit
+  class << self
+    attr_accessor :debug
+  end
+  
+  self.debug = false
+  
   VERSION = '1.0.0'
 end

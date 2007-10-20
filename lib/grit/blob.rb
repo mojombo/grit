@@ -41,6 +41,13 @@ module Grit
       @data ||= @repo.git.cat_file({:p => true}, id)
     end
     
+    # 
+    def self.blame(repo, commit, file)
+      data = repo.git.blame({:p => true}, commit, '--', file)
+      
+      p data
+    end
+    
     # Pretty object inspection
     def inspect
       %Q{#<Grit::Blob "#{@id}">}

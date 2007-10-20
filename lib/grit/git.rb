@@ -20,6 +20,7 @@ module Grit
                  :pretty => "--pretty=",
                  :sort => "--sort=",
                  :format => "--format=",
+                 :since => "--since=",
                  :p => "-p",
                  :s => "-s"}
     
@@ -36,7 +37,11 @@ module Grit
     def method_missing(cmd, options = {}, *args)
       opt_args = transform_options(options)
       
-      `#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + args).join(' ')}`
+      call = "#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + args).join(' ')}"
+      puts call if Grit.debug
+      response = `#{call}`
+      puts response if Grit.debug
+      response
     end
     
     # Transform Ruby style options into git command line options

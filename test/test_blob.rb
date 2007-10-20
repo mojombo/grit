@@ -29,6 +29,13 @@ class TestBlob < Test::Unit::TestCase
     assert_equal 11, blob.size
   end
   
+  # blame
+  
+  # def test_blame
+  #   Grit.debug = true
+  #   Blob.blame(@r, 'master', './Manifest.txt')
+  # end
+  
   # inspect
   
   def test_inspect

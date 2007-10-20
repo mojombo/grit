@@ -6,7 +6,7 @@ module Grit
   #   r = Grit::Repo.new("/path/to/repo")
   #   h = r.heads.first
   #   h.name       # => "master"
-  #   h.commit     # => #<Grit::Commit:0x6fd1a0 @id="1c09f116cbc2cb4100fb6935bb162daa4723f455">
+  #   h.commit     # => #<Grit::Commit "1c09f116cbc2cb4100fb6935bb162daa4723f455">
   #   h.commit.id  # => "1c09f116cbc2cb4100fb6935bb162daa4723f455"
   class Head
     attr_reader :name
