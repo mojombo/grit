@@ -76,6 +76,9 @@ module Grit
     #   +treeish+ is the reference (default 'master')
     #   +paths+ is an optional Array of directory paths to restrict the tree (deafult [])
     #
+    # Examples
+    #   Repo.tree('master', ['lib/'])
+    #
     # Returns Grit::Tree (baked)
     def tree(treeish = 'master', paths = [])
       Tree.construct(self, treeish, paths)

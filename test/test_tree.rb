@@ -40,6 +40,18 @@ class TestTree < Test::Unit::TestCase
     end
   end
   
+  # /
+  
+  def test_slash
+    Git.any_instance.expects(:ls_tree).returns(
+      fixture('ls_tree_a')
+    )
+    tree = @r.tree('master')
+    
+    assert_equal 'aa06ba24b4e3f463b3c4a85469d0fb9e5b421cf8', (tree/'lib').id
+    assert_equal '8b1e02c0fb554eed2ce2ef737a68bb369d7527df', (tree/'README.txt').id
+  end
+  
   # inspect
   
   def test_inspect

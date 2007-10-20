@@ -81,6 +81,19 @@ module Grit
       end
     end
     
+    # Find the named object in this tree's contents
+    #
+    # Examples
+    #   Repo.new('/path/to/grit').tree/'lib'
+    #   # => #<Grit::Tree "6cc23ee138be09ff8c28b07162720018b244e95e">
+    #   Repo.new('/path/to/grit').tree/'README.txt'
+    #   # => #<Grit::Blob "8b1e02c0fb554eed2ce2ef737a68bb369d7527df">
+    #
+    # Returns Grit::Blob or Grit::Tree or nil if not found
+    def /(file)
+      self.contents.select { |c| c.name == file }.first
+    end
+    
     # Pretty object inspection
     def inspect
       %Q{#<Grit::Tree "#{@id}">}
