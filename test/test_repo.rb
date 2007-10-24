@@ -107,9 +107,22 @@ class TestRepo < Test::Unit::TestCase
     Repo.init_bare("/foo/bar.git")
   end
   
+  # diff
+  
+  def test_diff
+    Git.any_instance.expects(:diff).with({}, 'master^', 'master', '--')
+    @r.diff('master^', 'master')
+    
+    Git.any_instance.expects(:diff).with({}, 'master^', 'master', '--', 'foo/bar')
+    @r.diff('master^', 'master', 'foo/bar')
+    
+    Git.any_instance.expects(:diff).with({}, 'master^', 'master', '--', 'foo/bar', 'foo/baz')
+    @r.diff('master^', 'master', 'foo/bar', 'foo/baz')
+  end
+  
   # inspect
   
   def test_inspect
-    assert_equal %Q{#<Grit::Repo "#{GRIT_REPO}/.git">}, @r.inspect
+    assert_equal %Q{#<Grit::Repo "#{File.expand_path(GRIT_REPO)}/.git">}, @r.inspect
   end
 end

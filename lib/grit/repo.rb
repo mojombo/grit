@@ -17,16 +17,18 @@ module Grit
     #
     # Returns Grit::Repo
     def initialize(path)
-      if File.exist?(File.join(path, '.git'))
-        self.path = File.join(path, '.git')
+      epath = File.expand_path(path)
+      
+      if File.exist?(File.join(epath, '.git'))
+        self.path = File.join(epath, '.git')
         @bare = false
-      elsif File.exist?(path) && path =~ /\.git$/
-        self.path = path
+      elsif File.exist?(epath) && epath =~ /\.git$/
+        self.path = epath
         @bare = true
-      elsif File.exist?(path)
-        raise InvalidGitRepositoryError.new(path)
+      elsif File.exist?(epath)
+        raise InvalidGitRepositoryError.new(epath)
       else
-        raise NoSuchPathError.new(path)
+        raise NoSuchPathError.new(epath)
       end
       
       self.git = Git.new(self.path)
@@ -90,6 +92,14 @@ module Grit
     # Returns Grit::Blob (unbaked)
     def blob(id)
       Blob.create(self, :id => id)
+    end
+    
+    # The diff from commit +a+ to commit +b+, optionally restricted to the given file(s)
+    #   +a+ is the base commit
+    #   +b+ is the other commit
+    #   +paths+ is an optional list of file paths on which to restrict the diff
+    def diff(a, b, *paths)
+      self.git.diff({}, a, b, '--', *paths)
     end
     
     # Initialize a bare git repository at the given path
