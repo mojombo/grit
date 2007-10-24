@@ -9,7 +9,8 @@ module Grit
     attr_reader :name
     
     def initialize
-      
+      @contents = nil
+      @__baked__ = nil
     end
     
     # Construct the contents of the tree
@@ -28,6 +29,8 @@ module Grit
       @repo = repo
       @id = id
       @contents = []
+      @__baked__ = nil
+      
       text.split("\n").each do |line|
         @contents << content_from_string(repo, line)
       end
@@ -56,6 +59,9 @@ module Grit
     # Returns Grit::Tree (unbaked)
     def create_initialize(repo, atts)
       @repo = repo
+      @contents = nil
+      @__baked__ = nil
+      
       atts.each do |k, v|
         instance_variable_set("@#{k}".to_sym, v)
       end

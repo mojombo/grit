@@ -28,10 +28,10 @@ module Lazy
     def lazy_reader(*args)
       args.each do |arg|
         define_method(arg) do
-          val = instance_variable_get('@' + arg.to_s)
+          val = instance_variable_get("@#{arg}")
           return val if val
           self.__prebake__
-          instance_variable_get('@' + arg.to_s)
+          instance_variable_get("@#{arg}")
         end
       end
     end

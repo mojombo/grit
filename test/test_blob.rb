@@ -23,7 +23,7 @@ class TestBlob < Test::Unit::TestCase
   
   # size
   
-  def test_data_should_return_blob_contents
+  def test_size_should_return_file_size
     Git.any_instance.expects(:cat_file).returns(fixture('cat_file_blob_size'))
     blob = Blob.create(@r, :id => 'abc')
     assert_equal 11, blob.size

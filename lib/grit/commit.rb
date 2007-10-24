@@ -52,6 +52,17 @@ module Grit
     #
     # Returns Grit::Commit (unbaked)
     def create_initialize(repo, atts)
+      @repo = nil
+      @id = nil
+      @parents = nil
+      @tree = nil
+      @author = nil
+      @authored_date = nil
+      @committer = nil
+      @committed_date = nil
+      @message = nil
+      @__baked__ = nil
+      
       @repo = repo
       atts.each do |k, v|
         instance_variable_set("@#{k}".to_sym, v)

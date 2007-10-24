@@ -6,7 +6,7 @@ class TestGit < Test::Unit::TestCase
   end
   
   def test_method_missing
-    assert_match /^git version [\d\.]*$/, @git.version
+    assert_match(/^git version [\d\.]*$/, @git.version)
   end
   
   def test_transform_options
