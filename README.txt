@@ -30,7 +30,7 @@ include the Grit module so reduce typing.
   repo = Repo.new("/Users/tom/dev/grit")
   
 In the above example, the directory /Users/tom/dev/grit is my working
-repo and contains the .git direcotyr. You can also initialize Grit with a 
+repo and contains the .git directory. You can also initialize Grit with a 
 bare repo.
 
   repo = Repo.new("/var/git/grit.git")
@@ -47,7 +47,7 @@ objects.
         #<Grit::Commit "40d3057d09a7a4d61059bca9dca5ae698de58cbe">,
         #<Grit::Commit "4ea50f4754937bf19461af58ce3b3d24c77311d9">]
         
-Called without arguments, Repo#commits returns the list of up to ten commits
+Called without arguments, Repo#commits returns a list of up to ten commits
 reachable by the master branch (starting at the latest commit). You can ask
 for commits beginning at a different branch, commit, tag, etc.
 
@@ -99,7 +99,81 @@ You can traverse a commit's ancestry by chaining calls to #parents.
 
   repo.commits.first.parents[0].parents[0].parents[0]
   
-The above corresponds to master^^^ or master~3 in git parlance
+The above corresponds to master^^^ or master~3 in git parlance.
+
+= The Tree object
+
+A tree records pointers to the contents of a directory. Let's say you want
+the root tree of the latest commit on the master branch.
+
+  tree = repo.commits.first.tree
+  # => #<Grit::Tree "3536eb9abac69c3e4db583ad38f3d30f8db4771f">
+  
+  tree.id
+  # => "3536eb9abac69c3e4db583ad38f3d30f8db4771f"
+  
+Once you have a tree, you can get the contents.
+
+  contents = tree.contents
+  # => [#<Grit::Blob "4ebc8aea50e0a67e000ba29a30809d0a7b9b2666">,
+        #<Grit::Blob "81d2c27608b352814cbe979a6acd678d30219678">,
+        #<Grit::Tree "c3d07b0083f01a6e1ac969a0f32b8d06f20c62e5">,
+        #<Grit::Tree "4d00fe177a8407dbbc64a24dbfc564762c0922d8">]
+
+This tree contains two Blob objects and two Tree objects. The trees are
+subdirectories and the blobs are files. Trees below the root have additional
+attributes.
+
+  contents.last.name
+  # => "lib"
+  
+  contents.last.mode
+  # => "040000"
+  
+There is a convenience method that allows you to get a named sub-object
+from a tree.
+
+  tree/"lib"
+  # => #<Grit::Tree "e74893a3d8a25cbb1367cf241cc741bfd503c4b2">
+  
+You can also get a tree directly from the repo if you know its name.
+
+  repo.tree
+  # => #<Grit::Tree "master">
+  
+  repo.tree("91169e1f5fa4de2eaea3f176461f5dc784796769")
+  # => #<Grit::Tree "91169e1f5fa4de2eaea3f176461f5dc784796769">
+  
+= The Blob object
+
+A blob represents a file. Trees often contain blobs.
+
+  blob = tree.contents.first
+  # => #<Grit::Blob "4ebc8aea50e0a67e000ba29a30809d0a7b9b2666">
+  
+A blob has certain attributes.
+
+  blob.id
+  # => "4ebc8aea50e0a67e000ba29a30809d0a7b9b2666"
+  
+  blob.name
+  # => "README.txt"
+  
+  blob.mode
+  # => "100644"
+  
+  blob.size
+  # => 7726
+  
+You can get the data of a blob as a string.
+
+  blob.data
+  # => "Grit is a library to ..."
+  
+You can also get a blob directly from the repo if you know its name.
+
+  repo.blob("4ebc8aea50e0a67e000ba29a30809d0a7b9b2666")
+  # => #<Grit::Blob "4ebc8aea50e0a67e000ba29a30809d0a7b9b2666">
 
 == LICENSE:
 
