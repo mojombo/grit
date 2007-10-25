@@ -9,6 +9,13 @@ module Grit
       @email = email
     end
     
+    # Create an Actor from a string.
+    #   +str+ is the string, which is expected to be in regular git format
+    #
+    # Format
+    #   John Doe <jdoe@example.com>
+    #
+    # Returns Actor
     def self.from_string(str)
       case str
         when /<.+>/
@@ -17,6 +24,11 @@ module Grit
         else
           return self.new(str, nil)
       end
+    end
+    
+    # Pretty object inspection
+    def inspect
+      %Q{#<Grit::Actor "#{@name} <#{@email}>">}
     end
   end # Actor
   
