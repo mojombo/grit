@@ -1,4 +1,4 @@
-$:.unshift File.dirname(__FILE__)     # For use/testing when no gem is installed
+$:.unshift File.dirname(__FILE__) # For use/testing when no gem is installed
 
 # core
 
@@ -22,5 +22,5 @@ module Grit
   
   self.debug = false
   
-  VERSION = '1.0.0'
+  VERSION = '0.1.0'
 end
