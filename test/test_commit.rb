@@ -10,9 +10,10 @@ class TestCommit < Test::Unit::TestCase
   def test_bake
     Git.any_instance.expects(:rev_list).returns(fixture('rev_list_single'))
     @c = Commit.create(@r, :id => '4c8124ffcf4039d292442eeccabdeca5af5c5017')
-    @c.author # cause bake-age
+    @c.author # bake
     
-    assert_equal "Tom Preston-Werner <tom@mojombo.com>", @c.author
+    assert_equal "Tom Preston-Werner", @c.author.name
+    assert_equal "tom@mojombo.com", @c.author.email
   end
   
   # to_s

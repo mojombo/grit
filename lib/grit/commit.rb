@@ -153,7 +153,7 @@ module Grit
     # Returns [String (actor name and email), Time (acted at time)]
     def self.actor(line)
       m, actor, epoch = *line.match(/^.+? (.*) (\d+) .*$/)
-      [actor, Time.at(epoch.to_i)]
+      [Actor.from_string(actor), Time.at(epoch.to_i)]
     end
   end # Commit
   

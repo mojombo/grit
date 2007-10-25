@@ -81,9 +81,9 @@ module Grit
             c = commits[info[:id]]
             unless c
               c = Commit.create(repo, :id => info[:id],
-                                      :author => info[:author],
+                                      :author => Actor.from_string(info[:author] + ' ' + info[:author_email]),
                                       :authored_date => info[:author_date],
-                                      :committer => info[:committer],
+                                      :committer => Actor.from_string(info[:committer] + ' ' + info[:committer_email]),
                                       :committed_date => info[:committer_date],
                                       :message => info[:summary])
               commits[info[:id]] = c
@@ -101,11 +101,6 @@ module Grit
     # Pretty object inspection
     def inspect
       %Q{#<Grit::Blob "#{@id}">}
-    end
-    
-    # private
-    
-    def self.read_
     end
   end # Blob
   
