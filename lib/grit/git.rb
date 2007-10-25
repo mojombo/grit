@@ -13,17 +13,6 @@ module Grit
       self.git_dir = git_dir
     end
     
-    # Converstion hash from Ruby style options to git command line
-    # style options
-    TRANSFORM = {:max_count => "--max-count=",
-                 :skip => "--skip=",
-                 :pretty => "--pretty=",
-                 :sort => "--sort=",
-                 :format => "--format=",
-                 :since => "--since=",
-                 :p => "-p",
-                 :s => "-s"}
-    
     # Run the given git command with the specified arguments and return
     # the result as a String
     #   +cmd+ is the command
@@ -52,12 +41,19 @@ module Grit
     def transform_options(options)
       args = []
       options.keys.each do |opt|
-        if TRANSFORM[opt]
+        if opt.to_s.size == 1
           if options[opt] == true
-            args << TRANSFORM[opt]
+            args << "-#{opt}"
           else
             val = options.delete(opt)
-            args << TRANSFORM[opt] + val.to_s
+            args << "-#{opt.to_s} #{val}"
+          end
+        else
+          if options[opt] == true
+            args << "--#{opt.to_s.gsub(/_/, '-')}"
+          else
+            val = options.delete(opt)
+            args << "--#{opt.to_s.gsub(/_/, '-')}=#{val}"
           end
         end
       end
