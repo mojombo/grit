@@ -1,8 +1,6 @@
 module Grit
   
   class Commit
-    include Lazy
-    
     attr_reader :id
     lazy_reader :parents
     lazy_reader :tree
@@ -33,8 +31,6 @@ module Grit
       @committer = committer
       @committed_date = committed_date
       @message = message
-      
-      __baked__
     end
     
     # Create an unbaked Commit containing just the specified attributes
@@ -52,38 +48,15 @@ module Grit
     #
     # Returns Grit::Commit (unbaked)
     def create_initialize(repo, atts)
-      @repo = nil
-      @id = nil
-      @parents = nil
-      @tree = nil
-      @author = nil
-      @authored_date = nil
-      @committer = nil
-      @committed_date = nil
-      @message = nil
-      @__baked__ = nil
-      
       @repo = repo
       atts.each do |k, v|
-        instance_variable_set("@#{k}".to_sym, v)
+        instance_variable_set("@#{k}", v)
       end
       self
     end
     
-    # Use the id of this instance to populate all of the other fields
-    # when any of them are called.
-    #
-    # Returns nil
-    def __bake__
-      temp = self.class.find_all(@repo, @id, {:max_count => 1}).first
-      @parents = temp.parents
-      @tree = temp.tree
-      @author = temp.author
-      @authored_date = temp.authored_date
-      @committer = temp.committer
-      @committed_date = temp.committed_date
-      @message = temp.message
-      nil
+    def lazy_source
+      self.class.find_all(@repo, @id, {:max_count => 1}).first
     end
     
     # Find all commits matching the given criteria.
