@@ -25,4 +25,11 @@ class TestActor < Test::Unit::TestCase
     a = Actor.from_string("Tom Werner <tom@example.com>")
     assert_equal %Q{#<Grit::Actor "Tom Werner <tom@example.com>">}, a.inspect
   end
+
+  # to_s
+
+  def test_to_s_should_alias_name
+    a = Actor.from_string("Tom Werner <tom@example.com>")
+    assert_equal a.name, a.to_s
+  end
 end

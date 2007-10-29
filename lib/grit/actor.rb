@@ -8,6 +8,7 @@ module Grit
       @name = name
       @email = email
     end
+    alias_method :to_s, :name
     
     # Create an Actor from a string.
     #   +str+ is the string, which is expected to be in regular git format
