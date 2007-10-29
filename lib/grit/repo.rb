@@ -113,6 +113,14 @@ module Grit
       self.git.diff({}, a, b, '--', *paths)
     end
     
+    # The commit diff for the given commit
+    #   +commit+ is the commit name/id
+    #
+    # Returns Grit::Diff[]
+    def commit_diff(commit)
+      Commit.diff(self, commit)
+    end
+    
     # Initialize a bare git repository at the given path
     #   +path+ is the full path to the repo (traditionally ends with /<name>.git)
     #

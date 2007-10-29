@@ -122,6 +122,15 @@ class TestRepo < Test::Unit::TestCase
     @r.diff('master^', 'master', 'foo/bar', 'foo/baz')
   end
   
+  # commit_diff
+  
+  def test_diff
+    Git.any_instance.expects(:diff).returns(fixture('diff_p'))
+    diffs = @r.commit_diff('master')
+    
+    assert_equal 15, diffs.size
+  end
+  
   # inspect
   
   def test_inspect
