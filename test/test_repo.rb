@@ -127,4 +127,18 @@ class TestRepo < Test::Unit::TestCase
   def test_inspect
     assert_equal %Q{#<Grit::Repo "#{File.expand_path(GRIT_REPO)}/.git">}, @r.inspect
   end
+
+  # log
+
+  def test_log
+    Git.any_instance.expects(:log).times(2).with({:pretty => 'raw'}, 'master').returns(fixture('rev_list'))
+
+    assert_equal '4c8124ffcf4039d292442eeccabdeca5af5c5017', @r.log.first.id
+    assert_equal 'ab25fd8483882c3bda8a458ad2965d2248654335', @r.log.last.id
+  end
+
+  def test_log_with_path_and_options
+    Git.any_instance.expects(:log).with({:pretty => 'raw', :max_count => 1}, 'master -- file.rb').returns(fixture('rev_list'))
+    @r.log('master', 'file.rb', :max_count => 1)
+  end
 end

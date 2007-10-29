@@ -93,6 +93,17 @@ module Grit
     def blob(id)
       Blob.create(self, :id => id)
     end
+
+    # The commit log for a treeish
+    #
+    # Returns Grit::Commit[]
+    def log(commit = 'master', path = nil, options = {})
+      default_options = {:pretty => "raw"}
+      actual_options  = default_options.merge(options)
+      arg = path ? "#{commit} -- #{path}" : commit
+      commits = self.git.log(actual_options, arg)
+      Commit.list_from_string(self, commits)
+    end
     
     # The diff from commit +a+ to commit +b+, optionally restricted to the given file(s)
     #   +a+ is the base commit
