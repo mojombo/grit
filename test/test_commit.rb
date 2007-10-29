@@ -38,6 +38,7 @@ class TestCommit < Test::Unit::TestCase
     assert_equal 'lib/grit/actor.rb', diffs[5].a_path
     assert_equal nil, diffs[5].a_commit
     assert_equal 'f733bce6b57c0e5e353206e692b0e3105c2527f4', diffs[5].b_commit.id
+    assert_equal true, diffs[5].new_file
   end
   
   # to_s

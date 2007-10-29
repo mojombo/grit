@@ -33,8 +33,8 @@ module Grit
         if lines.first =~ /^new file/
           m, mode = lines.shift.match(/^new file mode (.+)$/)
           new_file = true
-        elsif lines.first =~ /^delete file/
-          lines.shift
+        elsif lines.first =~ /^deleted file/
+          m, mode = lines.shift.match(/^deleted file mode (.+)$/)
           deleted_file = true
         end
         
