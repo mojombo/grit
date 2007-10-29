@@ -136,9 +136,13 @@ module Grit
       commits
     end
     
-    def self.diff(repo, id)
-      text = repo.git.diff({:full_index => true}, id)
+    def self.diff(repo, a, b = nil)
+      text = repo.git.diff({:full_index => true}, a, b)
       Diff.list_from_string(repo, text)
+    end
+
+    def diffs
+      self.class.diff(@repo, parents.first.id, @id) 
     end
     
     # Convert this Commit to a String which is just the SHA1 id
