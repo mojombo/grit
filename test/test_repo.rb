@@ -22,7 +22,7 @@ class TestRepo < Test::Unit::TestCase
   # descriptions
   
   def test_description
-    assert_equal "Grit is a ruby library for interfacing with git repositories.", @r.description
+    assert_equal "Unnamed repository; edit this file to name it for gitweb.", @r.description
   end
   
   # heads
