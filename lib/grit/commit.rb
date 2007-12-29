@@ -37,6 +37,10 @@ module Grit
       __baked__
     end
     
+    def id_abbrev
+      @id_abbrev ||= @repo.git.rev_parse({:short => true}, self.id).chomp
+    end
+    
     # Create an unbaked Commit containing just the specified attributes
     #   +repo+ is the Repo
     #   +atts+ is a Hash of instance variable data

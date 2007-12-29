@@ -131,6 +131,20 @@ class TestRepo < Test::Unit::TestCase
     assert_equal 15, diffs.size
   end
   
+  # init bare
+  
+  # archive
+  
+  def test_archive_tar
+    @r.archive_tar
+  end
+  
+  # archive_tar_gz
+  
+  def test_archive_tar_gz
+    @r.archive_tar_gz
+  end
+  
   # inspect
   
   def test_inspect
