@@ -1,6 +1,8 @@
 module Grit
   
   class Blob
+    DEFAULT_MIME_TYPE = "text/plain"
+    
     attr_reader :id
     attr_reader :mode
     attr_reader :name
@@ -39,6 +41,14 @@ module Grit
     # Returns String
     def data
       @data ||= @repo.git.cat_file({:p => true}, id)
+    end
+    
+    # The mime type of this file (based on the filename)
+    #
+    # Returns String
+    def mime_type
+      guesses = MIME::Types.type_for(self.name) rescue []
+      guesses.first ? guesses.first.simplified : DEFAULT_MIME_TYPE
     end
     
     # The blame information for the given file at the given commit
