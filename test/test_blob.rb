@@ -29,6 +29,20 @@ class TestBlob < Test::Unit::TestCase
     assert_equal 11, blob.size
   end
   
+  # data
+  
+  # mime_type
+  
+  def test_mime_type_should_return_mime_type_for_known_types
+    blob = Blob.create(@r, :id => 'abc', :name => 'foo.png')
+    assert_equal "image/png", blob.mime_type
+  end
+  
+  def test_mime_type_should_return_text_plain_for_unknown_types
+    blob = Blob.create(@r, :id => 'abc')
+    assert_equal "text/plain", blob.mime_type
+  end
+  
   # blame
   
   def test_blame
