@@ -134,6 +134,48 @@ module Grit
       self.new(path)
     end
     
+    # Archive the given treeish
+    #   +treeish+ is the treeish name/id (default 'master')
+    #   +prefix+ is the optional prefix
+    #
+    # Examples
+    #   repo.archive_tar
+    #   # => <String containing tar archive>
+    #
+    #   repo.archive_tar('a87ff14')
+    #   # => <String containing tar archive for commit a87ff14>
+    #
+    #   repo.archive_tar('master', 'myproject/')
+    #   # => <String containing tar archive and prefixed with 'myproject/'>
+    #
+    # Returns String (containing tar archive)
+    def archive_tar(treeish = 'master', prefix = nil)
+      options = {}
+      options[:prefix] = prefix if prefix
+      self.git.archive(options, treeish)
+    end
+    
+    # Archive and gzip the given treeish
+    #   +treeish+ is the treeish name/id (default 'master')
+    #   +prefix+ is the optional prefix
+    #
+    # Examples
+    #   repo.archive_tar_gz
+    #   # => <String containing tar.gz archive>
+    #
+    #   repo.archive_tar_gz('a87ff14')
+    #   # => <String containing tar.gz archive for commit a87ff14>
+    #
+    #   repo.archive_tar_gz('master', 'myproject/')
+    #   # => <String containing tar.gz archive and prefixed with 'myproject/'>
+    #
+    # Returns String (containing tar.gz archive)
+    def archive_tar_gz(treeish = 'master', prefix = nil)
+      options = {}
+      options[:prefix] = prefix if prefix
+      self.git.archive(options, treeish, "| gzip")
+    end
+    
     # Pretty object inspection
     def inspect
       %Q{#<Grit::Repo "#{@path}">}

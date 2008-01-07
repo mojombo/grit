@@ -1,6 +1,6 @@
 grit
-    by Tom Preston-Werner
-    grit.rubyforge.org
+    by Tom Preston-Werner, Chris Wanstrath
+    http://grit.rubyforge.org
 
 == DESCRIPTION:
 

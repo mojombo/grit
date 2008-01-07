@@ -22,7 +22,7 @@ class TestRepo < Test::Unit::TestCase
   # descriptions
   
   def test_description
-    assert_equal "Grit is a ruby library for interfacing with git repositories.", @r.description
+    assert_equal "Unnamed repository; edit this file to name it for gitweb.", @r.description
   end
   
   # heads
@@ -129,6 +129,20 @@ class TestRepo < Test::Unit::TestCase
     diffs = @r.commit_diff('master')
     
     assert_equal 15, diffs.size
+  end
+  
+  # init bare
+  
+  # archive
+  
+  def test_archive_tar
+    @r.archive_tar
+  end
+  
+  # archive_tar_gz
+  
+  def test_archive_tar_gz
+    @r.archive_tar_gz
   end
   
   # inspect

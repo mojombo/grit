@@ -16,6 +16,13 @@ class TestCommit < Test::Unit::TestCase
     assert_equal "tom@mojombo.com", @c.author.email
   end
   
+  # short_name
+  
+  def test_id_abbrev
+    Git.any_instance.expects(:rev_parse).returns(fixture('rev_parse'))
+    assert_equal '80f136f', @r.commit('80f136f500dfdb8c3e8abf4ae716f875f0a1b57f').id_abbrev
+  end
+  
   # diff
   
   def test_diff
