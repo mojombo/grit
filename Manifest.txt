@@ -2,11 +2,11 @@ History.txt
 Manifest.txt
 README.txt
 Rakefile
-bin/grit
 lib/grit.rb
 lib/grit/actor.rb
 lib/grit/blob.rb
 lib/grit/commit.rb
+lib/grit/diff.rb
 lib/grit/errors.rb
 lib/grit/git.rb
 lib/grit/head.rb
@@ -16,11 +16,13 @@ lib/grit/tree.rb
 test/fixtures/blame
 test/fixtures/cat_file_blob
 test/fixtures/cat_file_blob_size
+test/fixtures/diff_p
 test/fixtures/for_each_ref
 test/fixtures/ls_tree_a
 test/fixtures/ls_tree_b
 test/fixtures/rev_list
 test/fixtures/rev_list_single
+test/fixtures/rev_parse
 test/helper.rb
 test/profile.rb
 test/suite.rb
