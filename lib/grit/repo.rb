@@ -64,6 +64,16 @@ module Grit
       Commit.find_all(self, start, options)
     end
     
+    # The Commits objects that are reachable via +to+ but not via +from+
+    # Commits are returned in chronological order.
+    #   +from+ is the branch/commit name of the younger item
+    #   +to+ is the branch/commit name of the older item
+    #
+    # Returns Grit::Commit[] (baked)
+    def commits_between(from, to)
+      Commit.find_all(self, "#{from}..#{to}").reverse
+    end
+    
     # The Commit object for the specified id
     #   +id+ is the SHA1 identifier of the commit
     #
