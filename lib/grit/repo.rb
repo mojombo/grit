@@ -144,6 +144,15 @@ module Grit
       self.new(path)
     end
     
+    # Fork a bare git repository from this repo
+    #   +path+ is the full path of the new repo (traditionally ends with /<name>.git)
+    #
+    # Returns Grit::Repo (the newly forked repo)
+    def fork_bare(path)
+      self.git.clone({:bare => true, :shared => true}, self.path, path)
+      Repo.new(path)
+    end
+    
     # Archive the given treeish
     #   +treeish+ is the treeish name/id (default 'master')
     #   +prefix+ is the optional prefix
