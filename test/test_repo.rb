@@ -101,12 +101,34 @@ class TestRepo < Test::Unit::TestCase
     assert_equal "Hello world", blob.data
   end
   
-  # init_bar
+  # init_bare
   
   def test_init_bare
     Git.any_instance.expects(:init).returns(true)
     Repo.expects(:new).with("/foo/bar.git")
     Repo.init_bare("/foo/bar.git")
+  end
+  
+  # fork_bare
+  
+  def test_fork_bare
+    Git.any_instance.expects(:clone).with(
+      {:bare => true, :shared => true}, 
+      '/Users/tom/dev/mojombo/grit/.git',
+      "/foo/bar.git").returns(nil)
+    Repo.expects(:new)
+      
+    @r.fork_bare("/foo/bar.git")
+  end
+  
+  def test_fork_bare_with_options
+    Git.any_instance.expects(:clone).with(
+      {:bare => true, :shared => true, :template => '/awesome'}, 
+      '/Users/tom/dev/mojombo/grit/.git',
+      "/foo/bar.git").returns(nil)
+    Repo.expects(:new)
+      
+    @r.fork_bare("/foo/bar.git", :template => '/awesome')
   end
   
   # diff

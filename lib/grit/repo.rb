@@ -146,10 +146,13 @@ module Grit
     
     # Fork a bare git repository from this repo
     #   +path+ is the full path of the new repo (traditionally ends with /<name>.git)
+    #   +options+ is any additional options to the git clone command
     #
     # Returns Grit::Repo (the newly forked repo)
-    def fork_bare(path)
-      self.git.clone({:bare => true, :shared => true}, self.path, path)
+    def fork_bare(path, options = {})
+      default_options = {:bare => true, :shared => true}
+      real_options = default_options.merge(options)
+      self.git.clone(real_options, self.path, path)
       Repo.new(path)
     end
     
