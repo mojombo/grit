@@ -109,6 +109,13 @@ class TestRepo < Test::Unit::TestCase
     Repo.init_bare("/foo/bar.git")
   end
   
+  def test_init_bare_with_options
+    Git.any_instance.expects(:init).with(
+      :template => "/baz/sweet").returns(true)
+    Repo.expects(:new).with("/foo/bar.git")
+    Repo.init_bare("/foo/bar.git", :template => "/baz/sweet")
+  end
+  
   # fork_bare
   
   def test_fork_bare

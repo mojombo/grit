@@ -133,14 +133,15 @@ module Grit
     
     # Initialize a bare git repository at the given path
     #   +path+ is the full path to the repo (traditionally ends with /<name>.git)
+    #   +options+ is any additional options to the git init command
     #
     # Examples
     #   Grit::Repo.init_bare('/var/git/myrepo.git')
     #
     # Returns Grit::Repo (the newly created repo)
-    def self.init_bare(path)
+    def self.init_bare(path, options = {})
       git = Git.new(path)
-      git.init
+      git.init(options)
       self.new(path)
     end
     
