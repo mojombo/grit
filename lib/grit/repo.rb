@@ -53,6 +53,13 @@ module Grit
     
     alias_method :branches, :heads
     
+    # An array of Tag objects that are available in this repo
+    #
+    # Returns Grit::Tag[] (baked)
+    def tags
+      
+    end
+    
     # An array of Commit objects representing the history of a given ref/commit
     #   +start+ is the branch/commit name (default 'master')
     #   +max_count+ is the maximum number of commits to return (default 10)
