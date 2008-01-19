@@ -1,6 +1,8 @@
 module Grit
   
   class Git
+    undef_method :clone
+    
     class << self
       attr_accessor :git_binary
     end

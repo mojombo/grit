@@ -101,12 +101,41 @@ class TestRepo < Test::Unit::TestCase
     assert_equal "Hello world", blob.data
   end
   
-  # init_bar
+  # init_bare
   
   def test_init_bare
     Git.any_instance.expects(:init).returns(true)
     Repo.expects(:new).with("/foo/bar.git")
     Repo.init_bare("/foo/bar.git")
+  end
+  
+  def test_init_bare_with_options
+    Git.any_instance.expects(:init).with(
+      :template => "/baz/sweet").returns(true)
+    Repo.expects(:new).with("/foo/bar.git")
+    Repo.init_bare("/foo/bar.git", :template => "/baz/sweet")
+  end
+  
+  # fork_bare
+  
+  def test_fork_bare
+    Git.any_instance.expects(:clone).with(
+      {:bare => true, :shared => true}, 
+      '/Users/tom/dev/mojombo/grit/.git',
+      "/foo/bar.git").returns(nil)
+    Repo.expects(:new)
+      
+    @r.fork_bare("/foo/bar.git")
+  end
+  
+  def test_fork_bare_with_options
+    Git.any_instance.expects(:clone).with(
+      {:bare => true, :shared => true, :template => '/awesome'}, 
+      '/Users/tom/dev/mojombo/grit/.git',
+      "/foo/bar.git").returns(nil)
+    Repo.expects(:new)
+      
+    @r.fork_bare("/foo/bar.git", :template => '/awesome')
   end
   
   # diff
@@ -143,6 +172,20 @@ class TestRepo < Test::Unit::TestCase
   
   def test_archive_tar_gz
     @r.archive_tar_gz
+  end
+  
+  # enable_daemon_serve
+  
+  def test_enable_daemon_serve
+    FileUtils.expects(:touch).with(File.join(@r.path, '.git', 'git-daemon-export-ok'))
+    @r.enable_daemon_serve
+  end
+  
+  # disable_daemon_serve
+  
+  def test_disable_daemon_serve
+    FileUtils.expects(:rm_f).with(File.join(@r.path, '.git', 'git-daemon-export-ok'))
+    @r.disable_daemon_serve
   end
   
   # inspect

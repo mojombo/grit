@@ -22,3 +22,8 @@ task :coverage do
   system("rcov test/test_*.rb")
   system("open coverage/index.html")
 end
+
+desc "Upload site to Rubyforge"
+task :site do
+  sh "scp -r doc/* mojombo@grit.rubyforge.org:/var/www/gforge-projects/grit"
+end

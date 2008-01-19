@@ -15,6 +15,16 @@ object oriented manner.
 
 sudo gem install grit
 
+== SOURCE:
+
+Grit's git repo is available on GitHub, which can be browsed at:
+
+http://github.com/~mojombo/grit
+
+and cloned from:
+
+git://github.com/mojombo/grit.git
+
 == USAGE:
 
 Grit gives you object model access to your git repository. Once you have

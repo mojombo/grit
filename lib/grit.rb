@@ -1,6 +1,7 @@
 $:.unshift File.dirname(__FILE__) # For use/testing when no gem is installed
 
 # core
+require 'fileutils'
 
 # stdlib
 
@@ -27,5 +28,5 @@ module Grit
   
   self.debug = false
   
-  VERSION = '0.1.0'
+  VERSION = '0.7.0'
 end

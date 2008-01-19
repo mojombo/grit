@@ -1,5 +1,5 @@
-== 1.0.0 / 2007-10-09
+== 0.7.0 / 2008-01-07
 
 * 1 major enhancement
-  * Birthday!
+  * First public release!
 

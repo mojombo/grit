@@ -1,6 +1,8 @@
 module Grit
   
   class Repo
+    DAEMON_EXPORT_FILE = 'git-daemon-export-ok'
+    
     # The path of the git repo as a String
     attr_accessor :path
     attr_reader :bare
@@ -64,6 +66,16 @@ module Grit
       Commit.find_all(self, start, options)
     end
     
+    # The Commits objects that are reachable via +to+ but not via +from+
+    # Commits are returned in chronological order.
+    #   +from+ is the branch/commit name of the younger item
+    #   +to+ is the branch/commit name of the older item
+    #
+    # Returns Grit::Commit[] (baked)
+    def commits_between(from, to)
+      Commit.find_all(self, "#{from}..#{to}").reverse
+    end
+    
     # The Commit object for the specified id
     #   +id+ is the SHA1 identifier of the commit
     #
@@ -123,15 +135,28 @@ module Grit
     
     # Initialize a bare git repository at the given path
     #   +path+ is the full path to the repo (traditionally ends with /<name>.git)
+    #   +options+ is any additional options to the git init command
     #
     # Examples
     #   Grit::Repo.init_bare('/var/git/myrepo.git')
     #
     # Returns Grit::Repo (the newly created repo)
-    def self.init_bare(path)
+    def self.init_bare(path, options = {})
       git = Git.new(path)
-      git.init
+      git.init(options)
       self.new(path)
+    end
+    
+    # Fork a bare git repository from this repo
+    #   +path+ is the full path of the new repo (traditionally ends with /<name>.git)
+    #   +options+ is any additional options to the git clone command
+    #
+    # Returns Grit::Repo (the newly forked repo)
+    def fork_bare(path, options = {})
+      default_options = {:bare => true, :shared => true}
+      real_options = default_options.merge(options)
+      self.git.clone(real_options, self.path, path)
+      Repo.new(path)
     end
     
     # Archive the given treeish
@@ -174,6 +199,30 @@ module Grit
       options = {}
       options[:prefix] = prefix if prefix
       self.git.archive(options, treeish, "| gzip")
+    end
+    
+    # Enable git-daemon serving of this repository by writing the
+    # git-daemon-export-ok file to its git directory
+    #
+    # Returns nothing
+    def enable_daemon_serve
+      if @bare
+        FileUtils.touch(File.join(self.path, DAEMON_EXPORT_FILE))
+      else
+        FileUtils.touch(File.join(self.path, '.git', DAEMON_EXPORT_FILE))
+      end
+    end
+    
+    # Disable git-daemon serving of this repository by ensuring there is no
+    # git-daemon-export-ok file in its git directory
+    #
+    # Returns nothing
+    def disable_daemon_serve
+      if @bare
+        FileUtils.rm_f(File.join(self.path, DAEMON_EXPORT_FILE))
+      else
+        FileUtils.rm_f(File.join(self.path, '.git', DAEMON_EXPORT_FILE))
+      end
     end
     
     # Pretty object inspection
