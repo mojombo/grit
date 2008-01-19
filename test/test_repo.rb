@@ -174,6 +174,20 @@ class TestRepo < Test::Unit::TestCase
     @r.archive_tar_gz
   end
   
+  # enable_daemon_serve
+  
+  def test_enable_daemon_serve
+    FileUtils.expects(:touch).with(File.join(@r.path, '.git', 'git-daemon-export-ok'))
+    @r.enable_daemon_serve
+  end
+  
+  # disable_daemon_serve
+  
+  def test_disable_daemon_serve
+    FileUtils.expects(:rm_f).with(File.join(@r.path, '.git', 'git-daemon-export-ok'))
+    @r.disable_daemon_serve
+  end
+  
   # inspect
   
   def test_inspect

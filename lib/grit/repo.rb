@@ -1,6 +1,8 @@
 module Grit
   
   class Repo
+    DAEMON_EXPORT_FILE = 'git-daemon-export-ok'
+    
     # The path of the git repo as a String
     attr_accessor :path
     attr_reader :bare
@@ -197,6 +199,30 @@ module Grit
       options = {}
       options[:prefix] = prefix if prefix
       self.git.archive(options, treeish, "| gzip")
+    end
+    
+    # Enable git-daemon serving of this repository by writing the
+    # git-daemon-export-ok file to its git directory
+    #
+    # Returns nothing
+    def enable_daemon_serve
+      if @bare
+        FileUtils.touch(File.join(self.path, DAEMON_EXPORT_FILE))
+      else
+        FileUtils.touch(File.join(self.path, '.git', DAEMON_EXPORT_FILE))
+      end
+    end
+    
+    # Disable git-daemon serving of this repository by ensuring there is no
+    # git-daemon-export-ok file in its git directory
+    #
+    # Returns nothing
+    def disable_daemon_serve
+      if @bare
+        FileUtils.rm_f(File.join(self.path, DAEMON_EXPORT_FILE))
+      else
+        FileUtils.rm_f(File.join(self.path, '.git', DAEMON_EXPORT_FILE))
+      end
     end
     
     # Pretty object inspection
