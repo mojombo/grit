@@ -72,6 +72,31 @@ class TestCommit < Test::Unit::TestCase
     assert_equal 'f733bce6b57c0e5e353206e692b0e3105c2527f4', diffs[5].b_commit.id
     assert_equal true, diffs[5].new_file
   end
+
+  def test_diffs_on_initial_import
+    # git show --full-index 634396b2f541a9f2d58b00be1a07f0c358b999b3 > test/fixtures/diff_i
+
+    Git.any_instance.expects(:show).with({:full_index => true, :pretty => 'raw'}, '634396b2f541a9f2d58b00be1a07f0c358b999b3').returns(fixture('diff_i'))
+    @c = Commit.create(@r, :id => '634396b2f541a9f2d58b00be1a07f0c358b999b3')
+    diffs = @c.diffs
+    
+    assert_equal 10, diffs.size
+    
+    assert_equal 'History.txt', diffs.first.a_path
+    assert_equal 'History.txt', diffs.first.b_path
+    assert_equal nil, diffs.first.a_commit
+    assert_equal nil, diffs.first.mode
+    assert_equal '81d2c27608b352814cbe979a6acd678d30219678', diffs.first.b_commit.id
+    assert_equal true, diffs.first.new_file
+    assert_equal false, diffs.first.deleted_file
+    assert_equal "--- /dev/null\n+++ b/History.txt\n@@ -0,0 +1,5 @@\n+== 1.0.0 / 2007-10-09\n+\n+* 1 major enhancement\n+  * Birthday!\n+", diffs.first.diff
+
+    
+    assert_equal 'lib/grit.rb', diffs[5].a_path
+    assert_equal nil, diffs[5].a_commit
+    assert_equal '32cec87d1e78946a827ddf6a8776be4d81dcf1d1', diffs[5].b_commit.id
+    assert_equal true, diffs[5].new_file
+  end
   
   # to_s
   
