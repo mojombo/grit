@@ -76,6 +76,18 @@ module Grit
       Commit.find_all(self, "#{from}..#{to}").reverse
     end
     
+    # The Commits objects that are newer than the specified date.
+    # Commits are returned in chronological order.
+    #   +start+ is the branch/commit name (default 'master')
+    #   +since+ is a string represeting a date/time
+    #
+    # Returns Grit::Commit[] (baked)
+    def commits_since(start = 'master', since = '1970-01-01')
+      options = {:since => since}
+      
+      Commit.find_all(self, start, options)
+    end
+    
     # The Commit object for the specified id
     #   +id+ is the SHA1 identifier of the commit
     #
