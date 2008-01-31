@@ -124,8 +124,8 @@ module Grit
     def log(commit = 'master', path = nil, options = {})
       default_options = {:pretty => "raw"}
       actual_options  = default_options.merge(options)
-      arg = path ? "#{commit} -- #{path}" : commit
-      commits = self.git.log(actual_options, arg)
+      arg = path ? [commit, '--', path] : [commit]
+      commits = self.git.log(actual_options, *arg)
       Commit.list_from_string(self, commits)
     end
     

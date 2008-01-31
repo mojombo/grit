@@ -204,7 +204,7 @@ class TestRepo < Test::Unit::TestCase
   end
 
   def test_log_with_path_and_options
-    Git.any_instance.expects(:log).with({:pretty => 'raw', :max_count => 1}, 'master -- file.rb').returns(fixture('rev_list'))
+    Git.any_instance.expects(:log).with({:pretty => 'raw', :max_count => 1}, 'master', '--', 'file.rb').returns(fixture('rev_list'))
     @r.log('master', 'file.rb', :max_count => 1)
   end
 end
