@@ -29,7 +29,7 @@ module Grit
     # Returns Grit::Head[] (baked)
     def self.find_all(repo, options = {})
       default_options = {:sort => "committerdate",
-                         :format => "'%(refname)%00%(objectname)'"}
+                         :format => "%(refname)%00%(objectname)"}
                          
       actual_options = default_options.merge(options)
       

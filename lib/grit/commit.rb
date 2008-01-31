@@ -99,7 +99,7 @@ module Grit
     #
     # Returns Grit::Commit[] (baked)
     def self.find_all(repo, ref, options = {})
-      allowed_options = [:max_count, :skip]
+      allowed_options = [:max_count, :skip, :since]
       
       default_options = {:pretty => "raw"}
       actual_options = default_options.merge(options)

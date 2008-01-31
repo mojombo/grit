@@ -11,10 +11,10 @@ class TestGit < Test::Unit::TestCase
   
   def test_transform_options
     assert_equal ["-s"], @git.transform_options({:s => true})
-    assert_equal ["-s 5"], @git.transform_options({:s => 5})
+    assert_equal ["-s '5'"], @git.transform_options({:s => 5})
     
     assert_equal ["--max-count"], @git.transform_options({:max_count => true})
-    assert_equal ["--max-count=5"], @git.transform_options({:max_count => 5})
+    assert_equal ["--max-count='5'"], @git.transform_options({:max_count => 5})
     
     assert_equal ["-s", "-t"], @git.transform_options({:s => true, :t => true}).sort
   end
