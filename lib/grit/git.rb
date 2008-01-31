@@ -27,8 +27,9 @@ module Grit
     # Returns String
     def method_missing(cmd, options = {}, *args)
       opt_args = transform_options(options)
+      ext_args = args.map { |a| "'#{a}'" }
       
-      call = "#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + args).join(' ')}"
+      call = "#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}"
       puts call if Grit.debug
       response = `#{call}`
       puts response if Grit.debug
@@ -48,14 +49,14 @@ module Grit
             args << "-#{opt}"
           else
             val = options.delete(opt)
-            args << "-#{opt.to_s} #{val}"
+            args << "-#{opt.to_s} '#{val}'"
           end
         else
           if options[opt] == true
             args << "--#{opt.to_s.gsub(/_/, '-')}"
           else
             val = options.delete(opt)
-            args << "--#{opt.to_s.gsub(/_/, '-')}=#{val}"
+            args << "--#{opt.to_s.gsub(/_/, '-')}='#{val}'"
           end
         end
       end
