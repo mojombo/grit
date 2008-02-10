@@ -156,8 +156,12 @@ module Grit
 
     def diffs
       if parents.empty?
-        diff = @repo.git.show({:full_index => true, :pretty => 'raw'}, @id) 
-        diff = diff.sub(/.+?(diff --git a)/m, '\1')
+        diff = @repo.git.show({:full_index => true, :pretty => 'raw'}, @id)
+        if diff =~ /diff --git a/
+          diff = diff.sub(/.+?(diff --git a)/m, '\1')
+        else
+          diff = ''
+        end
         Diff.list_from_string(@repo, diff)
       else
         self.class.diff(@repo, parents.first.id, @id) 

@@ -98,6 +98,18 @@ class TestCommit < Test::Unit::TestCase
     assert_equal true, diffs[5].new_file
   end
   
+  def test_diffs_on_initial_import_with_empty_commit
+    Git.any_instance.expects(:show).with(
+      {:full_index => true, :pretty => 'raw'}, 
+      '634396b2f541a9f2d58b00be1a07f0c358b999b3'
+    ).returns(fixture('show_empty_commit'))
+    
+    @c = Commit.create(@r, :id => '634396b2f541a9f2d58b00be1a07f0c358b999b3')
+    diffs = @c.diffs
+    
+    assert_equal [], diffs
+  end
+  
   # to_s
   
   def test_to_s
