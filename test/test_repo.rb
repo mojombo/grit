@@ -75,6 +75,14 @@ class TestRepo < Test::Unit::TestCase
     assert_equal "Merge branch 'site'", c.message
   end
   
+  # commit_count
+  
+  def test_commit_count
+    Git.any_instance.expects(:rev_list).with({}, 'master').returns(fixture('rev_list_count'))
+    
+    assert_equal 655, @r.commit_count('master')
+  end
+  
   # commit
   
   def test_commit

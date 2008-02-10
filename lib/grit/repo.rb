@@ -88,6 +88,14 @@ module Grit
       Commit.find_all(self, start, options)
     end
     
+    # The number of commits reachable by the given branch/commit
+    #   +start+ is the branch/commit name (default 'master')
+    #
+    # Returns Integer
+    def commit_count(start = 'master')
+      Commit.count(self, start)
+    end
+    
     # The Commit object for the specified id
     #   +id+ is the SHA1 identifier of the commit
     #

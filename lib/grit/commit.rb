@@ -90,6 +90,15 @@ module Grit
       nil
     end
     
+    # Count the number of commits reachable from this ref
+    #   +repo+ is the Repo
+    #   +ref+ is the ref from which to begin (SHA1 or name)
+    #
+    # Returns Integer
+    def self.count(repo, ref)
+      repo.git.rev_list({}, ref).strip.split("\n").size
+    end
+    
     # Find all commits matching the given criteria.
     #   +repo+ is the Repo
     #   +ref+ is the ref from which to begin (SHA1 or name)
