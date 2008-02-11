@@ -27,6 +27,10 @@ module Grit
       while !lines.empty?
         m, a_path, b_path = *lines.shift.match(%r{^diff --git a/(\S+) b/(\S+)$})
         
+        if lines.first =~ /^old mode/
+          2.times { lines.shift }
+        end
+        
         new_file = false
         deleted_file = false
         
