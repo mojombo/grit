@@ -54,6 +54,7 @@ class TestCommit < Test::Unit::TestCase
     diffs = Commit.diff(@r, '59ddc32', '13d27d5')
     
     assert_equal 3, diffs.size
+    assert_equal %w(lib/grit/commit.rb test/fixtures/show_empty_commit test/test_commit.rb), diffs.collect { |d| d.a_path }
   end
   
   def test_diff_with_files
@@ -62,6 +63,7 @@ class TestCommit < Test::Unit::TestCase
     diffs = Commit.diff(@r, '59ddc32', %w(lib))
     
     assert_equal 1, diffs.size
+    assert_equal 'lib/grit/diff.rb', diffs.first.a_path
   end
   
   def test_diff_with_two_commits_and_files
@@ -70,6 +72,7 @@ class TestCommit < Test::Unit::TestCase
     diffs = Commit.diff(@r, '59ddc32', '13d27d5', %w(lib))
     
     assert_equal 1, diffs.size
+    assert_equal 'lib/grit/commit.rb', diffs.first.a_path
   end
 
   # diffs
