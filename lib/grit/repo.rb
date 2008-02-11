@@ -57,7 +57,7 @@ module Grit
     #
     # Returns Grit::Tag[] (baked)
     def tags
-      
+      Tag.find_all(self)
     end
     
     # An array of Commit objects representing the history of a given ref/commit

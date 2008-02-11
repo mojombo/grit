@@ -35,7 +35,7 @@ module Grit
       
       output = repo.git.for_each_ref(actual_options, "refs/heads")
                  
-      Head.list_from_string(repo, output)
+      self.list_from_string(repo, output)
     end
     
     # Parse out head information into an array of baked head objects
