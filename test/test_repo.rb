@@ -241,6 +241,12 @@ class TestRepo < Test::Unit::TestCase
     end
   end
   
+  def test_alternates_setter_empty
+    File.expects(:delete)
+    
+    @r.alternates = []
+  end
+  
   # inspect
   
   def test_inspect
