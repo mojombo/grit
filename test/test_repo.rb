@@ -196,6 +196,51 @@ class TestRepo < Test::Unit::TestCase
     @r.disable_daemon_serve
   end
   
+  # alternates
+  
+  def test_alternates_with_two_alternates
+    File.expects(:exist?).with('/Users/tom/dev/mojombo/grit/.git/objects/info/alternates').returns(true)
+    File.expects(:read).returns("/path/to/repo1/.git/objects\n/path/to/repo2.git/objects\n")
+    
+    assert_equal ["/path/to/repo1/.git/objects", "/path/to/repo2.git/objects"], @r.alternates
+  end
+  
+  def test_alternates_no_file
+    File.expects(:exist?).returns(false)
+    
+    assert_equal [], @r.alternates
+  end
+  
+  # alternates=
+  
+  def test_alternates_setter_ok
+    alts = %w{/path/to/repo.git/objects /path/to/repo2.git/objects}
+    
+    alts.each do |alt|
+      File.expects(:exist?).with(alt).returns(true)
+    end
+    
+    File.any_instance.expects(:write).with(alts.join("\n"))
+    
+    assert_nothing_raised do
+      @r.alternates = alts
+    end
+  end
+  
+  def test_alternates_setter_bad
+    alts = %w{/path/to/repo.git/objects}
+    
+    alts.each do |alt|
+      File.expects(:exist?).with(alt).returns(false)
+    end
+    
+    File.any_instance.expects(:write).never
+    
+    assert_raise RuntimeError do
+      @r.alternates = alts
+    end
+  end
+  
   # inspect
   
   def test_inspect
