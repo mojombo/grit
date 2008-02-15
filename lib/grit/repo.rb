@@ -276,8 +276,12 @@ module Grit
         end
       end
       
-      File.open(File.join(self.path, *%w{objects info alternates}), 'w') do |f|
-        f.write alts.join("\n")
+      if alts.empty?
+        File.delete(File.join(self.path, *%w{objects info alternates}))
+      else
+        File.open(File.join(self.path, *%w{objects info alternates}), 'w') do |f|
+          f.write alts.join("\n")
+        end
       end
     end
     
