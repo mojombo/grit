@@ -245,6 +245,35 @@ module Grit
       end
     end
     
+    # The list of alternates for this repo
+    #
+    # Returns Array[String] (pathnames of alternates)
+    def alternates
+      alternates_path = File.join(self.path, *%w{objects info alternates})
+      
+      if File.exist?(alternates_path)
+        File.read(alternates_path).strip.split("\n")
+      else
+        []
+      end
+    end
+    
+    # Sets the alternates
+    #   +alts+ is the Array of String paths representing the alternates
+    #
+    # Returns nothing
+    def alternates=(alts)
+      alts.each do |alt|
+        unless File.exist?(alt)
+          raise "Could not set alternates. Alternate path #{alt} must exist"
+        end
+      end
+      
+      File.open(File.join(self.path, *%w{objects info alternates}), 'w') do |f|
+        f.write alts.join("\n")
+      end
+    end
+    
     # Pretty object inspection
     def inspect
       %Q{#<Grit::Repo "#{@path}">}
