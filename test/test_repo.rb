@@ -129,7 +129,7 @@ class TestRepo < Test::Unit::TestCase
   def test_fork_bare
     Git.any_instance.expects(:clone).with(
       {:bare => true, :shared => true}, 
-      '/Users/tom/dev/mojombo/grit/.git',
+      "#{absolute_project_path}/.git",
       "/foo/bar.git").returns(nil)
     Repo.expects(:new)
       
@@ -139,7 +139,7 @@ class TestRepo < Test::Unit::TestCase
   def test_fork_bare_with_options
     Git.any_instance.expects(:clone).with(
       {:bare => true, :shared => true, :template => '/awesome'}, 
-      '/Users/tom/dev/mojombo/grit/.git',
+      "#{absolute_project_path}/.git",
       "/foo/bar.git").returns(nil)
     Repo.expects(:new)
       
@@ -199,7 +199,7 @@ class TestRepo < Test::Unit::TestCase
   # alternates
   
   def test_alternates_with_two_alternates
-    File.expects(:exist?).with('/Users/tom/dev/mojombo/grit/.git/objects/info/alternates').returns(true)
+    File.expects(:exist?).with("#{absolute_project_path}/.git/objects/info/alternates").returns(true)
     File.expects(:read).returns("/path/to/repo1/.git/objects\n/path/to/repo2.git/objects\n")
     
     assert_equal ["/path/to/repo1/.git/objects", "/path/to/repo2.git/objects"], @r.alternates
