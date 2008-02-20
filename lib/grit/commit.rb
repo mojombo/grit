@@ -149,8 +149,24 @@ module Grit
       commits
     end
     
-    def self.diff(repo, a, b = nil)
-      text = repo.git.diff({:full_index => true}, a, b)
+    # Show diffs between two trees:
+    #   +repo+ is the Repo
+    #   +a+ is a named commit
+    #   +b+ is an optional named commit.  Passing an array assumes you 
+    #     wish to omit the second named commit and limit the diff to the 
+    #     given paths.
+    #   +paths* is an array of paths to limit the diff.
+    #
+    # Returns Grit::Diff[] (baked)
+    def self.diff(repo, a, b = nil, paths = [])
+      if b.is_a?(Array)
+        paths = b
+        b     = nil
+      end
+      paths.unshift("--") unless paths.empty?
+      paths.unshift(b)    unless b.nil?
+      paths.unshift(a)
+      text = repo.git.diff({:full_index => true}, *paths)
       Diff.list_from_string(repo, text)
     end
 

@@ -28,7 +28,7 @@ class TestCommit < Test::Unit::TestCase
   def test_diff
     # git diff --full-index 91169e1f5fa4de2eaea3f176461f5dc784796769 > test/fixtures/diff_p
     
-    Git.any_instance.expects(:diff).returns(fixture('diff_p'))
+    Git.any_instance.expects(:diff).with({:full_index => true}, 'master').returns(fixture('diff_p'))
     diffs = Commit.diff(@r, 'master')
     
     assert_equal 15, diffs.size
@@ -46,6 +46,33 @@ class TestCommit < Test::Unit::TestCase
     assert_equal nil, diffs[5].a_commit
     assert_equal 'f733bce6b57c0e5e353206e692b0e3105c2527f4', diffs[5].b_commit.id
     assert_equal true, diffs[5].new_file
+  end
+  
+  def test_diff_with_two_commits
+    # git diff --full-index 59ddc32 13d27d5 > test/fixtures/diff_2
+    Git.any_instance.expects(:diff).with({:full_index => true}, '59ddc32', '13d27d5').returns(fixture('diff_2'))
+    diffs = Commit.diff(@r, '59ddc32', '13d27d5')
+    
+    assert_equal 3, diffs.size
+    assert_equal %w(lib/grit/commit.rb test/fixtures/show_empty_commit test/test_commit.rb), diffs.collect { |d| d.a_path }
+  end
+  
+  def test_diff_with_files
+    # git diff --full-index 59ddc32 -- lib > test/fixtures/diff_f
+    Git.any_instance.expects(:diff).with({:full_index => true}, '59ddc32', '--', 'lib').returns(fixture('diff_f'))
+    diffs = Commit.diff(@r, '59ddc32', %w(lib))
+    
+    assert_equal 1, diffs.size
+    assert_equal 'lib/grit/diff.rb', diffs.first.a_path
+  end
+  
+  def test_diff_with_two_commits_and_files
+    # git diff --full-index 59ddc32 13d27d5 -- lib > test/fixtures/diff_2f
+    Git.any_instance.expects(:diff).with({:full_index => true}, '59ddc32', '13d27d5', '--', 'lib').returns(fixture('diff_2f'))
+    diffs = Commit.diff(@r, '59ddc32', '13d27d5', %w(lib))
+    
+    assert_equal 1, diffs.size
+    assert_equal 'lib/grit/commit.rb', diffs.first.a_path
   end
 
   # diffs
