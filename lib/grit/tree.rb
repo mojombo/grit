@@ -34,6 +34,7 @@ module Grit
       text.split("\n").each do |line|
         @contents << content_from_string(repo, line)
       end
+      @contents.compact!
       __baked__
       self
     end

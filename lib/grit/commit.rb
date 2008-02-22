@@ -90,6 +90,15 @@ module Grit
       nil
     end
     
+    # Count the number of commits reachable from this ref
+    #   +repo+ is the Repo
+    #   +ref+ is the ref from which to begin (SHA1 or name)
+    #
+    # Returns Integer
+    def self.count(repo, ref)
+      repo.git.rev_list({}, ref).strip.split("\n").size
+    end
+    
     # Find all commits matching the given criteria.
     #   +repo+ is the Repo
     #   +ref+ is the ref from which to begin (SHA1 or name)
@@ -140,15 +149,35 @@ module Grit
       commits
     end
     
-    def self.diff(repo, a, b = nil)
-      text = repo.git.diff({:full_index => true}, a, b)
+    # Show diffs between two trees:
+    #   +repo+ is the Repo
+    #   +a+ is a named commit
+    #   +b+ is an optional named commit.  Passing an array assumes you 
+    #     wish to omit the second named commit and limit the diff to the 
+    #     given paths.
+    #   +paths* is an array of paths to limit the diff.
+    #
+    # Returns Grit::Diff[] (baked)
+    def self.diff(repo, a, b = nil, paths = [])
+      if b.is_a?(Array)
+        paths = b
+        b     = nil
+      end
+      paths.unshift("--") unless paths.empty?
+      paths.unshift(b)    unless b.nil?
+      paths.unshift(a)
+      text = repo.git.diff({:full_index => true}, *paths)
       Diff.list_from_string(repo, text)
     end
 
     def diffs
       if parents.empty?
-        diff = @repo.git.show({:full_index => true, :pretty => 'raw'}, @id) 
-        diff = diff.sub(/.+?(diff --git a)/m, '\1')
+        diff = @repo.git.show({:full_index => true, :pretty => 'raw'}, @id)
+        if diff =~ /diff --git a/
+          diff = diff.sub(/.+?(diff --git a)/m, '\1')
+        else
+          diff = ''
+        end
         Diff.list_from_string(@repo, diff)
       else
         self.class.diff(@repo, parents.first.id, @id) 

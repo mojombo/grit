@@ -34,6 +34,25 @@ class TestTree < Test::Unit::TestCase
     assert_equal "test", tree.name
   end
   
+  def test_content_from_string_tree_should_return_blob
+    text = fixture('ls_tree_b').split("\n").first
+    
+    tree = @t.content_from_string(nil, text)
+    
+    assert_equal Blob, tree.class
+    assert_equal "aa94e396335d2957ca92606f909e53e7beaf3fbb", tree.id
+    assert_equal "100644", tree.mode
+    assert_equal "grit.rb", tree.name
+  end
+  
+  def test_content_from_string_tree_should_return_commit
+    text = fixture('ls_tree_commit').split("\n")[1]
+    
+    tree = @t.content_from_string(nil, text)
+    
+    assert_nil tree
+  end
+  
   def test_content_from_string_invalid_type_should_raise
     assert_raise(RuntimeError) do
       @t.content_from_string(nil, "040000 bogus 650fa3f0c17f1edb4ae53d8dcca4ac59d86e6c44	test")
@@ -50,6 +69,17 @@ class TestTree < Test::Unit::TestCase
     
     assert_equal 'aa06ba24b4e3f463b3c4a85469d0fb9e5b421cf8', (tree/'lib').id
     assert_equal '8b1e02c0fb554eed2ce2ef737a68bb369d7527df', (tree/'README.txt').id
+  end
+  
+  def test_slash_with_commits
+    Git.any_instance.expects(:ls_tree).returns(
+      fixture('ls_tree_commit')
+    )
+    tree = @r.tree('master')
+    
+    assert_nil tree/'bar'
+    assert_equal '2afb47bcedf21663580d5e6d2f406f08f3f65f19', (tree/'foo').id
+    assert_equal 'f623ee576a09ca491c4a27e48c0dfe04be5f4a2e', (tree/'baz').id
   end
   
   # inspect

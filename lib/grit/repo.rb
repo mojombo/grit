@@ -53,6 +53,13 @@ module Grit
     
     alias_method :branches, :heads
     
+    # An array of Tag objects that are available in this repo
+    #
+    # Returns Grit::Tag[] (baked)
+    def tags
+      Tag.find_all(self)
+    end
+    
     # An array of Commit objects representing the history of a given ref/commit
     #   +start+ is the branch/commit name (default 'master')
     #   +max_count+ is the maximum number of commits to return (default 10)
@@ -86,6 +93,14 @@ module Grit
       options = {:since => since}
       
       Commit.find_all(self, start, options)
+    end
+    
+    # The number of commits reachable by the given branch/commit
+    #   +start+ is the branch/commit name (default 'master')
+    #
+    # Returns Integer
+    def commit_count(start = 'master')
+      Commit.count(self, start)
     end
     
     # The Commit object for the specified id
@@ -124,8 +139,8 @@ module Grit
     def log(commit = 'master', path = nil, options = {})
       default_options = {:pretty => "raw"}
       actual_options  = default_options.merge(options)
-      arg = path ? "#{commit} -- #{path}" : commit
-      commits = self.git.log(actual_options, arg)
+      arg = path ? [commit, '--', path] : [commit]
+      commits = self.git.log(actual_options, *arg)
       Commit.list_from_string(self, commits)
     end
     
@@ -234,6 +249,39 @@ module Grit
         FileUtils.rm_f(File.join(self.path, DAEMON_EXPORT_FILE))
       else
         FileUtils.rm_f(File.join(self.path, '.git', DAEMON_EXPORT_FILE))
+      end
+    end
+    
+    # The list of alternates for this repo
+    #
+    # Returns Array[String] (pathnames of alternates)
+    def alternates
+      alternates_path = File.join(self.path, *%w{objects info alternates})
+      
+      if File.exist?(alternates_path)
+        File.read(alternates_path).strip.split("\n")
+      else
+        []
+      end
+    end
+    
+    # Sets the alternates
+    #   +alts+ is the Array of String paths representing the alternates
+    #
+    # Returns nothing
+    def alternates=(alts)
+      alts.each do |alt|
+        unless File.exist?(alt)
+          raise "Could not set alternates. Alternate path #{alt} must exist"
+        end
+      end
+      
+      if alts.empty?
+        File.delete(File.join(self.path, *%w{objects info alternates}))
+      else
+        File.open(File.join(self.path, *%w{objects info alternates}), 'w') do |f|
+          f.write alts.join("\n")
+        end
       end
     end
     

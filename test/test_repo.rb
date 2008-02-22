@@ -75,6 +75,14 @@ class TestRepo < Test::Unit::TestCase
     assert_equal "Merge branch 'site'", c.message
   end
   
+  # commit_count
+  
+  def test_commit_count
+    Git.any_instance.expects(:rev_list).with({}, 'master').returns(fixture('rev_list_count'))
+    
+    assert_equal 655, @r.commit_count('master')
+  end
+  
   # commit
   
   def test_commit
@@ -121,7 +129,7 @@ class TestRepo < Test::Unit::TestCase
   def test_fork_bare
     Git.any_instance.expects(:clone).with(
       {:bare => true, :shared => true}, 
-      '/Users/tom/dev/mojombo/grit/.git',
+      "#{absolute_project_path}/.git",
       "/foo/bar.git").returns(nil)
     Repo.expects(:new)
       
@@ -131,7 +139,7 @@ class TestRepo < Test::Unit::TestCase
   def test_fork_bare_with_options
     Git.any_instance.expects(:clone).with(
       {:bare => true, :shared => true, :template => '/awesome'}, 
-      '/Users/tom/dev/mojombo/grit/.git',
+      "#{absolute_project_path}/.git",
       "/foo/bar.git").returns(nil)
     Repo.expects(:new)
       
@@ -188,6 +196,57 @@ class TestRepo < Test::Unit::TestCase
     @r.disable_daemon_serve
   end
   
+  # alternates
+  
+  def test_alternates_with_two_alternates
+    File.expects(:exist?).with("#{absolute_project_path}/.git/objects/info/alternates").returns(true)
+    File.expects(:read).returns("/path/to/repo1/.git/objects\n/path/to/repo2.git/objects\n")
+    
+    assert_equal ["/path/to/repo1/.git/objects", "/path/to/repo2.git/objects"], @r.alternates
+  end
+  
+  def test_alternates_no_file
+    File.expects(:exist?).returns(false)
+    
+    assert_equal [], @r.alternates
+  end
+  
+  # alternates=
+  
+  def test_alternates_setter_ok
+    alts = %w{/path/to/repo.git/objects /path/to/repo2.git/objects}
+    
+    alts.each do |alt|
+      File.expects(:exist?).with(alt).returns(true)
+    end
+    
+    File.any_instance.expects(:write).with(alts.join("\n"))
+    
+    assert_nothing_raised do
+      @r.alternates = alts
+    end
+  end
+  
+  def test_alternates_setter_bad
+    alts = %w{/path/to/repo.git/objects}
+    
+    alts.each do |alt|
+      File.expects(:exist?).with(alt).returns(false)
+    end
+    
+    File.any_instance.expects(:write).never
+    
+    assert_raise RuntimeError do
+      @r.alternates = alts
+    end
+  end
+  
+  def test_alternates_setter_empty
+    File.expects(:delete)
+    
+    @r.alternates = []
+  end
+  
   # inspect
   
   def test_inspect
@@ -204,7 +263,7 @@ class TestRepo < Test::Unit::TestCase
   end
 
   def test_log_with_path_and_options
-    Git.any_instance.expects(:log).with({:pretty => 'raw', :max_count => 1}, 'master -- file.rb').returns(fixture('rev_list'))
+    Git.any_instance.expects(:log).with({:pretty => 'raw', :max_count => 1}, 'master', '--', 'file.rb').returns(fixture('rev_list'))
     @r.log('master', 'file.rb', :max_count => 1)
   end
 end
