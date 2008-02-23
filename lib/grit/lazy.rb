@@ -1,53 +1,31 @@
+##
 # Allows attributes to be declared as lazy, meaning that they won't be
-# computed until they are asked for. Just mix this module in:
+# computed until they are asked for. 
 #
-#   class Foo
-#     include Lazy
-#     ...
+# Works by delegating each lazy_reader to a cached lazy_source method.
+#
+# class Person
+#   lazy_reader :eyes
+#
+#   def lazy_source
+#     OpenStruct.new(:eyes => 2)
 #   end
+# end
 #
-# To specify a lazy reader:
+# >> Person.new.eyes
+# => 2
 #
-#   lazy_reader :att
-#
-# Then, define a method called __bake__ that computes all your lazy
-# attributes:
-#
-#   def __bake__
-#     @att = ...
-#   end
-#
-# If you happen to have already done all the hard work, you can mark an instance
-# as already baked by calling:
-#
-#   __baked__
-#
-# That's it! (Tom Preston-Werner: rubyisawesome.com)
 module Lazy
-  module ClassMethods
-    def lazy_reader(*args)
-      args.each do |arg|
-        define_method(arg) do
-          val = instance_variable_get("@#{arg}")
-          return val if val
-          self.__prebake__
-          instance_variable_get("@#{arg}")
-        end
+  def lazy_reader(*args)
+    args.each do |arg|
+      ivar = "@#{arg}"
+      define_method(arg) do
+        val = instance_variable_get(ivar) 
+        return val if val
+        instance_variable_set(ivar, (@lazy_source ||= lazy_source).send(arg))
       end
     end
   end
-  
-  def __prebake__
-    return if @__baked__
-    self.__bake__
-    @__baked__ = true
-  end
-  
-  def __baked__
-    @__baked__ = true
-  end
-  
-  def self.included(base)
-    base.extend(ClassMethods)
-  end 
 end
+
+Object.extend Lazy unless Object.ancestors.include? Lazy
