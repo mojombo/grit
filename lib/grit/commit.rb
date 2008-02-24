@@ -11,6 +11,7 @@ module Grit
     lazy_reader :committer
     lazy_reader :committed_date
     lazy_reader :message
+    lazy_reader :short_message
     
     # Instantiate a new Commit
     #   +id+ is the id of the commit
@@ -20,7 +21,7 @@ module Grit
     #   +authored_date+ is the authored Time
     #   +committer+ is the committer string
     #   +committed_date+ is the committed Time
-    #   +message+ is the first line of the commit message
+    #   +message+ is an array of commit message lines
     #
     # Returns Grit::Commit (baked)
     def initialize(repo, id, parents, tree, author, authored_date, committer, committed_date, message)
@@ -32,7 +33,8 @@ module Grit
       @authored_date = authored_date
       @committer = committer
       @committed_date = committed_date
-      @message = message
+      @message = message.join("\n")
+      @short_message = message[0] || ''
       
       __baked__
     end
@@ -65,6 +67,7 @@ module Grit
       @committer = nil
       @committed_date = nil
       @message = nil
+      @short_message = nil
       @__baked__ = nil
       
       @repo = repo
@@ -87,6 +90,7 @@ module Grit
       @committer = temp.committer
       @committed_date = temp.committed_date
       @message = temp.message
+      @short_message = temp.short_message
       nil
     end
     
@@ -141,9 +145,8 @@ module Grit
         
         messages = []
         messages << lines.shift.strip while lines.first =~ /^ {4}/
-        message = messages.first || ''
         
-        commits << Commit.new(repo, id, parents, tree, author, authored_date, committer, committed_date, message)
+        commits << Commit.new(repo, id, parents, tree, author, authored_date, committer, committed_date, messages)
       end
       
       commits
