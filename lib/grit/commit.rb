@@ -128,8 +128,7 @@ module Grit
     #
     # Returns Grit::Commit[] (baked)
     def self.list_from_string(repo, text)
-      # remove empty lines
-      lines = text.split("\n").select { |l| !l.strip.empty? }
+      lines = text.split("\n")
       
       commits = []
       
@@ -143,10 +142,14 @@ module Grit
         author, authored_date = self.actor(lines.shift)
         committer, committed_date = self.actor(lines.shift)
         
-        messages = []
-        messages << lines.shift.strip while lines.first =~ /^ {4}/
+        lines.shift
         
-        commits << Commit.new(repo, id, parents, tree, author, authored_date, committer, committed_date, messages)
+        message_lines = []
+        message_lines << lines.shift.strip while lines.first =~ /^ {4}/
+        
+        lines.shift while lines.first && lines.first.empty?
+        
+        commits << Commit.new(repo, id, parents, tree, author, authored_date, committer, committed_date, message_lines)
       end
       
       commits
