@@ -145,7 +145,7 @@ module Grit
         lines.shift
         
         message_lines = []
-        message_lines << lines.shift.strip while lines.first =~ /^ {4}/
+        message_lines << lines.shift[4..-1] while lines.first =~ /^ {4}/
         
         lines.shift while lines.first && lines.first.empty?
         
