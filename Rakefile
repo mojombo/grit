@@ -10,6 +10,7 @@ Hoe.new('grit', Grit::VERSION) do |p|
   p.description = p.paragraphs_of('README.txt', 2..2).join("\n\n")
   p.url = p.paragraphs_of('README.txt', 0).first.split(/\n/)[2..-1].map { |u| u.strip }
   p.changes = p.paragraphs_of('History.txt', 0..1).join("\n\n")
+  p.extra_deps << ['mime-types']
 end
 
 desc "Open an irb session preloaded with this library"
