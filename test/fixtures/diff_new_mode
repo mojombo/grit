@@ -12,3 +12,6 @@ index 9ec1bac..1c4f83b
      "django.middleware.common.CommonMiddleware",
      "django.contrib.sessions.middleware.SessionMiddleware",
      "django.contrib.auth.middleware.AuthenticationMiddleware",
+diff --git a/moo b/moo
+old mode 100755
+new mode 100644

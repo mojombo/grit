@@ -33,7 +33,7 @@ module Grit
           m, b_mode = *lines.shift.match(/^new mode (\d+)/)
         end
         
-        if lines.first =~ /^diff --git/
+        if lines.empty? || lines.first =~ /^diff --git/
           diffs << Diff.new(repo, a_path, b_path, nil, nil, a_mode, b_mode, false, false, nil)
           next
         end
