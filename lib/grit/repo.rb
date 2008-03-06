@@ -87,10 +87,11 @@ module Grit
     # Commits are returned in chronological order.
     #   +start+ is the branch/commit name (default 'master')
     #   +since+ is a string represeting a date/time
+    #   +extra_options+ is a hash of extra options
     #
     # Returns Grit::Commit[] (baked)
-    def commits_since(start = 'master', since = '1970-01-01')
-      options = {:since => since}
+    def commits_since(start = 'master', since = '1970-01-01', extra_options = {})
+      options = {:since => since}.merge(extra_options)
       
       Commit.find_all(self, start, options)
     end

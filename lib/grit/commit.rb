@@ -105,7 +105,7 @@ module Grit
     
     # Find all commits matching the given criteria.
     #   +repo+ is the Repo
-    #   +ref+ is the ref from which to begin (SHA1 or name)
+    #   +ref+ is the ref from which to begin (SHA1 or name) or nil for --all
     #   +options+ is a Hash of optional arguments to git
     #     :max_count is the maximum number of commits to fetch
     #     :skip is the number of commits to skip
@@ -117,7 +117,11 @@ module Grit
       default_options = {:pretty => "raw"}
       actual_options = default_options.merge(options)
       
-      output = repo.git.rev_list(actual_options, ref)
+      if ref
+        output = repo.git.rev_list(actual_options, ref)
+      else
+        output = repo.git.rev_list(actual_options.merge(:all => true))
+      end
       
       self.list_from_string(repo, output)
     end
