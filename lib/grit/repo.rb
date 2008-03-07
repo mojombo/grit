@@ -286,6 +286,10 @@ module Grit
       end
     end
     
+    def config
+      @config ||= Config.new(self)
+    end
+    
     # Pretty object inspection
     def inspect
       %Q{#<Grit::Repo "#{@path}">}

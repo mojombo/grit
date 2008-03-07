@@ -1,0 +1,2 @@
+core.bare=false
+remote.origin.url=git://github.com/mojombo/grit.git
