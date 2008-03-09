@@ -5,6 +5,11 @@ module Grit
       @repo = repo
     end
     
+    def []=(key, value)
+      @repo.git.config({}, key, value)
+      @data = nil
+    end
+    
     def [](key)
       data[key]
     end

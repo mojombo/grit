@@ -48,4 +48,11 @@ class TestConfig < Test::Unit::TestCase
       config.fetch("unknown")
     end
   end
+  
+  def test_set_value
+    Git.any_instance.expects(:config).with({}, 'unknown', 'default')
+    
+    config = @r.config
+    config["unknown"] = "default"
+  end
 end
