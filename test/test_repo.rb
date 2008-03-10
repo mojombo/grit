@@ -72,7 +72,8 @@ class TestRepo < Test::Unit::TestCase
     
     c = commits[2]
     assert_equal ["6e64c55896aabb9a7d8e9f8f296f426d21a78c2c", "7f874954efb9ba35210445be456c74e037ba6af2"], c.parents.map { |p| p.id }
-    assert_equal "Merge branch 'site'", c.message
+    assert_equal "Merge branch 'site'\n\n  * Some other stuff\n  * just one more", c.message
+    assert_equal "Merge branch 'site'", c.short_message
   end
   
   # commit_count

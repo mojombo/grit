@@ -9,6 +9,7 @@ module Grit
     lazy_reader :committer
     lazy_reader :committed_date
     lazy_reader :message
+    lazy_reader :short_message
     
     # Instantiate a new Commit
     #   +id+ is the id of the commit
@@ -18,7 +19,7 @@ module Grit
     #   +authored_date+ is the authored Time
     #   +committer+ is the committer string
     #   +committed_date+ is the committed Time
-    #   +message+ is the first line of the commit message
+    #   +message+ is an array of commit message lines
     #
     # Returns Grit::Commit (baked)
     def initialize(repo, id, parents, tree, author, authored_date, committer, committed_date, message)
@@ -30,7 +31,8 @@ module Grit
       @authored_date = authored_date
       @committer = committer
       @committed_date = committed_date
-      @message = message
+      @message = message.join("\n")
+      @short_message = message[0] || ''
     end
     
     def id_abbrev
@@ -74,7 +76,7 @@ module Grit
     
     # Find all commits matching the given criteria.
     #   +repo+ is the Repo
-    #   +ref+ is the ref from which to begin (SHA1 or name)
+    #   +ref+ is the ref from which to begin (SHA1 or name) or nil for --all
     #   +options+ is a Hash of optional arguments to git
     #     :max_count is the maximum number of commits to fetch
     #     :skip is the number of commits to skip
@@ -86,7 +88,11 @@ module Grit
       default_options = {:pretty => "raw"}
       actual_options = default_options.merge(options)
       
-      output = repo.git.rev_list(actual_options, ref)
+      if ref
+        output = repo.git.rev_list(actual_options, ref)
+      else
+        output = repo.git.rev_list(actual_options.merge(:all => true))
+      end
       
       self.list_from_string(repo, output)
     end
@@ -97,8 +103,7 @@ module Grit
     #
     # Returns Grit::Commit[] (baked)
     def self.list_from_string(repo, text)
-      # remove empty lines
-      lines = text.split("\n").select { |l| !l.strip.empty? }
+      lines = text.split("\n")
       
       commits = []
       
@@ -112,11 +117,14 @@ module Grit
         author, authored_date = self.actor(lines.shift)
         committer, committed_date = self.actor(lines.shift)
         
-        messages = []
-        messages << lines.shift.strip while lines.first =~ /^ {4}/
-        message = messages.first || ''
+        lines.shift
         
-        commits << Commit.new(repo, id, parents, tree, author, authored_date, committer, committed_date, message)
+        message_lines = []
+        message_lines << lines.shift[4..-1] while lines.first =~ /^ {4}/
+        
+        lines.shift while lines.first && lines.first.empty?
+        
+        commits << Commit.new(repo, id, parents, tree, author, authored_date, committer, committed_date, message_lines)
       end
       
       commits
