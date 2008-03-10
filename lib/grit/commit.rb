@@ -176,6 +176,25 @@ module Grit
       m, actor, epoch = *line.match(/^.+? (.*) (\d+) .*$/)
       [Actor.from_string(actor), Time.at(epoch.to_i)]
     end
+
+    def to_hash
+      {
+        :id        => id,
+        :parents   => parents.map { |p| p.id },
+        :tree      => tree.id,
+        :message   => message,
+        :author    => {
+          :name  => author.name,
+          :email => author.email
+        },
+        :committer => {
+          :name  => committer.name,
+          :email => committer.email
+        },
+        :authored_date  => authored_date.xmlschema,
+        :committed_date => committed_date.xmlschema,
+      }
+    end
   end # Commit
   
 end # Grit
