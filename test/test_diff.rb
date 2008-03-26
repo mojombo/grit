@@ -11,7 +11,8 @@ class TestDiff < Test::Unit::TestCase
     output = fixture('diff_new_mode')
     
     diffs = Diff.list_from_string(@r, output)
-    assert_equal 1, diffs.size
+    assert_equal 2, diffs.size
     assert_equal 10, diffs.first.diff.split("\n").size
+    assert_equal nil, diffs.last.diff
   end
 end
