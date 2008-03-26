@@ -1,8 +1,6 @@
 module Grit
   
   class Commit
-    include Lazy
-    
     attr_reader :id
     lazy_reader :parents
     lazy_reader :tree
@@ -35,8 +33,6 @@ module Grit
       @committed_date = committed_date
       @message = message.join("\n")
       @short_message = message[0] || ''
-      
-      __baked__
     end
     
     def id_abbrev
@@ -58,40 +54,15 @@ module Grit
     #
     # Returns Grit::Commit (unbaked)
     def create_initialize(repo, atts)
-      @repo = nil
-      @id = nil
-      @parents = nil
-      @tree = nil
-      @author = nil
-      @authored_date = nil
-      @committer = nil
-      @committed_date = nil
-      @message = nil
-      @short_message = nil
-      @__baked__ = nil
-      
       @repo = repo
       atts.each do |k, v|
-        instance_variable_set("@#{k}".to_sym, v)
+        instance_variable_set("@#{k}", v)
       end
       self
     end
     
-    # Use the id of this instance to populate all of the other fields
-    # when any of them are called.
-    #
-    # Returns nil
-    def __bake__
-      temp = self.class.find_all(@repo, @id, {:max_count => 1}).first
-      @parents = temp.parents
-      @tree = temp.tree
-      @author = temp.author
-      @authored_date = temp.authored_date
-      @committer = temp.committer
-      @committed_date = temp.committed_date
-      @message = temp.message
-      @short_message = temp.short_message
-      nil
+    def lazy_source
+      self.class.find_all(@repo, @id, {:max_count => 1}).first
     end
     
     # Count the number of commits reachable from this ref
@@ -212,6 +183,25 @@ module Grit
     def self.actor(line)
       m, actor, epoch = *line.match(/^.+? (.*) (\d+) .*$/)
       [Actor.from_string(actor), Time.at(epoch.to_i)]
+    end
+
+    def to_hash
+      {
+        'id'       => id,
+        'parents'  => parents.map { |p| { 'id' => p.id } },
+        'tree'     => tree.id,
+        'message'  => message,
+        'author'   => {
+          'name'  => author.name,
+          'email' => author.email
+        },
+        'committer' => {
+          'name'  => committer.name,
+          'email' => committer.email
+        },
+        'authored_date'  => authored_date.xmlschema,
+        'committed_date' => committed_date.xmlschema,
+      }
     end
   end # Commit
   

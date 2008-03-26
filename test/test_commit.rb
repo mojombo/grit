@@ -160,4 +160,23 @@ class TestCommit < Test::Unit::TestCase
     @c = Commit.create(@r, :id => 'abc')
     assert_equal %Q{#<Grit::Commit "abc">}, @c.inspect
   end
+
+  # to_hash
+
+  def test_to_hash
+    @c = Commit.create(@r, :id => '4c8124ffcf4039d292442eeccabdeca5af5c5017')
+
+    expected = {
+      'parents' => ['id' => "634396b2f541a9f2d58b00be1a07f0c358b999b3"],
+      'committed_date' => "2007-10-10T00:06:12-07:00",
+      'tree' => "672eca9b7f9e09c22dcb128c283e8c3c8d7697a4",
+      'authored_date' => "2007-10-10T00:06:12-07:00",
+      'committer' => {'email' => "tom@mojombo.com", 'name' => "Tom Preston-Werner"},
+      'message' => "implement Grit#heads",
+      'author' => {'email' => "tom@mojombo.com", 'name' => "Tom Preston-Werner"},
+      'id' => "4c8124ffcf4039d292442eeccabdeca5af5c5017"
+    }
+
+    assert_equal expected, @c.to_hash
+  end
 end

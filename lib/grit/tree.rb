@@ -1,17 +1,10 @@
 module Grit
   
   class Tree
-    include Lazy
-    
     lazy_reader :contents
     attr_reader :id
     attr_reader :mode
     attr_reader :name
-    
-    def initialize
-      @contents = nil
-      @__baked__ = nil
-    end
     
     # Construct the contents of the tree
     #   +repo+ is the Repo
@@ -29,19 +22,17 @@ module Grit
       @repo = repo
       @id = id
       @contents = []
-      @__baked__ = nil
       
       text.split("\n").each do |line|
         @contents << content_from_string(repo, line)
       end
       @contents.compact!
-      __baked__
+
       self
     end
     
-    def __bake__
-      temp = Tree.construct(@repo, @id, [])
-      @contents = temp.contents
+    def lazy_source
+      Tree.construct(@repo, @id, [])
     end
     
     # Create an unbaked Tree containing just the specified attributes
@@ -60,11 +51,9 @@ module Grit
     # Returns Grit::Tree (unbaked)
     def create_initialize(repo, atts)
       @repo = repo
-      @contents = nil
-      @__baked__ = nil
       
       atts.each do |k, v|
-        instance_variable_set("@#{k}".to_sym, v)
+        instance_variable_set("@#{k}", v)
       end
       self
     end
