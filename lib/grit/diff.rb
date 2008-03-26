@@ -26,7 +26,7 @@ module Grit
       diffs = []
       
       while !lines.empty?
-        m, a_path, b_path = *lines.shift.match(%r{^diff --git a/(\S+) b/(\S+)$})
+        m, a_path, b_path = *lines.shift.match(%r{^diff --git a/(.+?) b/(.+)$})
         
         if lines.first =~ /^old mode/
           m, a_mode = *lines.shift.match(/^old mode (\d+)/)
