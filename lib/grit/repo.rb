@@ -234,11 +234,7 @@ module Grit
     #
     # Returns nothing
     def enable_daemon_serve
-      if @bare
-        FileUtils.touch(File.join(self.path, DAEMON_EXPORT_FILE))
-      else
-        FileUtils.touch(File.join(self.path, '.git', DAEMON_EXPORT_FILE))
-      end
+      FileUtils.touch(File.join(self.path, DAEMON_EXPORT_FILE))
     end
     
     # Disable git-daemon serving of this repository by ensuring there is no
@@ -246,11 +242,7 @@ module Grit
     #
     # Returns nothing
     def disable_daemon_serve
-      if @bare
-        FileUtils.rm_f(File.join(self.path, DAEMON_EXPORT_FILE))
-      else
-        FileUtils.rm_f(File.join(self.path, '.git', DAEMON_EXPORT_FILE))
-      end
+      FileUtils.rm_f(File.join(self.path, DAEMON_EXPORT_FILE))
     end
     
     # The list of alternates for this repo
@@ -284,6 +276,10 @@ module Grit
           f.write alts.join("\n")
         end
       end
+    end
+    
+    def config
+      @config ||= Config.new(self)
     end
     
     # Pretty object inspection

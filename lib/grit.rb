@@ -20,6 +20,7 @@ require 'grit/tree'
 require 'grit/blob'
 require 'grit/actor'
 require 'grit/diff'
+require 'grit/config'
 require 'grit/repo'
 
 module Grit
