@@ -1,4 +1,5 @@
 module Grit
+  HEAD_PREFIX = 'refs/heads'
   
   # A Head is a named reference to a Commit. Every Head instance contains a name
   # and a Commit object.
@@ -33,7 +34,7 @@ module Grit
                          
       actual_options = default_options.merge(options)
       
-      output = repo.git.for_each_ref(actual_options, "refs/heads")
+      output = repo.git.for_each_ref(actual_options, HEAD_PREFIX)
                  
       self.list_from_string(repo, output)
     end
@@ -65,7 +66,7 @@ module Grit
     # Returns Grit::Head (baked)
     def self.from_string(repo, line)
       full_name, id = line.split("\0")
-      name = full_name.split("/").last
+      name = full_name.sub("#{HEAD_PREFIX}/", '')
       commit = Commit.create(repo, :id => id)
       self.new(name, commit)
     end
