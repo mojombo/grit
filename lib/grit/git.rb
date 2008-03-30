@@ -31,9 +31,17 @@ module Grit
       
       call = "#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}"
       puts call if Grit.debug
-      response = `#{call}`
+      response = sh(call)
       puts response if Grit.debug
       response
+    end
+
+    def sh(command)
+      pid, _, io, _ = Open4.popen4(command)
+      Timeout.timeout(3) { io.read }
+    rescue Object
+      Process.kill('KILL', pid)
+      ''
     end
     
     # Transform Ruby style options into git command line options

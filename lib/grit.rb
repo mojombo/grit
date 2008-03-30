@@ -5,10 +5,12 @@ require 'fileutils'
 require 'time'
 
 # stdlib
+require 'timeout'
 
 # third party
 require 'rubygems'
 require 'mime/types'
+require 'open4'
 
 # internal requires
 require 'grit/lazy'
