@@ -37,7 +37,19 @@ module Grit
                  
       self.list_from_string(repo, output)
     end
-    
+
+   # Get the HEAD revision of the repo.
+    #   +repo+ is the Repo
+    #   +options+ is a Hash of options
+    #
+    # Returns Grit::Head (baked)
+    def self.current(repo, options = {})
+      head = File.open(File.join(repo.path, 'HEAD')).read.chomp
+      if /ref: refs\/heads\/(.*)/.match(head)
+        self.new($1, repo.git.rev_parse(options, 'HEAD'))
+      end
+    end
+
     # Parse out head information into an array of baked head objects
     #   +repo+ is the Repo
     #   +text+ is the text output from the git command
