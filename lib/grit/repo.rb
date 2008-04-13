@@ -52,7 +52,14 @@ module Grit
     end
     
     alias_method :branches, :heads
-    
+
+    # Object reprsenting the current repo head.
+    #
+    # Returns Grit::Head (baked)
+    def head
+      Head.current(self)
+    end
+
     # An array of Tag objects that are available in this repo
     #
     # Returns Grit::Tag[] (baked)
