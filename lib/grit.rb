@@ -11,10 +11,12 @@ require 'timeout'
 require 'rubygems'
 require 'mime/types'
 require 'open4'
+require 'digest/sha1'
 
 # internal requires
 require 'grit/lazy'
 require 'grit/errors'
+require 'grit/git-ruby'
 require 'grit/git'
 require 'grit/ref'
 require 'grit/commit'
@@ -25,6 +27,7 @@ require 'grit/diff'
 require 'grit/config'
 require 'grit/repo'
 require 'grit/index'
+
 
 module Grit
   class << self

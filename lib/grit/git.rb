@@ -8,6 +8,8 @@ end
 module Grit
   
   class Git
+    include Grit::GitRuby
+    
     class GitTimeout < RuntimeError
       attr_reader :command, :bytes_read
 
@@ -27,7 +29,7 @@ module Grit
     self.git_timeout = 5
     
     attr_accessor :git_dir, :bytes_read
-    
+
     def initialize(git_dir)
       self.git_dir    = git_dir
       self.bytes_read = 0
@@ -61,6 +63,8 @@ module Grit
       response
     end
 
+    
+    
     def sh(command)
       pid, _, io, _ = Open4.popen4(command)
       ret = Timeout.timeout(self.class.git_timeout) { io.read }
