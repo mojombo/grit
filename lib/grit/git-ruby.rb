@@ -18,6 +18,11 @@ module Grit
       end
     end
     
+    #   lib/grit/tree.rb:16:      output = repo.git.ls_tree({}, treeish, *paths)
+    def ls_tree(options, treeish, paths)
+      return ' hi '
+    end
+    
     def file_size(ref)
       ruby_git_dir.cat_file_size(ref).to_s
     end
