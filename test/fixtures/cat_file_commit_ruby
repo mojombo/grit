@@ -1,0 +1,7 @@
+tree 77fc9894c0904279fde93adc9c0ba231515ce68a
+parent 30e367cef2203eba2b341dc9050993b06fd1e108
+parent 420eac97a826bfac8724b6b0eef35c20922124b7
+author Tom Preston-Werner <tom@mojombo.com> 1208054148 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1208054148 -0700
+
+Merge branch 'master' of git://github.com/dustin/grit
