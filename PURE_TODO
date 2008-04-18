@@ -5,11 +5,11 @@ Completed
 ===========================
 ** lib/grit/blob.rb:36:      @size ||= @repo.git.cat_file({:s => true}, id).chomp.to_i
 ** lib/grit/blob.rb:43:      @data ||= @repo.git.cat_file({:p => true}, id)
+   lib/grit/tree.rb:16:      output = repo.git.ls_tree({}, treeish, *paths)
 
 
 Next to do
 ===========================
-lib/grit/tree.rb:16:      output = repo.git.ls_tree({}, treeish, *paths)
 lib/grit/config.rb:9:      @repo.git.config({}, key, value)
 lib/grit/config.rb:40:        @repo.git.config(:list => true).split(/\n/)
 lib/grit/tag.rb:28:      output = repo.git.for_each_ref(actual_options, "refs/tags")
