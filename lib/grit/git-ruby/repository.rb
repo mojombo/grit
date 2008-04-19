@@ -315,8 +315,8 @@ module Grit
         false
       end
       
-      def get_raw_object_by_sha1(sha1)
-        sha1 = [sha1].pack("H*")
+      def get_raw_object_by_sha1(sha1o)
+        sha1 = [sha1o.chomp].pack("H*")
         
         # try packs
         packs.each do |pack|
@@ -335,6 +335,7 @@ module Grit
           return o if o
         end
 
+        puts "*#{sha1o}*"
         raise NoSuchShaFound
       end
 
@@ -352,13 +353,17 @@ module Grit
           end if @packs
           
           @packs = []
-          if File.exists?(git_path("objects/pack"))
+          if f = File.exists?(git_path("objects/pack"))
             Dir.open(git_path("objects/pack/")) do |dir|
               dir.each do |entry|
                 if entry =~ /\.pack$/i
                   @packs << Grit::GitRuby::Internal::PackStorage.new(git_path("objects/pack/" \
                                                                     + entry))
+                #elsif entry =~ /\.idx$/i
+                #  puts Internal::PackStorage.get_shas(git_path("objects/pack/" \
+                #                                                    + entry))
                 end
+                
               end
             end
           end
