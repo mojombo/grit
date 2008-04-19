@@ -106,7 +106,7 @@ module Grit
       lines = text.split("\n")
       
       commits = []
-      
+            
       while !lines.empty?
         id = lines.shift.split.last
         tree = lines.shift.split.last
