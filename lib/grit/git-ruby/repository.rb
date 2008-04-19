@@ -228,22 +228,23 @@ module Grit
             add_sha = false
           end
           
-          if (!opts[:max_count] || (array.size < opts[:max_count]))
+          if (!opts[:max_count] || ((array.size + total_size) < opts[:max_count]))
             
             if !opts[:path_limiter]
               output = c.raw_log(sha)
               array << [sha, output]
             end
             
-            if array.size >= opts[:max_count]
+            if (opts[:max_count] && (array.size + total_size) >= opts[:max_count])
               return array
             end
             
             c.parent.each do |psha|
-              if psha && !files_changed?(c.tree, get_object_by_sha1(psha).tree, opts[:path_limiter])
+              if psha && !files_changed?(c.tree, get_object_by_sha1(psha).tree,
+                                        opts[:path_limiter])
                 add_sha = false 
               end
-              subarray += walk_log(psha, opts) 
+              subarray += walk_log(psha, opts, (array.size + subarray.size + total_size)) 
               next if opts[:first_parent]
             end
           
