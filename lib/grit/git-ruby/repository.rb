@@ -195,22 +195,22 @@ module Grit
 
       def rev_list(sha, options)
         log = log(sha, options)
-        if options[:pretty] = 'raw'
-          log.map {|k, v| v.chomp }.join('')
+        if options[:pretty] == 'raw'
+          log.map {|k, v| v }.join('')
         else
-          log.map {|k, v| k }.join('')
+          log.map {|k, v| k }.join("\n")
         end
       end
       
       # called by log() to recursively walk the tree
-      def walk_log(sha, opts)
+      def walk_log(sha, opts, total_size = 0)
         return [] if @already_searched[sha] # to prevent rechecking branches
         @already_searched[sha] = true
         
         array = []          
         if (sha)
           o = get_raw_object_by_sha1(sha)
-          c = Grit::GitRuby::Object.from_raw(o)
+          c = Object.from_raw(o)
 
           add_sha = true
           
@@ -228,20 +228,30 @@ module Grit
             add_sha = false
           end
           
-          c.parent.each do |psha|
-            if psha && !files_changed?(c.tree, get_object_by_sha1(psha).tree, opts[:path_limiter])
-              add_sha = false 
-            end
-            subarray += walk_log(psha, opts) 
-            next if opts[:first_parent]
-          end
-          
           if (!opts[:max_count] || (array.size < opts[:max_count]))
-            if add_sha
-              output = "commit #{sha}\n"
-              output += o.content + "\n\n"
+            
+            if !opts[:path_limiter]
+              output = c.raw_log(sha)
+              array << [sha, output]
+            end
+            
+            if array.size >= opts[:max_count]
+              return array
+            end
+            
+            c.parent.each do |psha|
+              if psha && !files_changed?(c.tree, get_object_by_sha1(psha).tree, opts[:path_limiter])
+                add_sha = false 
+              end
+              subarray += walk_log(psha, opts) 
+              next if opts[:first_parent]
+            end
+          
+            if opts[:path_limiter] && add_sha
+              output = c.raw_log(sha)
               array << [sha, output]
             end          
+            
             array += subarray
           end
                                 

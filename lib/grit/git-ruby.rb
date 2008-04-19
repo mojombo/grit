@@ -17,7 +17,6 @@ module Grit
     def cat_file(options, ref)
       if options[:t]
         file_type(ref)
-        return 
       elsif options[:s]
         file_size(ref)
       elsif options[:p]

@@ -196,15 +196,15 @@ module Grit
   end
 
   class Commit < Object
-    attr_accessor :author, :committer, :tree, :parent, :message
+    attr_accessor :author, :committer, :tree, :parent, :message, :headers
 
     def self.from_raw(rawobject, repository=nil)
       parent = []
       tree = author = committer = nil
 
       headers, message = rawobject.content.split(/\n\n/, 2)
-      headers = headers.split(/\n/).map { |header| header.split(/ /, 2) }
-      headers.each do |key, value|
+      all_headers = headers.split(/\n/).map { |header| header.split(/ /, 2) }
+      all_headers.each do |key, value|
         case key
         when "tree"
           tree = value
@@ -222,15 +222,16 @@ module Grit
       if not tree && author && committer
         raise RuntimeError, "incomplete raw commit object"
       end
-      new(tree, parent, author, committer, message, repository)
+      new(tree, parent, author, committer, message, headers, repository)
     end
 
-    def initialize(tree, parent, author, committer, message, repository=nil)
+    def initialize(tree, parent, author, committer, message, headers, repository=nil)
       @tree = tree
       @author = author
       @parent = parent
       @committer = committer
       @message = message
+      @headers = headers
       @repository = repository
     end
 
@@ -244,6 +245,13 @@ module Grit
         @parent.collect { |i| "parent %s\n" % i }.join,
         @author, @committer] + @message
     end
+    
+    def raw_log(sha)
+      output = "commit #{sha}\n"
+      output += @headers + "\n"
+      output += @message.split("\n").map { |l| '    ' + l }.join("\n") + "\n\n"
+    end
+    
   end
 
   class Tag < Object
