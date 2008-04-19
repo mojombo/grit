@@ -25,7 +25,7 @@ module Grit
         
     def revparse(string)
       if /\w{40}/.match(string)  # passing in a sha - just no-op it
-        return string
+        return string.chomp
       end
             
       head = File.join(@git_dir, 'refs', 'heads', string)
@@ -40,7 +40,6 @@ module Grit
       ## !! check packed-refs file, too !! 
       ## !! more - partials and such !!
       
-      puts "AH"
       # revert to calling git
       return method_missing('rev-parse', {}, string)
     end
