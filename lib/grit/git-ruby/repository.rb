@@ -268,6 +268,20 @@ module Grit
         end 
         @cache_ls_tree[sha] = data             
       end
+      
+      def list_tree(sha, paths = [])
+        o = get_raw_object_by_sha1(sha)
+        if o.type == :commit
+          tree = cat_file(object(sha).tree)
+        else
+          tree = cat_file(sha)
+        end
+        
+        if paths.size > 0
+          tree = tree.split("\n").select { |line| paths.include?(line.split("\t")[1]) }.join("\n")
+        end
+        tree
+      end
             
       def get_object_by_sha1(sha1)
         r = get_raw_object_by_sha1(sha1)

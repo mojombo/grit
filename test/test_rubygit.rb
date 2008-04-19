@@ -29,6 +29,23 @@ class TestRubyGit < Test::Unit::TestCase
     assert_equal '252', out
   end
   
+  def test_ls_tree
+    out = @git.ls_tree({}, @tree_sha)
+    assert_equal out, fixture('cat_file_tree_ruby').chomp
+  end
+
+  def test_ls_tree_treeish
+    out = @git.ls_tree({}, 'testing')
+    assert_equal out, fixture('cat_file_tree_ruby').chomp
+  end
+  
+  def test_ls_tree_paths
+    paths = ['History.txt', 'lib']
+    out = @git.ls_tree({}, @tree_sha, paths)
+    assert_equal out, fixture('ls_tree_paths_ruby').chomp
+  end
+  
+  
   def test_file_type
     out = @git.file_type(@tree_sha).to_s
     assert_equal 'tree', out

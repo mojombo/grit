@@ -19,8 +19,30 @@ module Grit
     end
     
     #   lib/grit/tree.rb:16:      output = repo.git.ls_tree({}, treeish, *paths)
-    def ls_tree(options, treeish, paths)
-      return ' hi '
+    def ls_tree(options, treeish, paths = [])
+      return ruby_git_dir.list_tree(revparse(treeish), paths)
+    end
+        
+    def revparse(string)
+      if /\w{40}/.match(string)  # passing in a sha - just no-op it
+        return string
+      end
+            
+      head = File.join(@git_dir, 'refs', 'heads', string)
+      return File.read(head).chomp if File.file?(head)
+
+      head = File.join(@git_dir, 'refs', 'remotes', string)
+      return File.read(head).chomp if File.file?(head)
+      
+      head = File.join(@git_dir, 'refs', 'tags', string)
+      return File.read(head).chomp if File.file?(head)
+      
+      ## !! check packed-refs file, too !! 
+      ## !! more - partials and such !!
+      
+      puts "AH"
+      # revert to calling git
+      return method_missing('rev-parse', {}, string)
     end
     
     def file_size(ref)
