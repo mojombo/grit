@@ -2,11 +2,13 @@ require 'grit/git-ruby/repository'
 
 module Grit
   
+  # the functions in this module intercept the calls to git binary
+  # made buy the grit objects and attempts to run them in pure ruby
+  # if it will be faster, or if the git binary is not available (!!TODO!!)
   module GitRuby
     
-    attr_accessor :ruby_gitdir
+    attr_accessor :ruby_git_repo
     
-    # (raw) allowed_options = [:max_count, :skip, :since, :all]
     def cat_file(options, ref)
       if options[:t]
         file_type(ref)
@@ -14,16 +16,16 @@ module Grit
       elsif options[:s]
         file_size(ref)
       elsif options[:p]
-        ruby_git_dir.cat_file(ref)
+        ruby_git.cat_file(ref)
       end
     end
     
-    #   lib/grit/tree.rb:16:      output = repo.git.ls_tree({}, treeish, *paths)
+    # lib/grit/tree.rb:16:      output = repo.git.ls_tree({}, treeish, *paths)
     def ls_tree(options, treeish, paths = [])
-      return ruby_git_dir.list_tree(revparse(treeish), paths)
+      return ruby_git.ls_tree(rev_parse(treeish), paths)
     end
         
-    def revparse(string)
+    def rev_parse(string)      
       if /\w{40}/.match(string)  # passing in a sha - just no-op it
         return string.chomp
       end
@@ -40,22 +42,21 @@ module Grit
       ## !! check packed-refs file, too !! 
       ## !! more - partials and such !!
       
-      # revert to calling git
+      # revert to calling git - grr
       return method_missing('rev-parse', {}, string)
     end
     
     def file_size(ref)
-      ruby_git_dir.cat_file_size(ref).to_s
+      ruby_git.cat_file_size(ref).to_s
     end
     
     def file_type(ref)
-      ruby_git_dir.cat_file_type(ref)
+      ruby_git.cat_file_type(ref)
     end
     
-    def ruby_git_dir
-      @ruby_gitdir ||= Repository.new(@git_dir)
+    def ruby_git
+      @ruby_git_repo ||= Repository.new(@git_dir)
     end
     
   end
-  
 end
