@@ -21,12 +21,10 @@ module Grit
       class NoSuchShaFound < StandardError
       end
       
-      attr_accessor :git_dir, :cache_list_tree, :use_cache
+      attr_accessor :git_dir, :cache
       
-      def initialize(git_dir, use_cache = false)
-        clear_cache()
-        @use_cache = use_cache
-        
+      def initialize(git_dir, cache_client = nil)
+        @cache = cache_client || false  
         @git_dir = git_dir
       end
       
@@ -60,29 +58,44 @@ module Grit
      
       # returns a raw object given a SHA1
       def get_raw_object_by_sha1(sha1o)
+        key = 'rawobject:' + sha1o
+        #puts
+        #puts key
+        if @cache && (cacheobj = @cache.get(key, false))
+        #  puts 'begin'
+        #  puts cacheobj if cacheobj
+        #  puts 'end'
+          return cacheobj
+        end
+        
         sha1 = [sha1o.chomp].pack("H*")
 
         # try packs
         packs.each do |pack|
           o = pack[sha1]
-          return o if o
+          return cached(key, o) if o
         end
 
         # try loose storage
         o = loose[sha1]
-        return o if o
+        return cached(key, o) if o
 
         # try packs again, maybe the object got packed in the meantime
         initpacks
         packs.each do |pack|
           o = pack[sha1]
-          return o if o
+          return cached(key, o) if o
         end
 
         puts "*#{sha1o}*"
         raise NoSuchShaFound
       end
-   
+
+      def cached(key, object)
+        @cache.set(key, object, 0, false) if @cache
+        object
+      end
+      
       # returns GitRuby object of any type given a SHA1
       def get_object_by_sha1(sha1)
         r = get_raw_object_by_sha1(sha1)
@@ -140,14 +153,11 @@ module Grit
       # returns a 2-d hash of the tree
       # ['blob']['FILENAME'] = {:mode => '100644', :sha => SHA}
       # ['tree']['DIRNAME'] = {:mode => '040000', :sha => SHA}
-      def list_tree(sha)
-        return @cache_list_tree[sha] if @cache_list_tree[sha] && @use_cache
-        
+      def list_tree(sha)        
         data = {'blob' => {}, 'tree' => {}}
         get_object_by_sha1(sha).entry.each do |e|
           data[e.format_type][e.name] = {:mode => e.format_mode, :sha => e.sha1}
         end 
-        @cache_list_tree[sha] = data             
       end
       
       # returns the raw (cat-file) output for a tree
@@ -164,7 +174,7 @@ module Grit
         if paths.size > 0
           tree = tree.split("\n").select { |line| paths.include?(line.split("\t")[1]) }.join("\n")
         end
-        tree
+        tree 
       end
           
       
@@ -182,6 +192,15 @@ module Grit
         walk_log(sha, options)
       end
 
+      def rev_list(sha, options)
+        log = log(sha, options)
+        if options[:pretty] = 'raw'
+          log.map {|k, v| v.chomp }.join('')
+        else
+          log.map {|k, v| k }.join('')
+        end
+      end
+      
       # called by log() to recursively walk the tree
       def walk_log(sha, opts)
         return [] if @already_searched[sha] # to prevent rechecking branches
@@ -321,16 +340,8 @@ module Grit
         # that dumb scott used ls-tree's each tree twice, which is 90% of the
         # time this takes, so caching those hits halves the time this takes to run
         # but, it does take up memory, so if you don't want it, i clear it later
-        old_use_cache = @use_cache 
-        @use_cache = true
-
-          @already_searched = {}
-          data = look_for_commits(commit_sha, looking_for)
-
-        @use_cache = old_use_cache
-        clear_cache if !old_use_cache 
-
-        data
+        @already_searched = {}
+        look_for_commits(commit_sha, looking_for)
       end
     
       def look_for_commits(commit_sha, looking_for)        
@@ -379,10 +390,6 @@ module Grit
       
       protected
 
-        def clear_cache
-          @cache_list_tree = {}
-        end
-      
         def git_path(path)
           return "#@git_dir/#{path}"
         end
