@@ -59,13 +59,8 @@ module Grit
       # returns a raw object given a SHA1
       def get_raw_object_by_sha1(sha1o)
         key = 'rawobject:' + sha1o
-        #puts
-        #puts key
-        if @cache && (cacheobj = @cache.get(key, false))
-        #  puts 'begin'
-        #  puts cacheobj if cacheobj
-        #  puts 'end'
-          return cacheobj
+        if @cache && (cacheobj = @cache.get(key))
+          return cacheobj 
         end
         
         sha1 = [sha1o.chomp].pack("H*")
@@ -73,34 +68,41 @@ module Grit
         # try packs
         packs.each do |pack|
           o = pack[sha1]
-          return cached(key, o) if o
+          return cached(key, o, (o.type != :blob)) if o
         end
 
         # try loose storage
         o = loose[sha1]
-        return cached(key, o) if o
+        return cached(key, o, (o.type != :blob)) if o
 
         # try packs again, maybe the object got packed in the meantime
         initpacks
         packs.each do |pack|
           o = pack[sha1]
-          return cached(key, o) if o
+          return cached(key, o, (o.type != :blob)) if o
         end
 
         puts "*#{sha1o}*"
         raise NoSuchShaFound
       end
 
-      def cached(key, object)
-        @cache.set(key, object, 0, false) if @cache
+      def cached(key, object, do_cache = true)
+        if @cache && do_cache
+          @cache.set(key, object) 
+        end
         object
       end
       
       # returns GitRuby object of any type given a SHA1
       def get_object_by_sha1(sha1)
+        key = 'rubyobject:' + sha1
+        if @cache && (cacheobj = @cache.get(key))
+          return cacheobj 
+        end
+        
         r = get_raw_object_by_sha1(sha1)
         return nil if !r
-        Object.from_raw(r, self)
+        cached(key, Object.from_raw(r), (r.type != :blob))
       end
       
       # writes a raw object into the git repo
@@ -146,7 +148,6 @@ module Grit
       
       # returns the raw file contents of this sha
       def cat_file(sha)
-        o = get_raw_object_by_sha1(sha)
         get_object_by_sha1(sha).raw_content
       end
       
