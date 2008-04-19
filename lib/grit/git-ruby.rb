@@ -32,6 +32,11 @@ module Grit
     def rev_list(options, ref)
       return ruby_git.rev_list(rev_parse({}, ref), options)      
     end
+
+    def log(options, ref)
+      options[:max_count] = 30 if !options[:max_count]
+      return ruby_git.rev_list(rev_parse({}, ref), options)      
+    end
     
         
     def rev_parse(options, string)      
