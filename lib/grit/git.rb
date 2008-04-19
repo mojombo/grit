@@ -8,6 +8,7 @@ end
 module Grit
   
   class Git
+    
     include Grit::GitRuby
     
     class GitTimeout < RuntimeError
@@ -55,7 +56,7 @@ module Grit
       call = "#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}"
       puts call if Grit.debug
       response = timeout ? sh(call) : wild_sh(call)
-      puts response if Grit.debug
+      #puts response if Grit.debug
       response
     end
 
@@ -64,6 +65,7 @@ module Grit
     def sh(command)
       pid, _, io, _ = Open4.popen4(command)
       ret = Timeout.timeout(self.class.git_timeout) { io.read }
+      @bytes_read = 0
       @bytes_read += ret.size
 
       if @bytes_read > 5242880 # 5.megabytes
