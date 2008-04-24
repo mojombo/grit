@@ -19,7 +19,7 @@ sudo gem install grit
 
 Grit's git repo is available on GitHub, which can be browsed at:
 
-http://github.com/~mojombo/grit
+http://github.com/mojombo/grit
 
 and cloned from:
 
