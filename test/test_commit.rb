@@ -164,6 +164,7 @@ class TestCommit < Test::Unit::TestCase
   # to_hash
 
   def test_to_hash
+    old_tz, ENV["TZ"] = ENV["TZ"], "US/Pacific"
     @c = Commit.create(@r, :id => '4c8124ffcf4039d292442eeccabdeca5af5c5017')
 
     expected = {
@@ -178,5 +179,7 @@ class TestCommit < Test::Unit::TestCase
     }
 
     assert_equal expected, @c.to_hash
+  ensure
+    ENV["TZ"] = old_tz
   end
 end
