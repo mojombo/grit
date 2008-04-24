@@ -1,6 +1,6 @@
 grit
     by Tom Preston-Werner, Chris Wanstrath
-    http://github.com/mojombo/grit/wikis
+    http://github.com/mojombo/grit
 
 == DESCRIPTION:
 

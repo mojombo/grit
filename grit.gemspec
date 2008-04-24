@@ -4,8 +4,7 @@ Gem::Specification.new do |s|
   s.date = %q{2008-04-24}
   s.summary = %q{Object model interface to a git repo}
   s.email = %q{tom@rubyisawesome.com}
-  s.homepage = %q{http://github.com/mojombo/gripj}
-  s.rubyforge_project = %q{grit}
+  s.homepage = %q{http://github.com/mojombo/grit}
   s.description = %q{Grit is a Ruby library for extracting information from a git repository in and object oriented manner.}
   s.has_rdoc = true
   s.authors = ["Tom Preston-Werner"]
