@@ -2,6 +2,7 @@ History.txt
 Manifest.txt
 README.txt
 Rakefile
+grit.gemspec
 lib/grit.rb
 lib/grit/actor.rb
 lib/grit/blob.rb

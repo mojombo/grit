@@ -3,7 +3,6 @@ require 'hoe'
 require './lib/grit.rb'
 
 Hoe.new('grit', Grit::VERSION) do |p|
-  p.rubyforge_name = 'grit'
   p.author = 'Tom Preston-Werner'
   p.email = 'tom@rubyisawesome.com'
   p.summary = 'Object model interface to a git repo'
