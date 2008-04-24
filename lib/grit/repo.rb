@@ -67,6 +67,22 @@ module Grit
       Tag.find_all(self)
     end
     
+    # An array of Remote objects representing the remote branches in
+    # this repo
+    #
+    # Returns Grit::Remote[] (baked)
+    def remotes
+      Remote.find_all(self)
+    end
+
+    # An array of Ref objects representing the refs in
+    # this repo
+    #
+    # Returns Grit::Ref[] (baked)
+    def refs
+      [ Head.find_all(self), Tag.find_all(self), Remote.find_all(self) ].flatten
+    end
+
     # An array of Commit objects representing the history of a given ref/commit
     #   +start+ is the branch/commit name (default 'master')
     #   +max_count+ is the maximum number of commits to return (default 10)
