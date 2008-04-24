@@ -11,10 +11,9 @@ lib/grit/config.rb
 lib/grit/diff.rb
 lib/grit/errors.rb
 lib/grit/git.rb
-lib/grit/head.rb
 lib/grit/lazy.rb
+lib/grit/ref.rb
 lib/grit/repo.rb
-lib/grit/tag.rb
 lib/grit/tree.rb
 test/fixtures/blame
 test/fixtures/cat_file_blob
@@ -27,6 +26,7 @@ test/fixtures/diff_mode_only
 test/fixtures/diff_new_mode
 test/fixtures/diff_p
 test/fixtures/for_each_ref
+test/fixtures/for_each_ref_remotes
 test/fixtures/for_each_ref_tags
 test/fixtures/ls_tree_a
 test/fixtures/ls_tree_b
