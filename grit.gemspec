@@ -1,4 +1,3 @@
-(in /Users/tom/dev/mojombo/grit)
 Gem::Specification.new do |s|
   s.name = %q{grit}
   s.version = "0.8.0"
