@@ -13,17 +13,18 @@ object oriented manner.
 
 == INSTALL:
 
-sudo gem install grit
+  $ gem sources -a http://gems.github.com/ (you only need to do this once)
+  $ gem install mojombo-grit
 
 == SOURCE:
 
 Grit's git repo is available on GitHub, which can be browsed at:
 
-http://github.com/mojombo/grit
+  http://github.com/mojombo/grit
 
 and cloned from:
 
-git://github.com/mojombo/grit.git
+  git://github.com/mojombo/grit.git
 
 == USAGE:
 
@@ -36,6 +37,7 @@ trees, blobs, etc.
 The first step is to create a Grit::Repo object to represent your repo. I
 include the Grit module so reduce typing.
 
+  require 'mojombo-grit'
   include Grit
   repo = Repo.new("/Users/tom/dev/grit")
   
