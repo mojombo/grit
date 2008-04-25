@@ -33,5 +33,5 @@ module Grit
   
   self.debug = false
   
-  VERSION = '0.8.0'
+  VERSION = '0.8.1'
 end
