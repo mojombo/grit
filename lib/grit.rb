@@ -24,6 +24,7 @@ require 'grit/actor'
 require 'grit/diff'
 require 'grit/config'
 require 'grit/repo'
+require 'grit/index'
 
 module Grit
   class << self

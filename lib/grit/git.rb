@@ -44,13 +44,17 @@ module Grit
     #
     # Returns String
     def method_missing(cmd, options = {}, *args)
+      run('', cmd, '', options, args)
+    end
+    
+    def run(prefix, cmd, postfix, options, args)
       timeout  = options.delete(:timeout)
       timeout  = true if timeout.nil?
 
       opt_args = transform_options(options)
       ext_args = args.map { |a| a == '--' ? a : "'#{a}'" }
       
-      call = "#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}"
+      call = "#{prefix}#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{postfix}"
       puts call if Grit.debug
       response = timeout ? sh(call) : wild_sh(call)
       puts response if Grit.debug

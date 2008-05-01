@@ -2,16 +2,18 @@
 # 
 # class TestReal < Test::Unit::TestCase
 #   def setup
-#     @repo = Repo.new('/Users/tom/dev/sandbox/ruby-on-rails-tmbundle')
+#     `rm -fr /Users/tom/dev/sandbox/grittest.git`
+#     `git --git-dir=/Users/tom/dev/sandbox/grittest.git init`
+#     @repo = Repo.new('/Users/tom/dev/sandbox/grittest.git')
 #   end
 #   
 #   def test_real
-#     # Grit.debug = true
+#     Grit.debug = true
 #     
-#     p @repo.commits
+#     index = @repo.index
+#     index.add('foo/bar/baz.txt', 'hello!')
+#     index.add('foo/qux/bam.txt', 'world!')
 #     
-#     # p (@repo.tree/'Syntaxes/Ruby on Rails.plist').data
-#     # p @repo.tree('master', ['Snippets/rea.plist']).contents.first
-#     p @repo.tree('master', ['Syntaxes/Ruby on Rails.plist']).contents.first
+#     puts index.commit('first commit')
 #   end
 # end
