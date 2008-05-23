@@ -62,16 +62,21 @@ module Grit
     end
 
     def sh(command)
-      pid, _, io, _ = Open4.popen4(command)
-      ret = Timeout.timeout(self.class.git_timeout) { io.read }
-      @bytes_read += ret.size
+      ret, pid = nil, nil
+      Open4.popen4(command) do |id, _, io, _|
+        p io
+        pid = id
+        ret = Timeout.timeout(self.class.git_timeout) { io.read }
+        @bytes_read += ret.size
 
-      if @bytes_read > 5242880 # 5.megabytes
-        bytes = @bytes_read
-        @bytes_read = 0
-        raise GitTimeout.new(command, bytes) 
+        if @bytes_read > 5242880 # 5.megabytes
+          bytes = @bytes_read
+          @bytes_read = 0
+          raise GitTimeout.new(command, bytes) 
+        end
       end
-
+      ret
+    rescue Errno::ECHILD
       ret
     rescue Object => e
       Process.kill('KILL', pid) rescue nil
@@ -81,8 +86,12 @@ module Grit
     end
 
     def wild_sh(command)
-      pid, _, io, _ = Open4.popen4(command)
-      io.read
+      ret = nil
+      Open4.popen4(command) {|pid, _, io, _|
+        ret = io.read
+      }
+    rescue Errno::ECHILD
+      ret
     end
 
     # Transform Ruby style options into git command line options

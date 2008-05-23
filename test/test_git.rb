@@ -38,7 +38,7 @@ class TestGit < Test::Unit::TestCase
 
   def test_raises_on_slow_shell
     Grit::Git.git_timeout = 0.5
-    Open4.expects(:popen4).returns([ nil, nil, mock(:read => proc { sleep 1 }), nil ])
+    Open4.expects(:popen4).yields( nil, nil, mock(:read => proc { sleep 1 }), nil )
     assert_raises Grit::Git::GitTimeout do
       @git.something
     end
@@ -46,7 +46,7 @@ class TestGit < Test::Unit::TestCase
 
   def test_works_fine_if_quick
     output = 'output'
-    Open4.expects(:popen4).returns([ nil, nil, mock(:read => output), nil ])
+    Open4.expects(:popen4).yields( nil, nil, mock(:read => output), nil )
     assert_equal output, @git.something
   end
 end
