@@ -64,7 +64,6 @@ module Grit
     def sh(command)
       ret, pid = nil, nil
       Open4.popen4(command) do |id, _, io, _|
-        p io
         pid = id
         ret = Timeout.timeout(self.class.git_timeout) { io.read }
         @bytes_read += ret.size
