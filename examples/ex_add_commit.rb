@@ -3,12 +3,11 @@ require '../lib/grit'
 count = 1
 Dir.chdir("/Users/schacon/projects/atest") do
   r = Grit::Repo.new('.')
-  i = r.index
   while(count < 10) do
     fname = Time.now.to_i.to_s + count.to_s
-    i.add(fname, 'hello ' + fname)
+    File.open(fname, 'w') { |f| f.write('hellor ' + fname) }
+    r.add(fname)
     count += 1
   end
-  puts i.commit('my commit')
-  puts i.inspect
+  r.commit_index('my commit')
 end
