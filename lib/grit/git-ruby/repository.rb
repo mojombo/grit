@@ -13,7 +13,6 @@ require 'grit/git-ruby/internal/raw_object'
 require 'grit/git-ruby/internal/pack'
 require 'grit/git-ruby/internal/loose'
 require 'grit/git-ruby/object'
-require 'grit/git-ruby/commit_db'
 
 module Grit
   module GitRuby
@@ -24,10 +23,7 @@ module Grit
       
       attr_accessor :git_dir, :commit_db
       
-      def initialize(git_dir, commit_db = nil)
-        if use_commit_db
-          @commit_db = CommitDb.new(git_dir)
-        end
+      def initialize(git_dir)
         @git_dir = git_dir
       end
       

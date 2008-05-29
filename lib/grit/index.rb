@@ -27,21 +27,36 @@ module Grit
       
       current[filename] = data
     end
-    
+        
     # Commit the contents of the index
     #   +message+ is the commit message
     #
     # Returns a String of the SHA1 of the commit
-    def commit(message)
+    def commit(message, parents = nil, actor = nil)
       tree_sha1 = write_tree(self.tree)
       
-      message = message.gsub("'", "\\'")
-      commit_sha1 = self.repo.git.run("echo '#{message}' | ", :commit_tree, '', {}, [tree_sha1])
+      contents = []
+      contents << ['tree', tree_sha1].join(' ')
+      parents.each do |p|
+        contents << ['parent', p].join(' ') if p        
+      end if parents
+
+      config = Config.new(self.repo)
+      name = config['user.name']
+      email = config['user.email']
+      
+      author_string = "#{name} <#{email}> #{Time.now.to_i}"
+      contents << ['author', author_string].join(' ')
+      contents << ['committer', author_string].join(' ')
+      contents << ''
+      contents << message
+      
+      commit_sha1 = self.repo.git.ruby_git.put_raw_object(contents.join("\n"), 'commit')      
       
       # self.repo.git.update_ref({}, 'HEAD', commit_sha1)
       File.open(File.join(self.repo.path, 'refs', 'heads', 'master'), 'w') do |f|
         f.write(commit_sha1)
-      end
+      end if commit_sha1
       
       commit_sha1
     end
@@ -51,18 +66,22 @@ module Grit
     #
     # Returns the SHA1 String of the tree
     def write_tree(tree)
-      lstree = []
+      tree_contents = ''
       tree.each do |k, v|
         case v
           when String:
-            lstree << "100644 blob #{write_blob(v)}\t#{k}"
+            sha = write_blob(v)
+            sha = [sha].pack("H*")
+            str = "%s %s\0%s" % ['100644', k, sha]
+            tree_contents += str
           when Hash:
-            lstree << "040000 tree #{write_tree(v)}\t#{k}"
+            sha = write_tree(v)
+            sha = [sha].pack("H*")
+            str = "%s %s\0%s" % ['040000', k, sha]
+            tree_contents += str
         end
       end
-      
-      lstree_string = lstree.join("\n").gsub("'", "\\'")
-      self.repo.git.run("echo '#{lstree_string}' | ", :mktree, '', {}, []).chomp
+      self.repo.git.ruby_git.put_raw_object(tree_contents, 'tree')
     end
     
     # Write the blob to the index
@@ -70,7 +89,7 @@ module Grit
     #
     # Returns the SHA1 String of the blob
     def write_blob(data)
-      self.repo.git.run("echo '#{data}' | ", :hash_object, '', {:w => true, :stdin => true}, []).chomp
+      self.repo.git.ruby_git.put_raw_object(data, 'blob')
     end
   end # Index
   

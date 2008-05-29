@@ -105,6 +105,6 @@ module Grit
 
   class Tag < Ref ; end
 
-  class Remote < Ref ; end
-
+  class Remote < Ref; end
+  
 end # Grit
