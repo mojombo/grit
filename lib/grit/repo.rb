@@ -65,8 +65,31 @@ module Grit
     #
     # Returns true/false if commit worked
     def commit_index(message)
-      self.git.commit({}, a, b, '--', *paths)
+      self.git.commit({}, '-m', message)
     end
+
+    # Commits all tracked and modified files
+    #
+    # Returns true/false if commit worked
+    def commit_all(message)
+      self.git.commit({}, '-a', '-m', message)
+    end
+
+    # Adds files to the index
+    def add(*files)
+      self.git.add({}, *files.flatten)
+    end
+
+    # Adds files to the index
+    def remove(*files)
+      self.git.rm({}, *files.flatten)
+    end
+
+    # Adds files to the index
+    def status
+      Status.new(self)
+    end
+
 
     # An array of Tag objects that are available in this repo
     #

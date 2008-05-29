@@ -1,0 +1,101 @@
+== TODO ==
+
+* Add remote branch references (Grit::Remote)
+* Add status - what is modified, staged
+
+g.checkout('new_branch')
+g.checkout(g.branch('new_branch'))
+
+g.branch(name).merge(branch2)
+g.branch(branch2).merge  # merges HEAD with branch2
+
+g.branch(name).in_branch(message) { # add files }  # auto-commits
+g.merge('new_branch')
+g.merge('origin/remote_branch')
+g.merge(b.branch('master'))
+g.merge([branch1, branch2])
+
+r = g.add_remote(name, uri)  # Git::Remote
+r = g.add_remote(name, Git::Base)  # Git::Remote
+
+g.remotes  # array of Git::Remotes
+g.remote(name).fetch
+g.remote(name).remove
+g.remote(name).merge
+g.remote(name).merge(branch)
+
+g.fetch
+g.fetch(g.remotes.first)
+
+g.pull
+g.pull(Git::Repo, Git::Branch) # fetch and a merge
+
+g.add_tag('tag_name') # returns Git::Tag
+
+g.repack
+
+g.push
+g.push(g.remote('name'))
+   
+g.reset # defaults to HEAD
+g.reset_hard(Git::Commit)
+
+g.branch('new_branch') # creates new or fetches existing
+g.branch('new_branch').checkout
+g.branch('new_branch').delete
+g.branch('existing_branch').checkout
+
+
+
+
+
+require 'mojombo-grit'
+
+include Grit
+Grit.debug
+Grit.use_pure_ruby
+
+repo = Repo.new("/Users/tom/dev/grit")
+
+= Commit Log
+
+repo.commits('mybranch')
+repo.commits('40d3057d09a7a4d61059bca9dca5ae698de58cbe')
+repo.commits('v0.1')
+
+repo.log('mybranch', 100, 20)
+
+head = repo.commits.first
+head.id
+# => "e80bbd2ce67651aa18e57fb0b43618ad4baf7750"
+head.parents
+# => [#<Grit::Commit "91169e1f5fa4de2eaea3f176461f5dc784796769">]
+head.tree
+# => #<Grit::Tree "3536eb9abac69c3e4db583ad38f3d30f8db4771f">
+head.author
+# => #<Grit::Actor "Tom Preston-Werner <tom@mojombo.com>">
+head.authored_date
+# => Wed Oct 24 22:02:31 -0700 2007
+head.committer
+# => #<Grit::Actor "Tom Preston-Werner <tom@mojombo.com>">
+head.committed_date
+# => Wed Oct 24 22:02:31 -0700 2007
+head.message
+# => "add Actor inspect"
+contents = tree.contents
+  # => [#<Grit::Blob "4ebc8aea50e0a67e000ba29a30809d0a7b9b2666">,
+        #<Grit::Blob "81d2c27608b352814cbe979a6acd678d30219678">,
+        #<Grit::Tree "c3d07b0083f01a6e1ac969a0f32b8d06f20c62e5">,
+        #<Grit::Tree "4d00fe177a8407dbbc64a24dbfc564762c0922d8">]
+blob.id
+# => "4ebc8aea50e0a67e000ba29a30809d0a7b9b2666"
+blob.name
+# => "README.txt"
+blob.mode
+# => "100644"
+blob.size
+# => 7726
+blob.data
+
+repo.blob("4ebc8aea50e0a67e000ba29a30809d0a7b9b2666")
+# => #<Grit::Blob "4ebc8aea50e0a67e000ba29a30809d0a7b9b2666">

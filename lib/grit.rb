@@ -27,6 +27,7 @@ require 'grit/diff'
 require 'grit/config'
 require 'grit/repo'
 require 'grit/index'
+require 'grit/status'
 
 
 module Grit

@@ -8,6 +8,7 @@ Completed
 ** lib/grit/tree.rb:16:      output = repo.git.ls_tree({}, treeish, *paths)
 
 
+
 lib/grit/commit.rb:74:      repo.git.rev_list({}, ref).strip.split("\n").size
 lib/grit/commit.rb:92:      output = repo.git.rev_list(actual_options, ref)
 lib/grit/commit.rb:94:      output = repo.git.rev_list(actual_options.merge(:all => true))
