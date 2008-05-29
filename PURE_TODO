@@ -8,6 +8,11 @@ Completed
 ** lib/grit/tree.rb:16:      output = repo.git.ls_tree({}, treeish, *paths)
 
 
+lib/grit/commit.rb:74:      repo.git.rev_list({}, ref).strip.split("\n").size
+lib/grit/commit.rb:92:      output = repo.git.rev_list(actual_options, ref)
+lib/grit/commit.rb:94:      output = repo.git.rev_list(actual_options.merge(:all => true))
+
+
 Next to do
 ===========================
 lib/grit/tag.rb:28:      output = repo.git.for_each_ref(actual_options, "refs/tags")
@@ -19,9 +24,6 @@ lib/grit/config.rb:40:        @repo.git.config(:list => true).split(/\n/)
 
 May not be fast enough
 =============================
-lib/grit/commit.rb:74:      repo.git.rev_list({}, ref).strip.split("\n").size
-lib/grit/commit.rb:92:      output = repo.git.rev_list(actual_options, ref)
-lib/grit/commit.rb:94:      output = repo.git.rev_list(actual_options.merge(:all => true))
 lib/grit/blob.rb:58:      data = repo.git.blame({:p => true}, commit, '--', file)
 
 

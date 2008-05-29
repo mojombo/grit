@@ -32,9 +32,11 @@ require 'grit/index'
 module Grit
   class << self
     attr_accessor :debug
+    attr_accessor :use_git_ruby
   end
   
   self.debug = false
+  self.use_git_ruby = true
   
-  VERSION = '0.8.1'
+  VERSION = '0.8.2'
 end

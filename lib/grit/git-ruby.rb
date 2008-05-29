@@ -8,9 +8,9 @@ module Grit
   module GitRuby
     
     class << self
-      attr_accessor :cache_client
+      attr_accessor :use_commit_db
     end
-    self.cache_client = false
+    self.use_commit_db = false
     
     attr_accessor :ruby_git_repo
     
@@ -69,7 +69,7 @@ module Grit
     end
     
     def ruby_git
-      @ruby_git_repo ||= Repository.new(@git_dir, GitRuby.cache_client)
+      @ruby_git_repo ||= Repository.new(self, @git_dir, GitRuby.use_commit_db)
     end
     
   end

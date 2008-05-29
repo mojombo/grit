@@ -60,6 +60,14 @@ module Grit
       Head.current(self)
     end
 
+
+    # Commits current index
+    #
+    # Returns true/false if commit worked
+    def commit_index(message)
+      self.git.commit({}, a, b, '--', *paths)
+    end
+
     # An array of Tag objects that are available in this repo
     #
     # Returns Grit::Tag[] (baked)

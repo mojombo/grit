@@ -13,6 +13,7 @@ require 'grit/git-ruby/internal/raw_object'
 require 'grit/git-ruby/internal/pack'
 require 'grit/git-ruby/internal/loose'
 require 'grit/git-ruby/object'
+require 'grit/git-ruby/commit_db'
 
 module Grit
   module GitRuby
@@ -21,10 +22,12 @@ module Grit
       class NoSuchShaFound < StandardError
       end
       
-      attr_accessor :git_dir, :cache
+      attr_accessor :git_dir, :commit_db
       
-      def initialize(git_dir, cache_client = nil)
-        @cache = cache_client || false  
+      def initialize(git_dir, commit_db = nil)
+        if use_commit_db
+          @commit_db = CommitDb.new(git_dir)
+        end
         @git_dir = git_dir
       end
       

@@ -5,8 +5,8 @@ require 'ruby-prof'
 require 'memcache'
 require 'pp'
 
-#require 'grit'
-require '../../lib/grit'
+gem 'grit', '=0.7.0' 
+#require '../../lib/grit'
 
 def main
   @wbare = File.expand_path(File.join('../../', 'test', 'dot_git'))
@@ -15,6 +15,7 @@ def main
     #result = RubyProf.profile do
 
       git = Grit::Repo.new('.')
+      puts Grit::VERSION
       #Grit::GitRuby.cache_client = MemCache.new 'localhost:11211', :namespace => 'grit'
       #Grit.debug = true
     
@@ -42,6 +43,10 @@ def main
           log.size
           log.first
           git.commits('testing').map { |c| c.message }
+        end
+
+        run_code(x, 'big revlist') do
+          c = git.commits('master', 200)
         end
 
         run_code(x, 'log') do
