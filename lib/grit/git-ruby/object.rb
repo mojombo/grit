@@ -11,6 +11,7 @@
 
 # These classes translate the raw binary data kept in the sha encoded files
 # into parsed data that can then be used in another fashion
+require 'stringio'
 
 module Grit
   module GitRuby
