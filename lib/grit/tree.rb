@@ -14,7 +14,6 @@ module Grit
     # Returns Grit::Tree (baked)
     def self.construct(repo, treeish, paths = [])
       output = repo.git.ls_tree({}, treeish, *paths)
-      
       self.allocate.construct_initialize(repo, treeish, output)
     end
     

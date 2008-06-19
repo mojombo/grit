@@ -22,7 +22,7 @@ module Grit
     def initialize(str)
       m = /^(.*?) <(.*)> (\d+) ([+-])0*(\d+?)$/.match(str)
       if !m
-        raise RuntimeError, "invalid %s header in commit" % str
+        raise RuntimeError, "invalid header '%s' in commit" % str
       end
       @name = m[1]
       @email = m[2]
@@ -101,18 +101,13 @@ module Grit
     S_IFDIR =  0040000
 
     attr_accessor :mode, :name, :sha1
-    def initialize(buf)
-      m = /^(\d+) (.*)\0(.{20})$/m.match(buf)
-      if !m
-        raise RuntimeError, "invalid directory entry"
-      end
+    def initialize(mode, filename, sha1o)
       @mode = 0
-      m[1].each_byte do |i|
+      mode.each_byte do |i|
         @mode = (@mode << 3) | (i-'0'[0])
       end
-      @name = m[2]
-      @sha1 = m[3].unpack("H*")[0]
-
+      @name = filename
+      @sha1 = sha1o
       if ![S_IFLNK, S_IFDIR, S_IFREG].include?(@mode & S_IFMT)
         raise RuntimeError, "unknown type for directory entry"
       end
@@ -164,13 +159,34 @@ module Grit
     end
   end
 
+
+  def self.read_bytes_until(io, char)
+    string = ''
+    while ((next_char = io.getc.chr) != char) && !io.eof
+      string += next_char
+    end
+    string
+  end
+
+  
   class Tree < Object
     attr_accessor :entry
 
+    
+    # schacon - had to rewrite this to avoid scan(), since the unicodey crap
+    # fraks it all up.  So, the code is pretty uggo, but it works again.
+    # Seriously sorry for it, I'll try to clean it up later...
     def self.from_raw(rawobject, repository=nil)
+      raw = StringIO.new(rawobject.content)
+  
       entries = []
-      rawobject.content.scan(/\d+ .*?\0.{20}/m) do |raw|
-        entries << DirectoryEntry.new(raw)
+      while !raw.eof?
+        mode      = Grit::GitRuby.read_bytes_until(raw, ' ')
+        file_name = Grit::GitRuby.read_bytes_until(raw, "\0")
+        raw_sha   = raw.read(20)
+        sha = raw_sha.unpack("H*").first
+        
+        entries << DirectoryEntry.new(mode, file_name, sha)
       end
       new(entries, repository)
     end

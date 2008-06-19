@@ -57,28 +57,22 @@ module Grit
      
       # returns a raw object given a SHA1
       def get_raw_object_by_sha1(sha1o)
-        key = 'rawobject:' + sha1o
-        if @cache && (cacheobj = @cache.get(key))
-          return cacheobj 
-        end
-        
         sha1 = [sha1o.chomp].pack("H*")
-
         # try packs
         packs.each do |pack|
           o = pack[sha1]
-          return cached(key, o, (o.type != :blob)) if o
+          return pack[sha1] if o
         end
 
         # try loose storage
         o = loose[sha1]
-        return cached(key, o, (o.type != :blob)) if o
+        return o if o
 
         # try packs again, maybe the object got packed in the meantime
         initpacks
         packs.each do |pack|
           o = pack[sha1]
-          return cached(key, o, (o.type != :blob)) if o
+          return o if o
         end
 
         puts "*#{sha1o}*"
@@ -86,22 +80,14 @@ module Grit
       end
 
       def cached(key, object, do_cache = true)
-        if @cache && do_cache
-          @cache.set(key, object) 
-        end
         object
       end
       
       # returns GitRuby object of any type given a SHA1
       def get_object_by_sha1(sha1)
-        key = 'rubyobject:' + sha1
-        if @cache && (cacheobj = @cache.get(key))
-          return cacheobj 
-        end
-        
         r = get_raw_object_by_sha1(sha1)
         return nil if !r
-        cached(key, Object.from_raw(r), (r.type != :blob))
+        Object.from_raw(r)
       end
       
       # writes a raw object into the git repo

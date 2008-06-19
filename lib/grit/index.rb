@@ -32,8 +32,9 @@ module Grit
     #   +message+ is the commit message
     #
     # Returns a String of the SHA1 of the commit
-    def commit(message, parents = nil, actor = nil)
+    def commit(message, parents = nil, actor = nil, last_tree = nil)
       tree_sha1 = write_tree(self.tree)
+      return false if tree_sha1 == last_tree # don't write identical commits
       
       contents = []
       contents << ['tree', tree_sha1].join(' ')
@@ -41,11 +42,16 @@ module Grit
         contents << ['parent', p].join(' ') if p        
       end if parents
 
-      config = Config.new(self.repo)
-      name = config['user.name']
-      email = config['user.email']
-      
-      author_string = "#{name} <#{email}> #{Time.now.to_i}"
+      if actor
+        name = actor.name
+        email = actor.email
+      else
+        config = Config.new(self.repo)
+        name = config['user.name']
+        email = config['user.email']
+      end
+    
+      author_string = "#{name} <#{email}> #{Time.now.to_i} -0700" # !! TODO : gotta fix this
       contents << ['author', author_string].join(' ')
       contents << ['committer', author_string].join(' ')
       contents << ''

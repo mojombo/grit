@@ -55,7 +55,7 @@ module Grit
       timeout  = true if timeout.nil?
 
       opt_args = transform_options(options)
-      ext_args = args.map { |a| a == '--' ? a : "'#{a}'" }
+      ext_args = args.map { |a| (a == '--' || a[0,1] == '|') ? a : "'#{a}'" }
       
       call = "#{prefix}#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{postfix}"
       puts call if Grit.debug

@@ -26,24 +26,15 @@ module Grit
     
     # lib/grit/tree.rb:16:      output = repo.git.ls_tree({}, treeish, *paths)
     def ls_tree(options, treeish, paths = [])
-      return ruby_git.ls_tree(rev_parse({}, treeish), paths)
-    end
-
-    def rev_list(options, ref)
-      return ruby_git.rev_list(rev_parse({}, ref), options)      
-    end
-
-    def log(options, ref)
-      options[:max_count] = 30 if !options[:max_count]
-      return ruby_git.rev_list(rev_parse({}, ref), options)      
-    end
-    
+      sha = rev_parse({}, treeish)
+      return ruby_git.ls_tree(sha, paths)
+      end
         
     def rev_parse(options, string)      
       if /\w{40}/.match(string)  # passing in a sha - just no-op it
         return string.chomp
       end
-            
+
       head = File.join(@git_dir, 'refs', 'heads', string)
       return File.read(head).chomp if File.file?(head)
 

@@ -36,6 +36,13 @@ module Grit
       self.git = Git.new(self.path)
     end
     
+    def self.init(path)
+      # !! TODO !!
+      # create directory
+      # generate initial git directory
+      # create new Grit::Repo on that dir, return it
+    end
+    
     # The project's description. Taken verbatim from GIT_REPO/description
     #
     # Returns String
@@ -114,6 +121,13 @@ module Grit
       [ Head.find_all(self), Tag.find_all(self), Remote.find_all(self) ].flatten
     end
 
+    def commit_stats(start = 'master', max_count = 10, skip = 0)
+      options = {:max_count => max_count,
+                 :skip => skip}
+      
+      CommitStats.find_all(self, start, options)
+    end
+    
     # An array of Commit objects representing the history of a given ref/commit
     #   +start+ is the branch/commit name (default 'master')
     #   +max_count+ is the maximum number of commits to return (default 10)
@@ -282,6 +296,15 @@ module Grit
       options[:prefix] = prefix if prefix
       self.git.archive(options, treeish, "| gzip")
     end
+
+    # run archive directly to a file
+    def archive_to_file(treeish = 'master', prefix = nil, filename = 'archive.tar.gz')
+      Grit.debug = true
+      options = {}
+      options[:prefix] = prefix if prefix
+      self.git.archive(options, treeish, "| gzip > #{filename}")
+    end
+
     
     # Enable git-daemon serving of this repository by writing the
     # git-daemon-export-ok file to its git directory
