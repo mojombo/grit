@@ -1,0 +1,30 @@
+commit a49b96b339c525d7fd455e0ad4f6fe7b550c9543
+Author: Scott Chacon <schacon@gmail.com>
+Date:   Thu May 29 15:56:41 2008 -0700
+
+    added examples
+
+13      0       examples/ex_add_commit.rb
+1       1       examples/ex_index.rb
+
+commit 8f19810374686ad23dd63342b08d4ad1e65204c4
+Author: Scott Chacon <schacon@gmail.com>
+Date:   Thu May 29 15:16:16 2008 -0700
+
+    rewrote the index implementation to write in pure ruby, which both speeds things up and deals with content mu
+
+14      0       examples/ex_index.rb
+1       1       lib/grit/git-ruby.rb
+1       5       lib/grit/git-ruby/repository.rb
+31      12      lib/grit/index.rb
+2       2       lib/grit/ref.rb
+
+commit 28f28c504f3ebb647dadd5d504aaf8133aecadd9
+Author: Scott Chacon <schacon@gmail.com>
+Date:   Thu May 29 11:33:09 2008 -0700
+
+    added some simple write ops : add, remove, commit
+
+101     0       API.txt
+1       0       PURE_TODO
+129     0       benchmarks.rb

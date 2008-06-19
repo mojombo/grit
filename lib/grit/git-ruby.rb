@@ -28,7 +28,7 @@ module Grit
     def ls_tree(options, treeish, paths = [])
       sha = rev_parse({}, treeish)
       return ruby_git.ls_tree(sha, paths)
-      end
+    end
         
     def rev_parse(options, string)      
       if /\w{40}/.match(string)  # passing in a sha - just no-op it

@@ -149,7 +149,7 @@ module Grit
       # returns the raw (cat-file) output for a tree
       # if given a commit sha, it will print the tree of that commit
       # if given a path limiter array, it will limit the output to those
-      def ls_tree(sha, paths = [])
+      def ls_tree(sha, paths = [], append = nil)
         o = get_raw_object_by_sha1(sha)
         if o.type == :commit
           tree = cat_file(get_object_by_sha1(sha).tree)
@@ -157,7 +157,24 @@ module Grit
           tree = cat_file(sha)
         end
         
+        if append
+          new_tree = ''
+          tree.split("\n").each_with_index do |line, i|
+            entry = line.split("\t")
+            new_tree << entry[0] + "\t" + File.join(append, entry[1]) + "\n"
+          end
+          tree = new_tree.chomp
+        end
+        
         if paths.size > 0
+          # need to walk the tree if one of the paths has a '/'
+          tree.split("\n").each do |line|
+            (info, file) = line.split("\t")
+            entry = info.split(' ')
+            if entry[1] == 'tree'
+              tree += "\n" + ls_tree(entry[2], [], file)
+            end
+          end
           tree = tree.split("\n").select { |line| paths.include?(line.split("\t")[1]) }.join("\n")
         end
         tree 

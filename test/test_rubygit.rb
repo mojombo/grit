@@ -45,28 +45,11 @@ class TestRubyGit < Test::Unit::TestCase
     assert_equal out, fixture('ls_tree_paths_ruby').chomp
   end
   
-
-  def test_log
+  def test_ls_tree_paths_multi
+    paths = ['History.txt', 'lib/grit.rb']
+    out = @git.ls_tree({}, @tree_sha, paths)
+    assert_equal out, fixture('ls_tree_paths_ruby_deep').chomp
   end
-  
-  def test_rev_list
-  end
-
-  def test_rev_list_max_count
-  end
-
-  def test_rev_list_since
-  end
-
-  def test_rev_list_until
-  end
-
-  def test_rev_list_range
-  end
-
-  def test_rev_list_skip
-  end
-  
   
   def test_file_type
     out = @git.file_type(@tree_sha).to_s
