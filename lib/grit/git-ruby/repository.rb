@@ -238,6 +238,7 @@ module Grit
 
       def rev_list(sha, options)
         log = log(sha, options)
+        log = log.sort { |a, b| a[2] <=> b[2] }.reverse
         if options[:pretty] == 'raw'
           log.map {|k, v| v }.join('')
         else
@@ -275,7 +276,7 @@ module Grit
             
             if !opts[:path_limiter]
               output = c.raw_log(sha)
-              array << [sha, output]
+              array << [sha, output, c.committer.date]
             end
             
             if (opts[:max_count] && (array.size + total_size) >= opts[:max_count])
@@ -293,10 +294,12 @@ module Grit
           
             if opts[:path_limiter] && add_sha
               output = c.raw_log(sha)
-              array << [sha, output]
+              array << [sha, output, c.committer.date]
             end          
             
-            array += subarray
+            if add_sha
+              array += subarray
+            end
           end
                                 
         end

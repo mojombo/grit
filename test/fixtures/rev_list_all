@@ -1,0 +1,892 @@
+commit ca8a30f5a7f0f163bbe3b6f0abf18a6c83b0687a
+tree 81a18c36ebe04e406ab84ccc911d79e65e14d1c0
+parent 3fa4e130fa18c92e3030d4accb5d3e0cadd40157
+author Scott Chacon <schacon@gmail.com> 1208561228 -0700
+committer Scott Chacon <schacon@gmail.com> 1208561228 -0700
+
+    added a pure-ruby git library and converted the cat_file commands to use it
+
+commit 3fa4e130fa18c92e3030d4accb5d3e0cadd40157
+tree b36d57789486dabe2309bd7819f7793ef2e7487c
+parent 2d3acf90f35989df8f262dc50beadc4ee3ae1560
+author Scott Chacon <schacon@gmail.com> 1208561167 -0700
+committer Scott Chacon <schacon@gmail.com> 1208561167 -0700
+
+    added a git directory to the testing dir for current and future testing
+    
+    sorry the directory is so large, but I wanted to use a real one and this
+    was easier than anything else.  It's not huge, but it is bigger than it
+    really needs to be.
+
+commit 2d3acf90f35989df8f262dc50beadc4ee3ae1560
+tree cd7422af5a2e0fff3e94d6fb1a8fff03b2841881
+parent 5e3ee1198672257164ce3fe31dea3e40848e68d5
+author Tom Preston-Werner <tom@mojombo.com> 1208054341 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1208054341 -0700
+
+    ignore errors from SIGCHLD on trap
+
+commit 5e3ee1198672257164ce3fe31dea3e40848e68d5
+tree 77fc9894c0904279fde93adc9c0ba231515ce68a
+parent 30e367cef2203eba2b341dc9050993b06fd1e108
+parent 420eac97a826bfac8724b6b0eef35c20922124b7
+author Tom Preston-Werner <tom@mojombo.com> 1208054148 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1208054148 -0700
+
+    Merge branch 'master' of git://github.com/dustin/grit
+
+commit 420eac97a826bfac8724b6b0eef35c20922124b7
+tree e20cd1de2a022aef9ddae66e3f8dd8184f156c0f
+parent d6016bc9fa3950ad18e3028f9d2d26f831061a62
+author Dustin Sallings <dustin@spy.net> 1207072323 -0700
+committer Dustin Sallings <dustin@spy.net> 1207072323 -0700
+
+    Added a method for getting the current branch.
+
+commit 30e367cef2203eba2b341dc9050993b06fd1e108
+tree 064fac18d116198ab6fd036f8b17aceac6d424f6
+parent 5a0943123f6872e75a9b1dd0b6519dd42a186fda
+author Chris Wanstrath <chris@ozmm.org> 1206935408 -0700
+committer Chris Wanstrath <chris@ozmm.org> 1206935408 -0700
+
+    timeout code and tests
+
+commit 5a0943123f6872e75a9b1dd0b6519dd42a186fda
+tree 5518ba132764c66c355352e7bd770b49813bfbe6
+parent e1193f8092ae9ece0ba336b7aa4c29dcde78777f
+author Chris Wanstrath <chris@ozmm.org> 1206919880 -0700
+committer Chris Wanstrath <chris@ozmm.org> 1206919880 -0700
+
+    add timeout protection to grit
+
+commit e1193f8092ae9ece0ba336b7aa4c29dcde78777f
+tree 2974dc0e066657e130a47805119da0d8aa196fc6
+parent d6016bc9fa3950ad18e3028f9d2d26f831061a62
+author Chris Wanstrath <chris@ozmm.org> 1206847883 -0700
+committer Chris Wanstrath <chris@ozmm.org> 1206847883 -0700
+
+    support for heads with slashes in them
+
+commit d6016bc9fa3950ad18e3028f9d2d26f831061a62
+tree 1debe02029de82bd5be9c8912a0b3e388ef43cf8
+parent 11d191ef3f04012a78222cb118619c16d5581886
+author Tom Preston-Werner <tom@mojombo.com> 1206505949 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1206505949 -0700
+
+    require time for xmlschema
+
+commit 11d191ef3f04012a78222cb118619c16d5581886
+tree abbd88b5eb9c6a2113cc61f16255ebb0e5541331
+parent f11ceb37cbd72b8c7627aa9e2a7b8dbcbf10d107
+parent ad44b88d69c4b7b61a9ec12445f00f082ca19f41
+author Tom Preston-Werner <tom@mojombo.com> 1206505512 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1206505512 -0700
+
+    Merge branch 'defunkt' into local
+
+commit f11ceb37cbd72b8c7627aa9e2a7b8dbcbf10d107
+tree 3c539330583d953e3178f1f2172881d2c5fe0dcb
+parent 28e7a1d3dd172a8e757ff777ab205a538b80385e
+parent ccc8ba203bfb6b6051bfa083f73969f680ced61a
+author Tom Preston-Werner <tom@mojombo.com> 1206500121 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1206500121 -0700
+
+    Merge branch 'master' of git://github.com/halorgium/grit into halorgium
+
+commit 28e7a1d3dd172a8e757ff777ab205a538b80385e
+tree 767ea252bae0f66ac8f07efc2b9e01e0eef37c64
+parent be3178ec3bf47bbdc69bd6023443fb6c4ac5385c
+parent 4aa3410e2d458b00b0f41920ffc2aa21f019d13d
+author Tom Preston-Werner <tom@mojombo.com> 1206499866 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1206499866 -0700
+
+    Merge branch 'master' of git://github.com/evilchelu/grit into evilchelu
+
+commit be3178ec3bf47bbdc69bd6023443fb6c4ac5385c
+tree bf41c8e3c2797b469ca1ad7a27fe2e9923ec2e3f
+parent 22825175e37f22c9418d756ca69b574d75602994
+parent 472e4f3d6f54514c560487ce6bde30405a84ffa7
+author Tom Preston-Werner <tom@mojombo.com> 1206499650 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1206499650 -0700
+
+    Merge branch 'master' of git://github.com/kamal/grit into kamal
+
+commit 22825175e37f22c9418d756ca69b574d75602994
+tree 21219d280aaa0c38935f2542c3f7addd143098e3
+parent 179f919876a255a8e09d32a95c8209d66c7ed660
+author Tom Preston-Werner <tom@mojombo.com> 1206499348 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1206499348 -0700
+
+    do not screw up diffs that have files with spaces in them
+
+commit ad44b88d69c4b7b61a9ec12445f00f082ca19f41
+tree 3694a0e49cf01cc4b5b87536b969dceb796c78ae
+parent 78617eaee2ca3b88cd9bb5361d29a99b5555a3d2
+author Chris Wanstrath <chris@ozmm.org> 1205197842 -0700
+committer Chris Wanstrath <chris@ozmm.org> 1205197842 -0700
+
+    Touch up Commit#to_hash
+    
+    * Use string instead of symbol keys
+    * Return parents as 'id' => ID rather than array of id strings
+
+commit 78617eaee2ca3b88cd9bb5361d29a99b5555a3d2
+tree f109df8b76219dc40ac02908293e237e76054c40
+parent a55a698345a3f27a981ada27c7486d89e374bc21
+parent 179f919876a255a8e09d32a95c8209d66c7ed660
+author Chris Wanstrath <chris@ozmm.org> 1205191591 -0700
+committer Chris Wanstrath <chris@ozmm.org> 1205191591 -0700
+
+    Merge branch 'master' of git://github.com/mojombo/grit into mojombo/master
+    
+    Conflicts:
+    
+    	lib/grit/commit.rb
+
+commit a55a698345a3f27a981ada27c7486d89e374bc21
+tree f0aa2f741d6f0677330bd8eb68e4ed7b2f840648
+parent 4f0ea0c7c8985c48c94269886ba93c0ea73636cc
+author Chris Wanstrath <chris@ozmm.org> 1205182982 -0700
+committer Chris Wanstrath <chris@ozmm.org> 1205182982 -0700
+
+    add in Commit#to_hash method
+
+commit ccc8ba203bfb6b6051bfa083f73969f680ced61a
+tree a12c4a3bee1bcb9e820f798fc9fcf4776eadf5a3
+parent 3dc4f654a697467692478f502817dfc3e0248378
+author Tim Carey-Smith <tim@spork.in> 1205034630 +1300
+committer Tim Carey-Smith <tim@spork.in> 1205034630 +1300
+
+    Add write support to the git configuration
+
+commit 3dc4f654a697467692478f502817dfc3e0248378
+tree 701dd1ad5da076d8c1905bf7df35216313ca6bed
+parent f1964ad1919180dd1d9eae9d21a1a1f68ac60e77
+author Tim Carey-Smith <tim@spork.in> 1204849678 +1300
+committer Tim Carey-Smith <tim@spork.in> 1204849678 +1300
+
+    Don't add .git to "bare" repositories as it is unnecessary.
+    
+    Repo#path is the full path to the .git directory regardless of whether it is bare or not
+
+commit f1964ad1919180dd1d9eae9d21a1a1f68ac60e77
+tree 8612a93b202cf0c9078d4e9163a6fdcf18eab3c7
+parent 179f919876a255a8e09d32a95c8209d66c7ed660
+author Tim Carey-Smith <tim@spork.in> 1204849330 +1300
+committer Tim Carey-Smith <tim@spork.in> 1204849330 +1300
+
+    Add support for accessing repository configuration values
+
+commit 4aa3410e2d458b00b0f41920ffc2aa21f019d13d
+tree 5fe8964e26fc7136289ab531f04a2ecb8b829559
+parent ca78e948410d39b690a76a7c613b83b70de64eeb
+author Cristi Balan <evil@che.lu> 1204844586 +0200
+committer Cristi Balan <evil@che.lu> 1204844586 +0200
+
+    don't crash when diffing and last pair only contains file mode changes
+
+commit ca78e948410d39b690a76a7c613b83b70de64eeb
+tree 3659fff21dc0603037e901ad2be8a5dc1314c964
+parent 179f919876a255a8e09d32a95c8209d66c7ed660
+author Cristi Balan <evil@che.lu> 1204843570 +0200
+committer Cristi Balan <evil@che.lu> 1204843570 +0200
+
+    allow letters in git version test
+    
+    git from git has versions like "1.5.4.19.ge375"
+
+commit 179f919876a255a8e09d32a95c8209d66c7ed660
+tree b1281e51087f91e527efbeb2872903585c747fee
+parent 55737f3f9128b02bf3519f5f70b6118234454c65
+author Tom Preston-Werner <tom@mojombo.com> 1204792712 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1204792712 -0800
+
+    enable --all for Commit.find_all
+
+commit 472e4f3d6f54514c560487ce6bde30405a84ffa7
+tree 788638e5d2d62aa7e136f5051cc2aac7da26ba0d
+parent 55737f3f9128b02bf3519f5f70b6118234454c65
+author Kamal Fariz Mahyuddin <kamal.fariz@gmail.com> 1204644737 +0800
+committer Kamal Fariz Mahyuddin <kamal.fariz@gmail.com> 1204644737 +0800
+
+    Tiny fix to add mime-types as a dependency in Hoe's extra_deps
+
+commit 55737f3f9128b02bf3519f5f70b6118234454c65
+tree 55498bb71d91548a3b853e600f322ef51782e28d
+parent f6b346156dd19a9fe46004a3efce4fc8d66addf9
+author Tom Preston-Werner <tom@mojombo.com> 1204347482 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1204347482 -0800
+
+    do not strip leading spaces from commit messages
+
+commit f6b346156dd19a9fe46004a3efce4fc8d66addf9
+tree ec4aab5726569a38c74b7f17df19f94840f4c6b3
+parent ff3f41fe66bd482281347314ed1cd1cb4b853c38
+author Tom Preston-Werner <tom@mojombo.com> 1203907527 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1203907527 -0800
+
+    repsect blank lines in commit messages
+
+commit ff3f41fe66bd482281347314ed1cd1cb4b853c38
+tree b675fe87a6276810e8c8a77d688379c9f180c3b8
+parent 242253bdce7ae94d34b2af702e3618eea8ed9754
+author Tom Preston-Werner <tom@mojombo.com> 1203893541 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1203893541 -0800
+
+    get full message from commits as well
+
+commit 4f0ea0c7c8985c48c94269886ba93c0ea73636cc
+tree e9f01d3b5f99a186f9e648e4ee6e20a7f2cbed62
+parent 991ac754cafa7c87ccf25d77225154d16d4f4be6
+parent 4c596908ce1136e8c32174ba13892c6fe68a010d
+author Chris Wanstrath <chris@ozmm.org> 1203757972 -0800
+committer Chris Wanstrath <chris@ozmm.org> 1203757972 -0800
+
+    Merge branch 'lazy_delegator'
+    
+    Conflicts:
+    
+    	lib/grit.rb
+    	lib/grit/tree.rb
+
+commit 991ac754cafa7c87ccf25d77225154d16d4f4be6
+tree 0eee584493ed8eafb398a317ce8b60e9fa2c2fa8
+parent 4ceb8e966103ba1c0cf442f90b476367b0302347
+parent 242253bdce7ae94d34b2af702e3618eea8ed9754
+author Chris Wanstrath <chris@ozmm.org> 1203668665 -0800
+committer Chris Wanstrath <chris@ozmm.org> 1203668665 -0800
+
+    Merge branch 'mojombo'
+
+commit 242253bdce7ae94d34b2af702e3618eea8ed9754
+tree 0eee584493ed8eafb398a317ce8b60e9fa2c2fa8
+parent 3c230a377740b6beb679a6b57a1e2b7e9940d321
+author Tom Preston-Werner <tom@mojombo.com> 1203581897 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1203581897 -0800
+
+    fix diffs for mode only changes
+
+commit 3c230a377740b6beb679a6b57a1e2b7e9940d321
+tree 0c5393477e9d87b948100516fd449430440ddf36
+parent e8ea908dd932eb21856495db140e27efb014bf3e
+parent 182a706d083de61af95c3dba0d59dd3f91fe31b2
+author Tom Preston-Werner <tom@mojombo.com> 1203498128 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1203498128 -0800
+
+    merge from technoweenie
+
+commit e8ea908dd932eb21856495db140e27efb014bf3e
+tree fc7f7a4a922021cdb0930157e7830befc9eeaeed
+parent e8e7b385fd00a7e9609cf2f270d021f19f08f17f
+author Wayne Larsen <wayne@larsen.st> 1203285956 -0500
+committer Tom Preston-Werner <tom@mojombo.com> 1203325906 -0800
+
+    Update tests to not use fixed absolute paths
+    
+    Signed-off-by: Tom Preston-Werner <tom@mojombo.com>
+
+commit 182a706d083de61af95c3dba0d59dd3f91fe31b2
+tree 2bdb7f089a890008730e239f2b894c71ac0d0693
+parent 125c3f885f9041a48b2828cd1c707dbaff78a825
+author rick <technoweenie@gmail.com> 1203324957 -0800
+committer rick <technoweenie@gmail.com> 1203324957 -0800
+
+    compact Commit contents from Trees so that #/(path_to_commit) doesn't raise a NoMethodError on NilClass#name.
+
+commit 125c3f885f9041a48b2828cd1c707dbaff78a825
+tree 58ecbd29348e6194379989ff43fecc220bb32d41
+parent 3ea514188523ae9e8ecd603f760442f147042d6c
+author Tom Preston-Werner <tom@mojombo.com> 1203049106 -0800
+committer rick <technoweenie@gmail.com> 1203319151 -0800
+
+    better alternates behavior
+
+commit 3ea514188523ae9e8ecd603f760442f147042d6c
+tree d03ebb928ede2410e267dcd6e4464a1843d458ff
+parent f32458940ef496d61946d4e3d63bc5edd1ae0af7
+author Tom Preston-Werner <tom@mojombo.com> 1203048371 -0800
+committer rick <technoweenie@gmail.com> 1203319141 -0800
+
+    add alternates getter and setter
+
+commit e8e7b385fd00a7e9609cf2f270d021f19f08f17f
+tree fbe0635ee7d51c3e4fb7e515fd161d79fde9ec96
+parent c6d10852bf3cca44f17c0e3f3abb721c6fe7ec27
+author Tom Preston-Werner <tom@mojombo.com> 1203049106 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1203049106 -0800
+
+    better alternates behavior
+
+commit c6d10852bf3cca44f17c0e3f3abb721c6fe7ec27
+tree c06c147aa36feb8ee8c3ae3cc578aaf2d0f4603a
+parent 7a8d32cb18a0ba2ff8bf86cadacc3fd2816da219
+author Tom Preston-Werner <tom@mojombo.com> 1203048371 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1203048371 -0800
+
+    add alternates getter and setter
+
+commit f32458940ef496d61946d4e3d63bc5edd1ae0af7
+tree 11805290045f0f3918e86cb469446da1dff30125
+parent c9cf68fc61bd2634e90a4f6a12d88744e6297c4e
+author rick <technoweenie@gmail.com> 1202712848 -0800
+committer rick <technoweenie@gmail.com> 1202712848 -0800
+
+    add to Commit::Diff tests so we know the right filename is parsed
+
+commit c9cf68fc61bd2634e90a4f6a12d88744e6297c4e
+tree 4929b022c7094614b84a2533022c6dfa07a69ef6
+parent 460b3216db32a55d07b1de0570bbb8427611b599
+author rick <technoweenie@gmail.com> 1202712678 -0800
+committer rick <technoweenie@gmail.com> 1202712678 -0800
+
+    allow Grit::Commit.diff to specify an optional array of paths
+
+commit 7a8d32cb18a0ba2ff8bf86cadacc3fd2816da219
+tree c419308ba70d36105336ddde1070209e516df853
+parent 80238dccfb24b5dee8f6d6c99fc8d272486e0946
+author Tom Preston-Werner <tom@mojombo.com> 1202698149 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1202698149 -0800
+
+    add tag support
+
+commit 80238dccfb24b5dee8f6d6c99fc8d272486e0946
+tree bad72bdba95db74888a8775cff30bdc81d82bab8
+parent 460b3216db32a55d07b1de0570bbb8427611b599
+author Tom Preston-Werner <tom@mojombo.com> 1200212521 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1202696651 -0800
+
+    wip
+
+commit 460b3216db32a55d07b1de0570bbb8427611b599
+tree 8ebeecb1d594925499506a9711fd8b7620629970
+parent 59ddc32609925a9fb7e3b2e2cee04b7afd204d00
+author Tom Preston-Werner <tom@mojombo.com> 1202690531 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1202690531 -0800
+
+    fix bug in diff caused by new mode
+
+commit 59ddc32609925a9fb7e3b2e2cee04b7afd204d00
+tree 1b4b064125f711c5aa6d7b9f451adf154c49e183
+parent 13d27d5cea4d0d787163dd97f8ee63d200d2a663
+author Tom Preston-Werner <tom@mojombo.com> 1202608769 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1202608769 -0800
+
+    deal with empty initial commit
+
+commit 13d27d5cea4d0d787163dd97f8ee63d200d2a663
+tree 7d0aa3121eb66d2bfbaef5f2ad8539f3b74af956
+parent 7235ace853d766d2c4a39d5e505c05497b1b7fb7
+parent c45fa0feea864d535f77d39caa735820aa720caa
+author Tom Preston-Werner <tom@mojombo.com> 1202605425 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1202605425 -0800
+
+    Merge branch 'master' of git://github.com/defunkt/grit into d3
+
+commit 7235ace853d766d2c4a39d5e505c05497b1b7fb7
+tree 978b80d57aac2acc932f8a93a6654b697cd545f4
+parent 3ed8c6eb935326c8de850dae4be5e2493a2a8c2e
+author Tom Preston-Werner <tom@mojombo.com> 1202602376 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1202602376 -0800
+
+    add Repo#commit_count
+
+commit 3ed8c6eb935326c8de850dae4be5e2493a2a8c2e
+tree 4344af33cce729b84f0c380496cfeb1dee3c2a3a
+parent 301edd42ff7a55dffb86446349b33d6d4198d192
+author Tom Preston-Werner <tom@mojombo.com> 1201772154 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1201772154 -0800
+
+    fix quoting problem for Repo#log
+
+commit 4ceb8e966103ba1c0cf442f90b476367b0302347
+tree 75a6b13626a6d971529252309a693960a09a4137
+parent c45fa0feea864d535f77d39caa735820aa720caa
+parent 301edd42ff7a55dffb86446349b33d6d4198d192
+author Chris Wanstrath <chris@ozmm.org> 1201770150 -0800
+committer Chris Wanstrath <chris@ozmm.org> 1201770150 -0800
+
+    Merge branch 'mojombo'
+
+commit 301edd42ff7a55dffb86446349b33d6d4198d192
+tree d606412db39af09b92badecb2451c728a629db32
+parent 6f6cb7cd4ab707c2273dd97113d9891da7a11885
+author Tom Preston-Werner <tom@mojombo.com> 1201758430 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1201758430 -0800
+
+    quote all git parameters
+
+commit 6f6cb7cd4ab707c2273dd97113d9891da7a11885
+tree 99aa245831a84469897317ffd2f29baaedc41396
+parent 02879cf62c803fd706dc45ab85dbc2e7efe5acc1
+author Tom Preston-Werner <tom@mojombo.com> 1201313728 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1201313728 -0800
+
+    add commits_since
+
+commit c45fa0feea864d535f77d39caa735820aa720caa
+tree 8196528d03eb59920ba6e4f69860fc06c2d1e6d5
+parent 3c413f1d3879a80ee3cbd8c7cd8033f7f04afa68
+author Chris Wanstrath <chris@ozmm.org> 1200780948 -0800
+committer Chris Wanstrath <chris@ozmm.org> 1200780948 -0800
+
+    display the first commit of a repo without dying
+
+commit 3c413f1d3879a80ee3cbd8c7cd8033f7f04afa68
+tree 0ffed5403914d1031d67cc0a0c38f07461c4c8d5
+parent db64b1265cb572d3b97cde164312194b83449ef2
+parent 02879cf62c803fd706dc45ab85dbc2e7efe5acc1
+author Chris Wanstrath <chris@ozmm.org> 1200780765 -0800
+committer Chris Wanstrath <chris@ozmm.org> 1200780765 -0800
+
+    Merge branch 'mojombo'
+
+commit 02879cf62c803fd706dc45ab85dbc2e7efe5acc1
+tree 0ffed5403914d1031d67cc0a0c38f07461c4c8d5
+parent 8f24479836ada10f08846678a59d79609ce3d14f
+author Tom Preston-Werner <tom@mojombo.com> 1200778557 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1200778557 -0800
+
+    add enable/disable daemon serve
+
+commit 8f24479836ada10f08846678a59d79609ce3d14f
+tree 4bdec4e8d370119fd0a54903b7fec5b61c35a2ec
+parent 275a2b7c7aeadbd03fae865a5f67900a7ee1bfc6
+author Tom Preston-Werner <tom@mojombo.com> 1200213518 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1200213518 -0800
+
+    add options to Repo.init_bare
+
+commit 275a2b7c7aeadbd03fae865a5f67900a7ee1bfc6
+tree 6f837e3f4598cfdfa28a65f809f10478b8241a74
+parent 18e19dbbe8b7e152f762af65799bb19429e0d349
+author Tom Preston-Werner <tom@mojombo.com> 1200210616 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1200210686 -0800
+
+    update readme with github location
+
+commit 18e19dbbe8b7e152f762af65799bb19429e0d349
+tree 6c7fc8d41d1585a999ddcd77fc340eb7a7d54b7d
+parent fb49d370b21ed9214677d812dcde243cfeaf2303
+author Tom Preston-Werner <tom@mojombo.com> 1200021682 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1200021682 -0800
+
+    add options to fork_bare
+
+commit fb49d370b21ed9214677d812dcde243cfeaf2303
+tree 112b15ec2bdf73bfb3d91005386d73b930666950
+parent e631529f2525180e49b7b90fd0198d90d8106de0
+parent 62e423d6d27b3c5016072c94e72bee1be37aea6d
+author Tom Preston-Werner <tom@mojombo.com> 1200018956 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1200018956 -0800
+
+    Merge branch 'master' of git://github.com/defunkt/grit into defunkt2
+
+commit e631529f2525180e49b7b90fd0198d90d8106de0
+tree 46bba7656462c3618686aad62d7d09efa1284052
+parent fe3bf3660ac64d86f2855ac3185eb5953ea2c3bd
+author Tom Preston-Werner <tom@mojombo.com> 1200018565 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1200018565 -0800
+
+    add fork_bare
+
+commit fe3bf3660ac64d86f2855ac3185eb5953ea2c3bd
+tree 526e68e86b2ffe53166d4087bc3754088e24fe3d
+parent 6c38e553796a965fe62397350c537d0a795c9fd6
+author Tom Preston-Werner <tom@mojombo.com> 1199870442 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1199870442 -0800
+
+    add Repo#commits_between
+
+commit 6c38e553796a965fe62397350c537d0a795c9fd6
+tree fe1fbec65bf99dc442780e4431b3d7defc6645fb
+parent 7bcc0ee821cdd133d8a53e8e7173a334fef448aa
+author Tom Preston-Werner <tom@mojombo.com> 1199768869 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1199768869 -0800
+
+    rake site
+
+commit 7bcc0ee821cdd133d8a53e8e7173a334fef448aa
+tree 7d09edb3825b5edff295fad85ac3ace7bfe31fdd
+parent 3e0955045cb189a7112015c26132152a94f637bf
+author Tom Preston-Werner <tom@mojombo.com> 1199767315 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1199767315 -0800
+
+    prepare for public release
+
+commit db64b1265cb572d3b97cde164312194b83449ef2
+tree 0955b8d93ab4758376d500ad692ca19549ae5174
+parent 62e423d6d27b3c5016072c94e72bee1be37aea6d
+parent 3e0955045cb189a7112015c26132152a94f637bf
+author Chris Wanstrath <chris@ozmm.org> 1199690014 -0800
+committer Chris Wanstrath <chris@ozmm.org> 1199690014 -0800
+
+    Merge branch 'mojombo'
+
+commit 3e0955045cb189a7112015c26132152a94f637bf
+tree 54f2aa4afa386748e129d209103b1235e8de4aaa
+parent b86b48e3520a106739035b149dbed97445152868
+author Tom Preston-Werner <tom@mojombo.com> 1199674791 -0800
+committer Tom Preston-Werner <tom@mojombo.com> 1199674791 -0800
+
+    add Commit#mime_type
+
+commit 62e423d6d27b3c5016072c94e72bee1be37aea6d
+tree e9ec095207155c95573defc2626b9276b16b6015
+parent 1d22e6fde59c9ded9b8093cf26213a5bd9d4c5ec
+parent b86b48e3520a106739035b149dbed97445152868
+author Chris Wanstrath <chris@ozmm.org> 1199671761 -0800
+committer Chris Wanstrath <chris@ozmm.org> 1199671761 -0800
+
+    Merge branch 'mojombo'
+
+commit b86b48e3520a106739035b149dbed97445152868
+tree f42108d0fd3b3930131c29b7f27a72878448430b
+parent 80f136f500dfdb8c3e8abf4ae716f875f0a1b57f
+author Tom Preston-Werner <tom@mojombo.com> 1198889662 -0600
+committer Tom Preston-Werner <tom@mojombo.com> 1198889662 -0600
+
+    abbreviated sha1 and archiving
+
+commit 80f136f500dfdb8c3e8abf4ae716f875f0a1b57f
+tree 3fffd0fce0655433c945e6bdc5e9f338b087b211
+parent 44f82e5ac93ba322161019dce44b78c5bd1fdce2
+author tom <tom@taco.(none)> 1195608462 -0800
+committer tom <tom@taco.(none)> 1195608462 -0800
+
+    fix tests on other machines
+
+commit 4c596908ce1136e8c32174ba13892c6fe68a010d
+tree b2c79656afd10d9e8fe1191891b57710a306fbf3
+parent 1d22e6fde59c9ded9b8093cf26213a5bd9d4c5ec
+author Chris Wanstrath <chris@ozmm.org> 1193660410 -0700
+committer Chris Wanstrath <chris@ozmm.org> 1193660410 -0700
+
+    rework lazy some to be more of a delegator
+
+commit 1d22e6fde59c9ded9b8093cf26213a5bd9d4c5ec
+tree 9ad5126eba69a9ab519e7bafe9328caff5c614cd
+parent 44f82e5ac93ba322161019dce44b78c5bd1fdce2
+author Chris Wanstrath <chris@ozmm.org> 1193650959 -0700
+committer Chris Wanstrath <chris@ozmm.org> 1193650959 -0700
+
+    add #diffs to commit object
+
+commit 44f82e5ac93ba322161019dce44b78c5bd1fdce2
+tree c8f24bdaf32a822a8ff96d4a87924125608b32e2
+parent 46291865ba0f6e0c9818b11be799fe2db6964d56
+author Tom Preston-Werner <tom@mojombo.com> 1193642849 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1193642849 -0700
+
+    fix commit-diff deleted file bug
+
+commit 46291865ba0f6e0c9818b11be799fe2db6964d56
+tree e5d730ad9f05808195b0e2d8f9b14614d5bc881d
+parent 02617bd0f7cae462e71be075c99385f709279533
+author Tom Preston-Werner <tom@mojombo.com> 1193642198 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1193642330 -0700
+
+    implement commit diff
+
+commit 02617bd0f7cae462e71be075c99385f709279533
+tree faa81ee0f836ea8d954fba1fa088a40cfbe9cdf4
+parent 5f141d9c0181b8732c0ec2fab4967f0ffa24fa3f
+author Chris Wanstrath <chris@ozmm.org> 1193635446 -0700
+committer Chris Wanstrath <chris@ozmm.org> 1193635446 -0700
+
+    add Actor#to_s as alias to Actor#name
+
+commit 5f141d9c0181b8732c0ec2fab4967f0ffa24fa3f
+tree 318f0f8dfad4fcd19adf10742898642ddccf3156
+parent 337539e896b8c85cc043a923c8fbb927f58e6450
+author Chris Wanstrath <chris@ozmm.org> 1193616774 -0700
+committer Chris Wanstrath <chris@ozmm.org> 1193616774 -0700
+
+    git-log support
+
+commit 337539e896b8c85cc043a923c8fbb927f58e6450
+tree 16eb2a18985f5f5bb8945d051c4f1abb9b3a96e1
+parent 8c7f4e1d8cb66590825701b758160e3721003dde
+author Tom Preston-Werner <tom@mojombo.com> 1193329381 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1193329381 -0700
+
+    prepare for packaging as gem
+
+commit 8c7f4e1d8cb66590825701b758160e3721003dde
+tree acc8645713a107f3b755d6c721aa9e0a3fd658d9
+parent b5d4f15a4dd41646405f11fb107aa8efb16c98a4
+author Tom Preston-Werner <tom@mojombo.com> 1193328783 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1193328783 -0700
+
+    dynamically rewrite ruby style git options
+
+commit b5d4f15a4dd41646405f11fb107aa8efb16c98a4
+tree 98d3a51546524761b31c6411f36d2f883fef6803
+parent f1ec1aea10986159456846b8a05615b87828d6c6
+author Tom Preston-Werner <tom@mojombo.com> 1193293172 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1193293172 -0700
+
+    more readme
+
+commit f1ec1aea10986159456846b8a05615b87828d6c6
+tree f6105060dcd58ee588c4e8ecc22ac869b8b6a1b9
+parent ec037431382e83c3e95d4f2b3d145afbac8ea55d
+author Tom Preston-Werner <tom@mojombo.com> 1193289601 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1193289601 -0700
+
+    begin readme
+
+commit ec037431382e83c3e95d4f2b3d145afbac8ea55d
+tree de82ff44049069c5e6431d0f7ca1d1947c61b6f8
+parent e80bbd2ce67651aa18e57fb0b43618ad4baf7750
+author Tom Preston-Werner <tom@mojombo.com> 1193288551 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1193288551 -0700
+
+    add Actor inspect
+
+commit e80bbd2ce67651aa18e57fb0b43618ad4baf7750
+tree 3536eb9abac69c3e4db583ad38f3d30f8db4771f
+parent 91169e1f5fa4de2eaea3f176461f5dc784796769
+author Tom Preston-Werner <tom@mojombo.com> 1193286556 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1193286556 -0700
+
+    add Actor class to encapsulate name and email
+
+commit 91169e1f5fa4de2eaea3f176461f5dc784796769
+tree 802ed53edbf6f02ad664af3f7e5900f514024b2f
+parent 038af8c329ef7c1bae4568b98bd5c58510465493
+author Tom Preston-Werner <tom@mojombo.com> 1193200199 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1193200199 -0700
+
+    fix some initialization warnings
+
+commit 038af8c329ef7c1bae4568b98bd5c58510465493
+tree 890b57e86a663ad5f5943efe7cbce842724d3821
+parent 40d3057d09a7a4d61059bca9dca5ae698de58cbe
+author Tom Preston-Werner <tom@mojombo.com> 1193198877 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1193198877 -0700
+
+    implement repo level diff
+
+commit 40d3057d09a7a4d61059bca9dca5ae698de58cbe
+tree 35e282bc46bad194cab4d895f96543e514926710
+parent 4ea50f4754937bf19461af58ce3b3d24c77311d9
+author Tom Preston-Werner <tom@mojombo.com> 1192920277 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192920277 -0700
+
+    add Tree./ to ease getting subtrees
+
+commit 4ea50f4754937bf19461af58ce3b3d24c77311d9
+tree 193a54188f5d18fb36a40ca39d4459b9e7f52b91
+parent 1fddfabeaa0b62cb4becdb44980ec6cfa48ebd87
+author Tom Preston-Werner <tom@mojombo.com> 1192917830 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192917830 -0700
+
+    better errors for Repo.new
+
+commit 1fddfabeaa0b62cb4becdb44980ec6cfa48ebd87
+tree cb2a50044adef599a7ae90ec8f389a479cf8b0de
+parent 01a1b4f1cbf0f4d9c13618a3ca9c9f429c8dd0e8
+author Tom Preston-Werner <tom@mojombo.com> 1192871465 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192871465 -0700
+
+    clear info hash in Blob.blame and update the doc
+
+commit 01a1b4f1cbf0f4d9c13618a3ca9c9f429c8dd0e8
+tree 5a367d4bedd38762f4ba47c5e30082a094dd19de
+parent b6e1b765e0c15586a2c5b9832854f95defd71e1f
+author Tom Preston-Werner <tom@mojombo.com> 1192870968 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192870968 -0700
+
+    implement Blob.blame
+
+commit b6e1b765e0c15586a2c5b9832854f95defd71e1f
+tree 04c36f85f3a6c491cb6cdbbc459006f6e92ecbbf
+parent ebdf4716e38c810b06b6e1fbc2ce3a6da2821f7a
+author Tom Preston-Werner <tom@mojombo.com> 1192860483 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192860483 -0700
+
+    implement Repo.init_bare
+
+commit ebdf4716e38c810b06b6e1fbc2ce3a6da2821f7a
+tree d2d6d6c99155b82e2bcfb1b11e97ba8b6c6a614c
+parent 34a87f9a723cc51b6b74e0fe095c9046a826ef3b
+author Tom Preston-Werner <tom@mojombo.com> 1192408450 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192408450 -0700
+
+    add Repo.blob
+
+commit 34a87f9a723cc51b6b74e0fe095c9046a826ef3b
+tree d341f7ff79790dd059eddff582a98cbc553ac83c
+parent fc128af28cb263bf1f524f84609a7a75ffa27a9b
+author Tom Preston-Werner <tom@mojombo.com> 1192323935 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192323935 -0700
+
+    implement Blob.data and Blob.size
+
+commit fc128af28cb263bf1f524f84609a7a75ffa27a9b
+tree e17421e5d7f9c7f791da1b87069f784c2570ebc5
+parent c12f398c2f3c4068ca5e01d736b1c9ae994b2138
+author Tom Preston-Werner <tom@mojombo.com> 1192318328 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192318328 -0700
+
+    commit now returns Tree object for tree attribute
+
+commit c12f398c2f3c4068ca5e01d736b1c9ae994b2138
+tree 23ddf701b1cc7a4eb8861da83bd944fb6011cf6f
+parent 74fd66519e983a0f29e16a342a6059dbffe36020
+author Tom Preston-Werner <tom@mojombo.com> 1192317474 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192317474 -0700
+
+    add inspects to objects
+
+commit 74fd66519e983a0f29e16a342a6059dbffe36020
+tree b400fbfadf631b5ae8547522e30c4fa001acfe7a
+parent 2ac1712b56771dd2ca6420eb5319765c1827e13e
+author Tom Preston-Werner <tom@mojombo.com> 1192317005 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192317005 -0700
+
+    add Blob
+
+commit 2ac1712b56771dd2ca6420eb5319765c1827e13e
+tree 8a6316e1f43bc0327f8208a96ba16ed7ce2bbef6
+parent b17b974691f0a26f26908495d24d9c4c718920f8
+author Tom Preston-Werner <tom@mojombo.com> 1192312613 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192312613 -0700
+
+    add lazy computation of tree contents
+
+commit b17b974691f0a26f26908495d24d9c4c718920f8
+tree 642389ee051c07987b97bb3124e0046d2663153d
+parent 917522c4572a6237897e9a554cde21b8c6292dd3
+author Tom Preston-Werner <tom@mojombo.com> 1192271832 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192271832 -0700
+
+    started implementing Tree
+
+commit 917522c4572a6237897e9a554cde21b8c6292dd3
+tree f2a8e42a8cfbe614c71c789f716719f0f61fcf09
+parent 4aa0e11f540c42a32ba24988966e9b1efbba6de3
+author Tom Preston-Werner <tom@mojombo.com> 1192269257 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192269257 -0700
+
+    more code comments throughout
+
+commit 4aa0e11f540c42a32ba24988966e9b1efbba6de3
+tree c2bd22b8d10bce2fa568f125094943827b6f6a00
+parent 3b1930208a82457747d76729ae088e90edca4673
+author Tom Preston-Werner <tom@mojombo.com> 1192268181 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192268181 -0700
+
+    add comments and make Comment.parents return Commits
+
+commit 3b1930208a82457747d76729ae088e90edca4673
+tree 303706575c597fce0a9975ad22aa32092214e3fb
+parent 6ffe534098dacefb3633efafff01eb0296f26725
+author Tom Preston-Werner <tom@mojombo.com> 1192267241 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192267241 -0700
+
+    big refactor to do lazy loading
+
+commit 6ffe534098dacefb3633efafff01eb0296f26725
+tree 03bb17629f49a3f745f7c81ef31e6c3f0b3b3239
+parent 8bfefdbc0d901a6e8ccd27b9f20879d109f49c03
+author Tom Preston-Werner <tom@mojombo.com> 1192259702 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192259702 -0700
+
+    branches is alias of heads
+
+commit 8bfefdbc0d901a6e8ccd27b9f20879d109f49c03
+tree e41a446722f0e103818a660a51c6d1805c556920
+parent de8ecf488033fb75504bf5179608f90d750f8759
+author Tom Preston-Werner <tom@mojombo.com> 1192118973 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192118973 -0700
+
+    implement Repo#commit and begin on Repo#tree
+
+commit de8ecf488033fb75504bf5179608f90d750f8759
+tree d224e6997c212a6306656ccbb7afdb823a8ec203
+parent 404b7a0dea6406545f9969232049ff8119d3ac6f
+author Tom Preston-Werner <tom@mojombo.com> 1192089079 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192089079 -0700
+
+    more commits tests
+
+commit 404b7a0dea6406545f9969232049ff8119d3ac6f
+tree 176de8041f29d7ba67a5a12cfc9a518a4b4b25e5
+parent a911921efe39c4f6fdce8571c1828eaf45d5551e
+author Tom Preston-Werner <tom@mojombo.com> 1192088426 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192088426 -0700
+
+    handle multiline commit messages
+
+commit a911921efe39c4f6fdce8571c1828eaf45d5551e
+tree d9fac0495032ed31cb52754d8a1bdc791126f70e
+parent 2c6af5a45ddf8b539e8481d7bf9dff4bc71dde78
+author Tom Preston-Werner <tom@mojombo.com> 1192083766 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192083766 -0700
+
+    move heads logic into Head
+
+commit 2c6af5a45ddf8b539e8481d7bf9dff4bc71dde78
+tree f86a29df0aa853135af8eb3593ed38766542b86d
+parent d837bd432d63b740b62d964dda48818bd97e778b
+author Tom Preston-Werner <tom@mojombo.com> 1192083654 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192083654 -0700
+
+    implement Repo.commits
+
+commit d837bd432d63b740b62d964dda48818bd97e778b
+tree f58593a0a776b92171214ea9af5095fde9edbb9f
+parent d01a4cfad6ea50285c4710243e3cbe019d381eba
+author Tom Preston-Werner <tom@mojombo.com> 1192033923 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192033923 -0700
+
+    implement Repo#branches
+
+commit d01a4cfad6ea50285c4710243e3cbe019d381eba
+tree fb1e576fc4cf9822a47c331738fb27c4ebb9caef
+parent a47fd41f3aa4610ea527dcc1669dfdb9c15c5425
+author Tom Preston-Werner <tom@mojombo.com> 1192032303 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192032303 -0700
+
+    convert to Grit module, refactor to be more OO
+
+commit a47fd41f3aa4610ea527dcc1669dfdb9c15c5425
+tree 34c16407fd62230585cacb0238061d4777d1a699
+parent 5057e76a11abd02e83b7d3d3171c4b68d9c88480
+author Tom Preston-Werner <tom@mojombo.com> 1192002639 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192002639 -0700
+
+    add more comments throughout
+
+commit 5057e76a11abd02e83b7d3d3171c4b68d9c88480
+tree efab3b1bbd3c233778d0f912bb78e25c2e8c5b9f
+parent 06f63b43050935962f84fe54473a7c5de7977325
+author Tom Preston-Werner <tom@mojombo.com> 1192000700 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192000700 -0700
+
+    clean up heads test
+
+commit 06f63b43050935962f84fe54473a7c5de7977325
+tree 81d34f133988acb07bc4f6a2f592d4f3bf7bbce0
+parent 4c8124ffcf4039d292442eeccabdeca5af5c5017
+author Tom Preston-Werner <tom@mojombo.com> 1192000262 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1192000262 -0700
+
+    stub git call for Grit#heads test
+
+commit 4c8124ffcf4039d292442eeccabdeca5af5c5017
+tree 672eca9b7f9e09c22dcb128c283e8c3c8d7697a4
+parent 634396b2f541a9f2d58b00be1a07f0c358b999b3
+author Tom Preston-Werner <tom@mojombo.com> 1191999972 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1191999972 -0700
+
+    implement Grit#heads
+
+commit 634396b2f541a9f2d58b00be1a07f0c358b999b3
+tree b35b4bf642d667fdd613eebcfe4e17efd420fb8a
+author Tom Preston-Werner <tom@mojombo.com> 1191997100 -0700
+committer Tom Preston-Werner <tom@mojombo.com> 1191997100 -0700
+
+    initial grit setup
+

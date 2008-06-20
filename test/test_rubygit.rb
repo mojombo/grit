@@ -51,6 +51,27 @@ class TestRubyGit < Test::Unit::TestCase
     assert_equal out, '100644 blob 6afcf64c80da8253fa47228eb09bc0eea217e5d1	lib/grit.rb'
   end
 
+  def test_rev_list_pretty
+    out = @git.rev_list({:pretty => 'raw'}, 'master')
+    assert_equal out, fixture('rev_list_all')
+  end
+
+  def test_rev_list_raw_since
+    out = @git.rev_list({:since => Time.at(1204644738)}, 'master')
+    assert_match fixture('rev_list_since'), out  # I return slightly more for now
+  end
+
+  def test_rev_list_pretty_raw
+    out = @git.rev_list({:pretty => 'raw'}, 'f1964ad1919180dd1d9eae9d21a1a1f68ac60e77')
+    assert_match 'f1964ad1919180dd1d9eae9d21a1a1f68ac60e77', out
+    assert_equal out.split("\n").size, 654
+  end
+
+  def test_rev_list
+    out = @git.rev_list({}, 'master')
+    assert_equal out, fixture('rev_list_lines').chomp
+  end
+  
 =begin
   def test_ls_tree_grit_tree
     paths = ['lib/grit.rb']

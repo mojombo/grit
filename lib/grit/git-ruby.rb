@@ -27,15 +27,18 @@ module Grit
     # lib/grit/tree.rb:16:      output = repo.git.ls_tree({}, treeish, *paths)
     def ls_tree(options, treeish, *paths)
       sha = rev_parse({}, treeish)
-      #if paths.flatten.size > 1
-        #puts 'git'
-      #  return method_missing('ls-tree', options, treeish, paths)
-      #else
-        #puts 'ruby'
       return ruby_git.ls_tree(sha, paths.flatten)
-      #end
     end
-        
+
+    def rev_list(options, ref)
+      allowed_options = [:max_count, :since, :until, :pretty]  # this is all I can do right now
+      if (options.keys - allowed_options).size > 0
+        return method_missing('rev-list', options, ref)
+      else
+        return ruby_git.rev_list(rev_parse({}, ref), options)      
+      end
+    end
+
     def rev_parse(options, string)      
       if /\w{40}/.match(string)  # passing in a sha - just no-op it
         return string.chomp

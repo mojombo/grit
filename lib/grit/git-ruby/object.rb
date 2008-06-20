@@ -265,7 +265,7 @@ module Grit
     
     def raw_log(sha)
       output = "commit #{sha}\n"
-      output += @headers + "\n"
+      output += @headers + "\n\n"
       output += @message.split("\n").map { |l| '    ' + l }.join("\n") + "\n\n"
     end
     
