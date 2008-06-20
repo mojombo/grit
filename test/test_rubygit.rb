@@ -44,7 +44,22 @@ class TestRubyGit < Test::Unit::TestCase
     out = @git.ls_tree({}, @tree_sha, paths)
     assert_equal out, fixture('ls_tree_paths_ruby').chomp
   end
-  
+
+  def test_ls_tree_paths_multi_single
+    paths = ['lib/grit.rb']
+    out = @git.ls_tree({}, @tree_sha, paths)
+    assert_equal out, '100644 blob 6afcf64c80da8253fa47228eb09bc0eea217e5d1	lib/grit.rb'
+  end
+
+  def test_ls_tree_grit_tree
+    paths = ['lib/grit.rb']
+    @repo = Grit::Repo.new('~/projects/github')    
+    paths = ['app/models/event.rb']
+    puts out = @repo.git.ls_tree({}, 'master', ['app/models/event.rb'])
+    puts out = @repo.tree('master', ['app/models/event.rb']).contents
+    assert_equal out, '100644 blob 6afcf64c80da8253fa47228eb09bc0eea217e5d1	lib/grit.rb'
+  end
+
   def test_ls_tree_paths_multi
     paths = ['History.txt', 'lib/grit.rb']
     out = @git.ls_tree({}, @tree_sha, paths)

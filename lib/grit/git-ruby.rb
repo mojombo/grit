@@ -25,9 +25,15 @@ module Grit
     end
     
     # lib/grit/tree.rb:16:      output = repo.git.ls_tree({}, treeish, *paths)
-    def ls_tree(options, treeish, paths = [])
+    def ls_tree(options, treeish, *paths)
       sha = rev_parse({}, treeish)
-      return ruby_git.ls_tree(sha, paths)
+      #if paths.flatten.size > 1
+        #puts 'git'
+      #  return method_missing('ls-tree', options, treeish, paths)
+      #else
+        #puts 'ruby'
+      return ruby_git.ls_tree(sha, paths.flatten)
+      #end
     end
         
     def rev_parse(options, string)      

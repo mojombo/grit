@@ -168,16 +168,21 @@ module Grit
         
         if paths.size > 0
           # need to walk the tree if one of the paths has a '/'
+          old_tree = tree
           tree.split("\n").each do |line|
             (info, file) = line.split("\t")
             entry = info.split(' ')
             if entry[1] == 'tree'
-              tree += "\n" + ls_tree(entry[2], [], file)
+              if paths.select { |p| file =~ Regexp.new(p) }
+                old_tree += "\n" + ls_tree(entry[2], paths, file)
+              end
             end
           end
+          tree = old_tree
+          
           tree = tree.split("\n").select { |line| paths.include?(line.split("\t")[1]) }.join("\n")
         end
-        tree 
+        tree
       end
           
       
