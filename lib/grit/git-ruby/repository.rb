@@ -149,42 +149,78 @@ module Grit
       # returns the raw (cat-file) output for a tree
       # if given a commit sha, it will print the tree of that commit
       # if given a path limiter array, it will limit the output to those
-      def ls_tree(sha, paths = [], append = nil)
+      def ls_tree(sha, paths = [])
+        if paths.size > 0
+          # pathing
+          part = []
+          paths.each do |path|
+            part += ls_tree_path(sha, path)
+          end
+          return part.join("\n")
+        else
+          get_raw_tree(sha)
+        end
+      end
+
+      def get_raw_tree(sha)
         o = get_raw_object_by_sha1(sha)
         if o.type == :commit
           tree = cat_file(get_object_by_sha1(sha).tree)
         else
           tree = cat_file(sha)
         end
-        
-        if append
-          new_tree = ''
-          tree.split("\n").each_with_index do |line, i|
-            entry = line.split("\t")
-            new_tree << entry[0] + "\t" + File.join(append, entry[1]) + "\n"
-          end
-          tree = new_tree.chomp
-        end
-        
-        if paths.size > 0
-          # need to walk the tree if one of the paths has a '/'
-          old_tree = tree
-          tree.split("\n").each do |line|
-            (info, file) = line.split("\t")
-            entry = info.split(' ')
-            if entry[1] == 'tree'
-              if paths.select { |p| file =~ Regexp.new(p) }
-                old_tree += "\n" + ls_tree(entry[2], paths, file)
+        return tree
+      end
+      
+      # return array of tree entries
+      ## TODO : refactor this to remove the fugly
+      def ls_tree_path(sha, path, append = nil)
+        tree = get_raw_tree(sha)
+        if path =~ /\//
+          paths = path.split('/')
+          last = path[path.size - 1, 1]
+          if (last == '/') && (paths.size == 1)
+            append = append ? File.join(append, paths.first) : paths.first
+            dir_name = tree.split("\n").select { |p| p.split("\t")[1] == paths.first }.first
+            next_sha = dir_name.split(' ')[2]
+            tree = get_raw_tree(next_sha)
+            tree = tree.split("\n")
+            if append
+              mod_tree = []
+              tree.each do |ent|
+                (info, fpath) = ent.split("\t")
+                mod_tree << [info, File.join(append, fpath)].join("\t")
               end
+              mod_tree
+            else
+              tree
+            end
+          else
+            next_path = paths.shift
+            dir_name = tree.split("\n").select { |p| p.split("\t")[1] == next_path }.first
+            next_sha = dir_name.split(' ')[2]
+            next_path = append ? File.join(append, next_path) : next_path
+            if (last == '/')
+              ls_tree_path(next_sha, paths.join("/") + '/', next_path)
+            else
+              ls_tree_path(next_sha, paths.join("/"), next_path)
             end
           end
-          tree = old_tree
-          
-          tree = tree.split("\n").select { |line| paths.include?(line.split("\t")[1]) }.join("\n")
+        else
+          tree = tree.split("\n")
+          tree = tree.select { |p| p.split("\t")[1] == path }
+          if append
+            mod_tree = []
+            tree.each do |ent|
+              (info, fpath) = ent.split("\t")
+              mod_tree << [info, File.join(append, fpath)].join("\t")
+            end
+            mod_tree
+          else
+            tree
+          end
         end
-        tree
-      end
-          
+      end  
       
       # returns an array of GitRuby Commit objects
       # [ [sha, raw_output], [sha, raw_output], [sha, raw_output] ... ]

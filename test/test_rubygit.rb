@@ -51,19 +51,33 @@ class TestRubyGit < Test::Unit::TestCase
     assert_equal out, '100644 blob 6afcf64c80da8253fa47228eb09bc0eea217e5d1	lib/grit.rb'
   end
 
+=begin
   def test_ls_tree_grit_tree
     paths = ['lib/grit.rb']
     @repo = Grit::Repo.new('~/projects/github')    
     paths = ['app/models/event.rb']
     puts out = @repo.git.ls_tree({}, 'master', ['app/models/event.rb'])
-    puts out = @repo.tree('master', ['app/models/event.rb']).contents
+    puts out = @repo.tree('master', paths).contents
     assert_equal out, '100644 blob 6afcf64c80da8253fa47228eb09bc0eea217e5d1	lib/grit.rb'
   end
+=end
 
   def test_ls_tree_paths_multi
     paths = ['History.txt', 'lib/grit.rb']
     out = @git.ls_tree({}, @tree_sha, paths)
     assert_equal out, fixture('ls_tree_paths_ruby_deep').chomp
+  end
+
+  def test_ls_tree_path
+    paths = ['lib/']
+    out = @git.ls_tree({}, @tree_sha, paths)
+    assert_equal out, "100644 blob 6afcf64c80da8253fa47228eb09bc0eea217e5d1\tlib/grit.rb\n040000 tree 6244414d0229fb2bd58bc426a2afb5ba66773498\tlib/grit"
+  end
+  
+  def test_ls_tree_path_deep
+    paths = ['lib/grit/']
+    out = @git.ls_tree({}, @tree_sha, paths)
+    assert_equal out, fixture('ls_tree_subdir').chomp
   end
   
   def test_file_type
