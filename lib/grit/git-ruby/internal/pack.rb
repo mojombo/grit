@@ -167,38 +167,38 @@ module Grit
         end
 
         def parse_object(offset)
-          data, type = unpack_object(offset)
-          RawObject.new(OBJ_TYPES[type], data)
+          obj = nil
+          with_packfile do |packfile|
+            data, type = unpack_object(packfile, offset)
+            obj = RawObject.new(OBJ_TYPES[type], data)
+          end
+          obj
         end
         protected :parse_object
 
-        def unpack_object(offset)
-          data = nil
-          type = nil
-          with_packfile do |packfile|
-            obj_offset = offset
-            packfile.seek(offset)
+        def unpack_object(packfile, offset)
+          obj_offset = offset
+          packfile.seek(offset)
 
+          c = packfile.read(1)[0]
+          size = c & 0xf
+          type = (c >> 4) & 7
+          shift = 4
+          offset += 1
+          while c & 0x80 != 0
             c = packfile.read(1)[0]
-            size = c & 0xf
-            type = (c >> 4) & 7
-            shift = 4
+            size |= ((c & 0x7f) << shift)
+            shift += 7
             offset += 1
-            while c & 0x80 != 0
-              c = packfile.read(1)[0]
-              size |= ((c & 0x7f) << shift)
-              shift += 7
-              offset += 1
-            end
-          
-            case type
-            when OBJ_OFS_DELTA, OBJ_REF_DELTA
-              data, type = unpack_deltified(type, offset, obj_offset, size)
-            when OBJ_COMMIT, OBJ_TREE, OBJ_BLOB, OBJ_TAG
-              data = unpack_compressed(offset, size)
-            else
-              raise PackFormatError, "invalid type #{type}"
-            end
+          end
+        
+          case type
+          when OBJ_OFS_DELTA, OBJ_REF_DELTA
+            data, type = unpack_deltified(type, offset, obj_offset, size)
+          when OBJ_COMMIT, OBJ_TREE, OBJ_BLOB, OBJ_TAG
+            data = unpack_compressed(offset, size)
+          else
+            raise PackFormatError, "invalid type #{type}"
           end
           [data, type]
         end
@@ -229,7 +229,7 @@ module Grit
               offset += SHA1Size
             end
 
-            base, type = unpack_object(base_offset)
+            base, type = unpack_object(packfile, base_offset)
             delta = unpack_compressed(offset, size)
           end
           [patch_delta(base, delta), type]
