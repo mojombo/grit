@@ -40,6 +40,11 @@ module Grit
     end
 
     def rev_parse(options, string)      
+      if string =~ /\.\./
+        (sha1, sha2) = string.split('..')
+        return [rev_parse({}, sha1), rev_parse({}, sha2)]
+      end
+      
       if /\w{40}/.match(string)  # passing in a sha - just no-op it
         return string.chomp
       end

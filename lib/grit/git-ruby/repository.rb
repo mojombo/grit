@@ -236,9 +236,29 @@ module Grit
         walk_log(sha, options)
       end
 
+      def truncate_arr(arr, sha)
+        new_arr = []
+        arr.each do |a|
+          if a[0] == sha
+            return new_arr
+          end
+          new_arr << a
+        end
+        return new_arr
+      end
+      
       def rev_list(sha, options)
+        if sha.is_a? Array
+          (end_sha, sha) = sha
+        end
+        
         log = log(sha, options)
         log = log.sort { |a, b| a[2] <=> b[2] }.reverse
+        
+        if end_sha
+          log = truncate_arr(log, end_sha)
+        end
+        
         if options[:pretty] == 'raw'
           log.map {|k, v| v }.join('')
         else

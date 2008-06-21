@@ -72,16 +72,11 @@ class TestRubyGit < Test::Unit::TestCase
     assert_equal out, fixture('rev_list_lines').chomp
   end
   
-=begin
-  def test_ls_tree_grit_tree
-    paths = ['lib/grit.rb']
-    @repo = Grit::Repo.new('~/projects/github')    
-    paths = ['app/models/event.rb']
-    puts out = @repo.git.ls_tree({}, 'master', ['app/models/event.rb'])
-    puts out = @repo.tree('master', paths).contents
-    assert_equal out, '100644 blob 6afcf64c80da8253fa47228eb09bc0eea217e5d1	lib/grit.rb'
+  def test_rev_list_range
+    range = '30e367cef2203eba2b341dc9050993b06fd1e108..3fa4e130fa18c92e3030d4accb5d3e0cadd40157'
+    out = @git.rev_list({}, range)
+    assert_equal out, fixture('rev_list_range').chomp
   end
-=end
 
   def test_ls_tree_paths_multi
     paths = ['History.txt', 'lib/grit.rb']
@@ -109,5 +104,16 @@ class TestRubyGit < Test::Unit::TestCase
     out = @git.file_type(@commit_sha).to_s
     assert_equal 'commit', out
   end
+  
+=begin
+  def test_ls_tree_grit_tree
+    paths = ['lib/grit.rb']
+    @repo = Grit::Repo.new('~/projects/github')    
+    paths = ['app/models/event.rb']
+    puts out = @repo.git.ls_tree({}, 'master', ['app/models/event.rb'])
+    puts out = @repo.tree('master', paths).contents
+    assert_equal out, '100644 blob 6afcf64c80da8253fa47228eb09bc0eea217e5d1	lib/grit.rb'
+  end
+=end
   
 end
