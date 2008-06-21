@@ -53,7 +53,6 @@ module Grit
         end
         
         def with_idx(index_file = nil)
-          puts "WITH INDEX"
           if !index_file
             index_file = @name
             idxfile = File.open(@name[0...-4]+'idx')
@@ -67,7 +66,6 @@ module Grit
         end
         
         def with_packfile
-          puts "WITH PACKFILE"
           packfile = File.open(@name)
           yield packfile
           packfile.close
