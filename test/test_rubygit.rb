@@ -105,6 +105,11 @@ class TestRubyGit < Test::Unit::TestCase
     assert_equal 'commit', out
   end
   
+  #def test_ls_tree_noexist
+  #  puts out = @git.ls_tree({}, '6afcf64c80da8253fa47228eb09bc0eea217e5d0')
+  #end
+  
+  
 =begin
   def test_ls_tree_grit_tree
     paths = ['lib/grit.rb']

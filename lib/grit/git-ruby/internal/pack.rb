@@ -194,7 +194,7 @@ module Grit
         
           case type
           when OBJ_OFS_DELTA, OBJ_REF_DELTA
-            data, type = unpack_deltified(type, offset, obj_offset, size)
+            data, type = unpack_deltified(packfile, type, offset, obj_offset, size)
           when OBJ_COMMIT, OBJ_TREE, OBJ_BLOB, OBJ_TAG
             data = unpack_compressed(offset, size)
           else
@@ -204,34 +204,29 @@ module Grit
         end
         private :unpack_object
 
-        def unpack_deltified(type, offset, obj_offset, size)
-          base = nil
-          type = nil
-          delta = nil
-          with_packfile do |packfile|
-            packfile.seek(offset)
-            data = packfile.read(SHA1Size)
+        def unpack_deltified(packfile, type, offset, obj_offset, size)
+          packfile.seek(offset)
+          data = packfile.read(SHA1Size)
 
-            if type == OBJ_OFS_DELTA
-              i = 0
-              c = data[i]
-              base_offset = c & 0x7f
-              while c & 0x80 != 0
-                c = data[i += 1]
-                base_offset += 1
-                base_offset <<= 7
-                base_offset |= c & 0x7f
-              end
-              base_offset = obj_offset - base_offset
-              offset += i + 1
-            else
-              base_offset = find_object(data)
-              offset += SHA1Size
+          if type == OBJ_OFS_DELTA
+            i = 0
+            c = data[i]
+            base_offset = c & 0x7f
+            while c & 0x80 != 0
+              c = data[i += 1]
+              base_offset += 1
+              base_offset <<= 7
+              base_offset |= c & 0x7f
             end
-
-            base, type = unpack_object(packfile, base_offset)
-            delta = unpack_compressed(offset, size)
+            base_offset = obj_offset - base_offset
+            offset += i + 1
+          else
+            base_offset = find_object(data)
+            offset += SHA1Size
           end
+
+          base, type = unpack_object(packfile, base_offset)
+          delta = unpack_compressed(offset, size)
           [patch_delta(base, delta), type]
         end
         private :unpack_deltified
