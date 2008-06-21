@@ -466,6 +466,12 @@ module Grit
         found_data
       end
       
+      def close
+        @packs.each do |pack|
+          pack.close
+        end if @packs
+      end
+      
       protected
 
         def git_path(path)
@@ -475,9 +481,7 @@ module Grit
       private 
       
         def initpacks
-          @packs.each do |pack|
-            pack.close
-          end if @packs
+          close
           
           @packs = []
           if f = File.exists?(git_path("objects/pack"))
