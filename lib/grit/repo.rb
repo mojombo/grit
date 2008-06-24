@@ -18,13 +18,13 @@ module Grit
     #   g = Repo.new("/Users/tom/public/grit.git")
     #
     # Returns Grit::Repo
-    def initialize(path)
+    def initialize(path, options = {})
       epath = File.expand_path(path)
       
       if File.exist?(File.join(epath, '.git'))
         self.path = File.join(epath, '.git')
         @bare = false
-      elsif File.exist?(epath) && epath =~ /\.git$/
+      elsif File.exist?(epath) && (epath =~ /\.git$/ || options[:is_bare])
         self.path = epath
         @bare = true
       elsif File.exist?(epath)

@@ -3,7 +3,6 @@ require File.dirname(__FILE__) + '/helper'
 class TestRemote < Test::Unit::TestCase
   def setup
     @r = Repo.new(GRIT_REPO)
-    Git.any_instance.expects(:for_each_ref).returns(fixture('for_each_ref_remotes'))
   end
 
   # inspect
