@@ -15,8 +15,14 @@ class TestRubyGit < Test::Unit::TestCase
     out = @git.diff({}, commit1, commit2)
     assert_match 'index 6afcf64..9e78ddf 100644', out
   end
+
+  def test_diff_single
+    commit1 = '2d3acf90f35989df8f262dc50beadc4ee3ae1560'
+    out = @git.diff({}, commit1, nil)
+    assert_match 'index ad42ff5..aa50f09 100644', out
+  end
   
-  def test_diff
+  def test_diff_full
     commit1 = '2d3acf90f35989df8f262dc50beadc4ee3ae1560'
     commit2 = '420eac97a826bfac8724b6b0eef35c20922124b7'
     out = @git.diff({:full_index => true}, commit1, commit2)
@@ -27,14 +33,14 @@ class TestRubyGit < Test::Unit::TestCase
     commit1 = 'c9cf68fc61bd2634e90a4f6a12d88744e6297c4e'
     commit2 = '7a8d32cb18a0ba2ff8bf86cadacc3fd2816da219'
     out = @git.diff({}, commit1, commit2)
-    assert_match 'index 0000000..2e3b0cb 100644', out
+    assert_match 'index 0000000..2e3b0cb', out
   end
 
   def test_diff_remove
     commit1 = 'c9cf68fc61bd2634e90a4f6a12d88744e6297c4e'
     commit2 = '7a8d32cb18a0ba2ff8bf86cadacc3fd2816da219'
     out = @git.diff({}, commit1, commit2)
-    assert_match 'index 0000000..2e3b0cb 100644', out
+    assert_match 'index 0000000..2e3b0cb', out
   end
 
 

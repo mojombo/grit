@@ -22,20 +22,13 @@ module Grit
     # lib/grit/tree.rb:16:      output = repo.git.ls_tree({}, treeish, *paths)
     def ls_tree(options, treeish, *paths)
       sha = rev_parse({}, treeish)
-      return ruby_git.ls_tree(sha, paths.flatten)
+      ruby_git.ls_tree(sha, paths.flatten)
     end
 
-    # TODO 
-    
     # git diff --full-index 'ec037431382e83c3e95d4f2b3d145afbac8ea55d' 'f1ec1aea10986159456846b8a05615b87828d6c6'
     def diff(options, sha1, sha2)
       ruby_git.diff(sha1, sha2, options)
     end
-    
-    # git grep -n 'foo' 'master'
-    
-    # git log --pretty='raw' --max-count='1' 'master' -- 'LICENSE'
-    # git log --pretty='raw' --max-count='1' 'master' -- 'test'
     
     def rev_list(options, ref)
       options.delete(:skip) if options[:skip].to_i == 0
@@ -84,6 +77,12 @@ module Grit
     def ruby_git
       @ruby_git_repo ||= Repository.new(@git_dir)
     end
+    
+    
+    # TODO     
+    # git grep -n 'foo' 'master'
+    # git log --pretty='raw' --max-count='1' 'master' -- 'LICENSE'
+    # git log --pretty='raw' --max-count='1' 'master' -- 'test'
     
   end
 end

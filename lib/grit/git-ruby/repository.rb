@@ -340,8 +340,13 @@ module Grit
       def diff(commit1, commit2, options = {})
         patch = ''
         
-        tree1 = get_object_by_sha1(commit1).tree
-        tree2 = get_object_by_sha1(commit2).tree
+        commit_obj1 = get_object_by_sha1(commit1)
+        tree1 = commit_obj1.tree
+        if commit2
+          tree2 = get_object_by_sha1(commit2).tree
+        else
+          tree2 = get_object_by_sha1(commit_obj1.parent.first).tree
+        end
         qdiff = quick_diff(tree1, tree2)
         qdiff.sort.each do |diff_arr|
           format, lines, output = :unified, 3, ''
@@ -361,10 +366,14 @@ module Grit
 
           header = 'diff --git a/' + diff_arr[0].gsub('./', '') + ' b/' + diff_arr[0].gsub('./', '')
           if options[:full_index]
-            header << "\n" + 'index ' + sha1 + '..' + sha2 + ' 100644' # hard coding this because i don't think we use it
+            header << "\n" + 'index ' + sha1 + '..' + sha2
+            header << ' 100644' if diff_arr[3] # hard coding this because i don't think we use it
           else
-            header << "\n" + 'index ' + sha1[0,7] + '..' + sha2[0,7] + ' 100644' # hard coding this because i don't think we use it
+            header << "\n" + 'index ' + sha1[0,7] + '..' + sha2[0,7]
+            header << ' 100644' if diff_arr[3] # hard coding this because i don't think we use it
           end
+          header << "\n--- " + 'a/' + diff_arr[0].gsub('./', '')
+          header << "\n+++ " + 'b/' + diff_arr[0].gsub('./', '')
           header += "\n"
           
           oldhunk = hunk = nil
