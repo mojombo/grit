@@ -9,47 +9,20 @@ module Grit
       #   +options+ is a Hash of options
       #
       # Returns Grit::Ref[] (baked)
-      def find_all(repo, options = {})
-        default_options = {:sort => "committerdate",
-                           :format => "%(refname)%00%(objectname)"}
-
-        actual_options = default_options.merge(options)
-
-        output = repo.git.for_each_ref(actual_options, prefix)
-
-        self.list_from_string(repo, output)
-      end
-
-      # Parse out ref information into an array of baked refs objects
-      #   +repo+ is the Repo
-      #   +text+ is the text output from the git command
-      #
-      # Returns Grit::Ref[] (baked)
-      def list_from_string(repo, text)
+      def find_all(repo, options = {})      
         refs = []
-
-        text.split("\n").each do |line|
-          refs << self.from_string(repo, line)
+        
+        Dir.chdir(repo.git.git_dir) do
+          files = Dir.glob(prefix + '/**/*')
+          files.each do |ref|
+            id = File.read(ref).chomp
+            name = ref.sub("#{prefix}/", '')
+            commit = Commit.create(repo, :id => id)
+            refs << self.new(name, commit)
+          end
         end
-
-        refs.sort { | x, y | x.name <=> y.name }
-      end
-
-      # Create a new Ref instance from the given string.
-      #   +repo+ is the Repo
-      #   +line+ is the formatted head information
-      #
-      # Format
-      #   name: [a-zA-Z_/]+
-      #   <null byte>
-      #   id: [0-9A-Fa-f]{40}
-      #
-      # Returns Grit::Ref (baked)
-      def from_string(repo, line)
-        full_name, id = line.split("\0")
-        name = full_name.sub("#{prefix}/", '')
-        commit = Commit.create(repo, :id => id)
-        self.new(name, commit)
+        
+        refs
       end
 
       protected

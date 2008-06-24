@@ -8,9 +8,6 @@ end
 module Grit
   
   class Git
-    
-    include Grit::GitRuby
-    
     class GitTimeout < RuntimeError
       attr_reader :command, :bytes_read
 
@@ -22,6 +19,8 @@ module Grit
 
     undef_method :clone
     
+    include GitRuby
+    
     class << self
       attr_accessor :git_binary, :git_timeout
     end
@@ -30,7 +29,7 @@ module Grit
     self.git_timeout = 5
     
     attr_accessor :git_dir, :bytes_read
-
+    
     def initialize(git_dir)
       self.git_dir    = git_dir
       self.bytes_read = 0
@@ -47,29 +46,22 @@ module Grit
     #
     # Returns String
     def method_missing(cmd, options = {}, *args)
-      run('', cmd, '', options, args)
-    end
-    
-    def run(prefix, cmd, postfix, options, args)
       timeout  = options.delete(:timeout)
       timeout  = true if timeout.nil?
 
       opt_args = transform_options(options)
-      ext_args = args.map { |a| (a == '--' || a[0,1] == '|') ? a : "'#{a}'" }
+      ext_args = args.map { |a| a == '--' ? a : "'#{a}'" }
       
-      call = "#{prefix}#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{postfix}"
+      call = "#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}"
       puts call if Grit.debug
       response = timeout ? sh(call) : wild_sh(call)
       #puts response if Grit.debug
       response
     end
 
-    
-    
     def sh(command)
       pid, _, io, _ = Open4.popen4(command)
       ret = Timeout.timeout(self.class.git_timeout) { io.read }
-      @bytes_read = 0
       @bytes_read += ret.size
 
       if @bytes_read > 5242880 # 5.megabytes

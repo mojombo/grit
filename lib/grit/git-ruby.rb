@@ -7,11 +7,6 @@ module Grit
   # if it will be faster, or if the git binary is not available (!!TODO!!)
   module GitRuby
     
-    class << self
-      attr_accessor :use_commit_db
-    end
-    self.use_commit_db = false
-    
     attr_accessor :ruby_git_repo
     
     def cat_file(options, ref)
@@ -30,7 +25,20 @@ module Grit
       return ruby_git.ls_tree(sha, paths.flatten)
     end
 
+    # TODO 
+    
+    # git diff --full-index 'ec037431382e83c3e95d4f2b3d145afbac8ea55d' 'f1ec1aea10986159456846b8a05615b87828d6c6'
+    def diff(options, sha1, sha2)
+      ruby_git.diff(sha1, sha2, options)
+    end
+    
+    # git grep -n 'foo' 'master'
+    
+    # git log --pretty='raw' --max-count='1' 'master' -- 'LICENSE'
+    # git log --pretty='raw' --max-count='1' 'master' -- 'test'
+    
     def rev_list(options, ref)
+      options.delete(:skip) if options[:skip].to_i == 0
       allowed_options = [:max_count, :since, :until, :pretty]  # this is all I can do right now
       if (options.keys - allowed_options).size > 0
         return method_missing('rev-list', options, ref)
@@ -38,7 +46,7 @@ module Grit
         return ruby_git.rev_list(rev_parse({}, ref), options)      
       end
     end
-
+    
     def rev_parse(options, string)      
       if string =~ /\.\./
         (sha1, sha2) = string.split('..')

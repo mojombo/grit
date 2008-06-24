@@ -8,11 +8,19 @@
 #
 # provides native ruby access to git objects and pack files
 #
-
 require 'grit/git-ruby/internal/raw_object'
 require 'grit/git-ruby/internal/pack'
 require 'grit/git-ruby/internal/loose'
 require 'grit/git-ruby/object'
+
+require 'rubygems'
+require 'diff/lcs'
+require 'diff/lcs/hunk'
+
+# have to do this so it doesn't interfere with Grit::Diff
+module Difference
+  include Diff
+end
 
 module Grit
   module GitRuby
@@ -144,6 +152,7 @@ module Grit
         get_object_by_sha1(sha).entry.each do |e|
           data[e.format_type][e.name] = {:mode => e.format_mode, :sha => e.sha1}
         end 
+        data
       end
       
       # returns the raw (cat-file) output for a tree
@@ -328,6 +337,64 @@ module Grit
       end
 
 
+      def diff(commit1, commit2, options = {})
+        patch = ''
+        
+        tree1 = get_object_by_sha1(commit1).tree
+        tree2 = get_object_by_sha1(commit2).tree
+        qdiff = quick_diff(tree1, tree2)
+        qdiff.sort.each do |diff_arr|
+          format, lines, output = :unified, 3, ''
+          file_length_difference = 0
+          
+          fileA = (diff_arr[2]) ? cat_file(diff_arr[2]) : ''
+          fileB = (diff_arr[3]) ? cat_file(diff_arr[3]) : ''
+          
+          sha1 = (diff_arr[2]) ? diff_arr[2] : '0000000000000000000000000000000000000000'
+          sha2 = (diff_arr[3]) ? diff_arr[3] : '0000000000000000000000000000000000000000'
+
+          data_old = fileA.split(/\n/).map! { |e| e.chomp }
+          data_new = fileB.split(/\n/).map! { |e| e.chomp }
+          
+          diffs = Difference::LCS.diff(data_old, data_new)    
+          return if diffs.empty?
+
+          header = 'diff --git a/' + diff_arr[0].gsub('./', '') + ' b/' + diff_arr[0].gsub('./', '')
+          if options[:full_index]
+            header << "\n" + 'index ' + sha1 + '..' + sha2 + ' 100644' # hard coding this because i don't think we use it
+          else
+            header << "\n" + 'index ' + sha1[0,7] + '..' + sha2[0,7] + ' 100644' # hard coding this because i don't think we use it
+          end
+          header += "\n"
+          
+          oldhunk = hunk = nil
+
+          diffs.each do |piece|
+            begin
+              hunk = Difference::LCS::Hunk.new(data_old, data_new, piece, lines, file_length_difference)
+              file_length_difference = hunk.file_length_difference
+
+              next unless oldhunk
+
+              if lines > 0 && hunk.overlaps?(oldhunk)
+                hunk.unshift(oldhunk)
+              else
+                output << oldhunk.diff(format)
+              end
+            ensure
+              oldhunk = hunk
+              output << "\n"
+            end
+          end
+          
+          output << oldhunk.diff(format)
+          output << "\n"
+          
+          patch << header + output.lstrip      
+        end
+        patch
+      end
+      
       # takes 2 tree shas and recursively walks them to find out what
       # files or directories have been modified in them and returns an 
       # array of changes
