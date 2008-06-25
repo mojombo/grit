@@ -336,7 +336,6 @@ module Grit
         array
       end
 
-
       def diff(commit1, commit2, options = {})
         patch = ''
         
@@ -484,26 +483,57 @@ module Grit
         
             
       ## EXPERIMENTAL - the following are trying to develop a fast blame-tree ##
+
+      def get_subtree(commit_sha, path)
+        tree_sha = get_object_by_sha1(commit_sha).tree
+        
+        if path && !path.blank?
+          paths = path.split('/')
+          paths.each do |path|
+            tree = get_object_by_sha1(tree_sha)
+            if entry = tree.entry.select { |e| e.name == path }.first
+              tree_sha = entry.sha1 rescue nil
+            else
+              return false
+            end
+          end
+        end
+        
+        tree_sha
+      end
       
       # this is slighltly broken right now, so don't use it
       # it returns a list of the last commit for each file in the tree
       # of the commit you pass in, but I don't think the looking_for 
       # works yet, so it will only work from the root, not a subtree
-      def blame_tree(commit_sha, looking_for)        
-        # swap caching temporarily - we have to do this because the algorithm 
-        # that dumb scott used ls-tree's each tree twice, which is 90% of the
-        # time this takes, so caching those hits halves the time this takes to run
-        # but, it does take up memory, so if you don't want it, i clear it later
+      def blame_tree(commit_sha, path)
+        
+        # find subtree please! :)
+        tree_sha = get_subtree(commit_sha, path)
+        return {} if !tree_sha
+
+        looking_for = []
+        get_object_by_sha1(tree_sha).entry.each do |e|
+          looking_for << File.join('.', e.name)
+        end
+                
         @already_searched = {}
-        look_for_commits(commit_sha, looking_for)
+        commits = look_for_commits(commit_sha, path, looking_for)
+        
+        arr = {}
+        commits.each do |commit_array|
+          key = commit_array[0].gsub('./', '')
+          arr[key] = commit_array[1]
+        end
+        arr
       end
     
-      def look_for_commits(commit_sha, looking_for)        
+      def look_for_commits(commit_sha, path, looking_for)        
         return [] if @already_searched[commit_sha] # to prevent rechecking branches
         @already_searched[commit_sha] = true
         
         commit = get_object_by_sha1(commit_sha)
-        tree_sha = commit.tree
+        tree_sha = get_subtree(commit_sha, path)
         
         found_data = []
         
@@ -521,7 +551,7 @@ module Grit
         
         # go through the parents recursively, looking for somewhere this has been changed
         commit.parent.each do |pc|
-          diff = quick_diff(tree_sha, get_object_by_sha1(pc).tree, '.', false)
+          diff = quick_diff(tree_sha, get_subtree(pc, path), '.', false)
           
           # remove anything found
           looking_for.each do |search|
@@ -535,7 +565,7 @@ module Grit
             return found_data
           end
 
-          found_data += look_for_commits(pc, looking_for)  # recurse into parent
+          found_data += look_for_commits(pc, path, looking_for)  # recurse into parent
         end
         
         ## TODO : find most recent commit with change in any parent

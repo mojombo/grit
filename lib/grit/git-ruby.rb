@@ -74,6 +74,10 @@ module Grit
       ruby_git.cat_file_type(ref)
     end
     
+    def blame_tree(commit, path = nil)
+      ruby_git.blame_tree(rev_parse({}, commit), path)
+    end
+    
     def ruby_git
       @ruby_git_repo ||= Repository.new(@git_dir)
     end

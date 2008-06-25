@@ -173,10 +173,6 @@ module Grit
   class Tree < Object
     attr_accessor :entry
 
-    
-    # schacon - had to rewrite this to avoid scan(), since the unicodey crap
-    # fraks it all up.  So, the code is pretty uggo, but it works again.
-    # Seriously sorry for it, I'll try to clean it up later...
     def self.from_raw(rawobject, repository=nil)
       raw = StringIO.new(rawobject.content)
   

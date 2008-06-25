@@ -91,8 +91,12 @@ module Grit
     def remove(*files)
       self.git.rm({}, *files.flatten)
     end
+    
 
-    # Adds files to the index
+    def blame_tree(commit, path = nil)
+      self.git.blame_tree(commit, path)
+    end
+    
     def status
       Status.new(self)
     end
