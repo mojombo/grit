@@ -30,10 +30,10 @@ module Grit
       ruby_git.diff(sha1, sha2, options)
     end
     
-    def rev_list(options, ref)
+    def rev_list(options, ref = 'master')
       options.delete(:skip) if options[:skip].to_i == 0
       allowed_options = [:max_count, :since, :until, :pretty]  # this is all I can do right now
-      if (options.keys - allowed_options).size > 0
+      if (options.size == 0) || ((options.keys - allowed_options).size > 0)
         return method_missing('rev-list', options, ref)
       else
         return ruby_git.rev_list(rev_parse({}, ref), options)      

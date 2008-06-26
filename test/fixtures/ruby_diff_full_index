@@ -1,0 +1,216 @@
+diff --git a/lib/grit.rb b/lib/grit.rb
+index 6afcf64c80da8253fa47228eb09bc0eea217e5d1..9e78ddfaabf79f8314cc9a53a2f59775aee06bd7 100644
+--- a/lib/grit.rb
++++ b/lib/grit.rb
+@@ -5,12 +5,10 @@ require 'fileutils'
+ require 'time'
+ 
+ # stdlib
+-require 'timeout'
+ 
+ # third party
+ require 'rubygems'
+ require 'mime/types'
+-require 'open4'
+ 
+ # internal requires
+ require 'grit/lazy'
+diff --git a/lib/grit/git.rb b/lib/grit/git.rb
+index ad42ff593e936be1ec7ac17346beab0a0761e278..61919dff16ff3962ce857a0e723f083c73793273 100644
+--- a/lib/grit/git.rb
++++ b/lib/grit/git.rb
+@@ -1,36 +1,18 @@
+-trap("CHLD") do
+-  begin
+-    Process.wait(-1, Process::WNOHANG)
+-  rescue Object
+-  end
+-end
+-
+ module Grit
+   
+   class Git
+-    class GitTimeout < RuntimeError
+-      attr_reader :command, :bytes_read
+-
+-      def initialize(command = nil, bytes_read = nil)
+-        @command = command
+-        @bytes_read = bytes_read
+-      end
+-    end
+-
+     undef_method :clone
+     
+     class << self
+-      attr_accessor :git_binary, :git_timeout
++      attr_accessor :git_binary
+     end
+   
+-    self.git_binary  = "/usr/bin/env git"
+-    self.git_timeout = 5
++    self.git_binary = "/usr/bin/env git"
+     
+-    attr_accessor :git_dir, :bytes_read
++    attr_accessor :git_dir
+     
+     def initialize(git_dir)
+-      self.git_dir    = git_dir
+-      self.bytes_read = 0
++      self.git_dir = git_dir
+     end
+     
+     # Run the given git command with the specified arguments and return
+@@ -44,43 +26,16 @@ module Grit
+     #
+     # Returns String
+     def method_missing(cmd, options = {}, *args)
+-      timeout  = options.delete(:timeout)
+-      timeout  = true if timeout.nil?
+-
+       opt_args = transform_options(options)
+       ext_args = args.map { |a| a == '--' ? a : "'#{a}'" }
+       
+       call = "#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}"
+       puts call if Grit.debug
+-      response = timeout ? sh(call) : wild_sh(call)
++      response = `#{call}`
+       puts response if Grit.debug
+       response
+     end
+-
+-    def sh(command)
+-      pid, _, io, _ = Open4.popen4(command)
+-      ret = Timeout.timeout(self.class.git_timeout) { io.read }
+-      @bytes_read += ret.size
+-
+-      if @bytes_read > 5242880 # 5.megabytes
+-        bytes = @bytes_read
+-        @bytes_read = 0
+-        raise GitTimeout.new(command, bytes) 
+-      end
+-
+-      ret
+-    rescue Object => e
+-      Process.kill('KILL', pid) rescue nil
+-      bytes = @bytes_read
+-      @bytes_read = 0
+-      raise GitTimeout.new(command, bytes)
+-    end
+-
+-    def wild_sh(command)
+-      pid, _, io, _ = Open4.popen4(command)
+-      io.read
+-    end
+-
++    
+     # Transform Ruby style options into git command line options
+     #   +options+ is a hash of Ruby style options
+     #
+@@ -109,4 +64,4 @@ module Grit
+     end
+   end # Git
+   
+-end # Grit
++end # Grit
+\ No newline at end of file
+diff --git a/lib/grit/head.rb b/lib/grit/head.rb
+index 6865bf036695bed006fdfb2a8abd8a6b83fb149e..86f29c26ae054aea7134c71168538928d23864fc 100644
+--- a/lib/grit/head.rb
++++ b/lib/grit/head.rb
+@@ -1,5 +1,4 @@
+ module Grit
+-  HEAD_PREFIX = 'refs/heads'
+   
+   # A Head is a named reference to a Commit. Every Head instance contains a name
+   # and a Commit object.
+@@ -34,7 +33,7 @@ module Grit
+                          
+       actual_options = default_options.merge(options)
+       
+-      output = repo.git.for_each_ref(actual_options, HEAD_PREFIX)
++      output = repo.git.for_each_ref(actual_options, "refs/heads")
+                  
+       self.list_from_string(repo, output)
+     end
+@@ -78,7 +77,7 @@ module Grit
+     # Returns Grit::Head (baked)
+     def self.from_string(repo, line)
+       full_name, id = line.split("\0")
+-      name = full_name.sub("#{HEAD_PREFIX}/", '')
++      name = full_name.split("/").last
+       commit = Commit.create(repo, :id => id)
+       self.new(name, commit)
+     end
+diff --git a/test/fixtures/for_each_ref b/test/fixtures/for_each_ref
+index 9f3bece3da6b8793a75384d35f583eac1abb506d..e56f5262621ebe2a5a903dde14e149845c963930 100644
+Binary files a/test/fixtures/for_each_ref and b/test/fixtures/for_each_ref differ
+diff --git a/test/test_git.rb b/test/test_git.rb
+index adbdc6d61b8caba532e13af64f6c7caea801b417..dcc5fdc1ca60422ca59d32a3c60b360ddc0d0ed7 100644
+--- a/test/test_git.rb
++++ b/test/test_git.rb
+@@ -18,35 +18,4 @@ class TestGit < Test::Unit::TestCase
+     
+     assert_equal ["-s", "-t"], @git.transform_options({:s => true, :t => true}).sort
+   end
+-
+-  def test_uses_custom_sh_method
+-    @git.expects(:sh)
+-    @git.something
+-  end
+-
+-  def test_can_skip_timeout
+-    @git.expects(:wild_sh)
+-    @git.something(:timeout => false)
+-  end
+-
+-  def test_raises_if_too_many_bytes
+-    @git.instance_variable_set(:@bytes_read, 6000000)
+-    assert_raises Grit::Git::GitTimeout do
+-      @git.something
+-    end
+-  end
+-
+-  def test_raises_on_slow_shell
+-    Grit::Git.git_timeout = 0.5
+-    Open4.expects(:popen4).returns([ nil, nil, mock(:read => proc { sleep 1 }), nil ])
+-    assert_raises Grit::Git::GitTimeout do
+-      @git.something
+-    end
+-  end
+-
+-  def test_works_fine_if_quick
+-    output = 'output'
+-    Open4.expects(:popen4).returns([ nil, nil, mock(:read => output), nil ])
+-    assert_equal output, @git.something
+-  end
+ end
+diff --git a/test/test_head.rb b/test/test_head.rb
+index baaae854addf9b0443ac7f0021dda4344b868819..6b97822eb2ba0194bddd194f670f62853061ac9a 100644
+--- a/test/test_head.rb
++++ b/test/test_head.rb
+@@ -3,20 +3,15 @@ require File.dirname(__FILE__) + '/helper'
+ class TestHead < Test::Unit::TestCase
+   def setup
+     @r = Repo.new(GRIT_REPO)
+-    Git.any_instance.expects(:for_each_ref).returns(fixture('for_each_ref'))
+   end
+   
+   # inspect
+   
+   def test_inspect
++    Git.any_instance.expects(:for_each_ref).returns(fixture('for_each_ref'))
++    
+     head = @r.heads.first
++    
+     assert_equal %Q{#<Grit::Head "#{head.name}">}, head.inspect
+   end
+-
+-  # heads with slashes
+-
+-  def test_heads_with_slashes
+-    head = @r.heads.last
+-    assert_equal %Q{#<Grit::Head "mojombo/master">}, head.inspect
+-  end
+-end
++end
+\ No newline at end of file
