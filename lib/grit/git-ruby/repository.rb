@@ -29,10 +29,11 @@ module Grit
       class NoSuchShaFound < StandardError
       end
       
-      attr_accessor :git_dir, :commit_db
+      attr_accessor :git_dir, :options
       
-      def initialize(git_dir)
+      def initialize(git_dir, options = {})
         @git_dir = git_dir
+        @options = options
       end
       
       # returns the loose objects object lazily
@@ -413,7 +414,8 @@ module Grit
       def quick_diff(tree1, tree2, path = '.', recurse = true)
          # handle empty trees
          changed = []
-
+         return changed if tree1 == tree2
+         
          t1 = list_tree(tree1) if tree1
          t2 = list_tree(tree2) if tree2
 
@@ -438,13 +440,13 @@ module Grit
            full = File.join(path, dir)
            if !t2_tree
              if recurse
-               changed += quick_diff(hsh[:sha], nil, full) 
+               changed += quick_diff(hsh[:sha], nil, full, true) 
              else
                changed << [full, 'added', hsh[:sha], nil]      # not in parent
              end
            elsif (hsh[:sha] != t2_tree[:sha])
              if recurse
-               changed += quick_diff(hsh[:sha], t2_tree[:sha], full) 
+               changed += quick_diff(hsh[:sha], t2_tree[:sha], full, true)
              else
                changed << [full, 'modified', hsh[:sha], t2_tree[:sha]]   # file changed
              end
@@ -455,7 +457,7 @@ module Grit
            full = File.join(path, dir)
            if !t1_tree
              if recurse
-               changed += quick_diff(nil, hsh[:sha], full) 
+               changed += quick_diff(nil, hsh[:sha], full, true) 
              else
                changed << [full, 'removed', nil, hsh[:sha]]
              end
@@ -481,13 +483,10 @@ module Grit
         true
       end
         
-            
-      ## EXPERIMENTAL - the following are trying to develop a fast blame-tree ##
-
       def get_subtree(commit_sha, path)
         tree_sha = get_object_by_sha1(commit_sha).tree
         
-        if path && !path.blank?
+        if path && !(path == '' || path == '.' || path == './')
           paths = path.split('/')
           paths.each do |path|
             tree = get_object_by_sha1(tree_sha)
@@ -502,13 +501,8 @@ module Grit
         tree_sha
       end
       
-      # this is slighltly broken right now, so don't use it
-      # it returns a list of the last commit for each file in the tree
-      # of the commit you pass in, but I don't think the looking_for 
-      # works yet, so it will only work from the root, not a subtree
       def blame_tree(commit_sha, path)
-        
-        # find subtree please! :)
+        # find subtree
         tree_sha = get_subtree(commit_sha, path)
         return {} if !tree_sha
 
@@ -516,7 +510,7 @@ module Grit
         get_object_by_sha1(tree_sha).entry.each do |e|
           looking_for << File.join('.', e.name)
         end
-                
+                        
         @already_searched = {}
         commits = look_for_commits(commit_sha, path, looking_for)
         
@@ -528,13 +522,14 @@ module Grit
         arr
       end
     
-      def look_for_commits(commit_sha, path, looking_for)        
+      def look_for_commits(commit_sha, path, looking_for, options = {})        
         return [] if @already_searched[commit_sha] # to prevent rechecking branches
+        
         @already_searched[commit_sha] = true
         
         commit = get_object_by_sha1(commit_sha)
         tree_sha = get_subtree(commit_sha, path)
-        
+
         found_data = []
         
         # at the beginning of the branch
@@ -566,6 +561,7 @@ module Grit
           end
 
           found_data += look_for_commits(pc, path, looking_for)  # recurse into parent
+          return found_data if options[:first_parent]
         end
         
         ## TODO : find most recent commit with change in any parent
@@ -594,13 +590,12 @@ module Grit
             Dir.open(git_path("objects/pack/")) do |dir|
               dir.each do |entry|
                 if entry =~ /\.pack$/i
-                  @packs << Grit::GitRuby::Internal::PackStorage.new(git_path("objects/pack/" \
-                                                                    + entry))
-                #elsif entry =~ /\.idx$/i
-                #  puts Internal::PackStorage.get_shas(git_path("objects/pack/" \
-                #                                                    + entry))
+                  pack = Grit::GitRuby::Internal::PackStorage.new(git_path("objects/pack/" + entry))
+                  if @options[:map_packfile]
+                    pack.cache_objects
+                  end
+                  @packs << pack
                 end
-                
               end
             end
           end

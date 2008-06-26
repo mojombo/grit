@@ -55,14 +55,8 @@ module Grit
       call = "#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}"
       puts call if Grit.debug
       
-      puts
-      puts "****"
-      puts call
-      puts "****"
-      puts
-      
       response = timeout ? sh(call) : wild_sh(call)
-      #puts response if Grit.debug
+      puts response if Grit.debug
       response
     end
 

@@ -35,7 +35,8 @@ module Grit
           if file =~ /\.idx$/
             file = file[0...-3] + 'pack'
           end
-
+          
+          @cache = {}
           @name = file
           
           with_idx do |idx|
@@ -95,6 +96,18 @@ module Grit
             shas
           end
         end
+        
+        def cache_objects
+          @cache = {}
+          with_packfile do |packfile|          
+            each_entry do |sha, offset|
+              data, type = unpack_object(packfile, offset, {:caching => true})
+              if data
+                @cache[sha] = RawObject.new(OBJ_TYPES[type], data)
+              end
+            end
+          end
+        end
 
         def name
           @name
@@ -105,9 +118,14 @@ module Grit
         end
 
         def [](sha1)
+          if obj = @cache[sha1]
+            return obj 
+          end
+          
           offset = find_object(sha1)
           return nil if !offset
-          return parse_object(offset)
+          @cache[sha1] = obj = parse_object(offset)
+          return obj
         end
 
         def each_entry
@@ -176,7 +194,7 @@ module Grit
         end
         protected :parse_object
 
-        def unpack_object(packfile, offset)
+        def unpack_object(packfile, offset, options = {})
           obj_offset = offset
           packfile.seek(offset)
 
@@ -192,9 +210,12 @@ module Grit
             offset += 1
           end
         
+          return [false, false] if !(type == OBJ_COMMIT || type == OBJ_TREE) && options[:caching]
+          
           case type
           when OBJ_OFS_DELTA, OBJ_REF_DELTA
-            data, type = unpack_deltified(packfile, type, offset, obj_offset, size)
+            data, type = unpack_deltified(packfile, type, offset, obj_offset, size, options)
+            #puts type
           when OBJ_COMMIT, OBJ_TREE, OBJ_BLOB, OBJ_TAG
             data = unpack_compressed(offset, size)
           else
@@ -204,7 +225,7 @@ module Grit
         end
         private :unpack_object
 
-        def unpack_deltified(packfile, type, offset, obj_offset, size)
+        def unpack_deltified(packfile, type, offset, obj_offset, size, options = {})
           packfile.seek(offset)
           data = packfile.read(SHA1Size)
 
@@ -226,6 +247,9 @@ module Grit
           end
 
           base, type = unpack_object(packfile, base_offset)
+          
+          return [false, false] if !(type == OBJ_COMMIT || type == OBJ_TREE) && options[:caching]
+          
           delta = unpack_compressed(offset, size)
           [patch_delta(base, delta), type]
         end

@@ -15,12 +15,11 @@ module Grit
         Dir.chdir(repo.git.git_dir) do
           files = Dir.glob(prefix + '/**/*')
           files.each do |ref|
-            if File.file?(ref)
-              id = File.read(ref).chomp
-              name = ref.sub("#{prefix}/", '')
-              commit = Commit.create(repo, :id => id)
-              refs << self.new(name, commit)
-            end
+            next if !File.file?(ref)
+            id = File.read(ref).chomp
+            name = ref.sub("#{prefix}/", '')
+            commit = Commit.create(repo, :id => id)
+            refs << self.new(name, commit)
           end
         end
         
