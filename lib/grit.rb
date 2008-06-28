@@ -6,6 +6,7 @@ require 'time'
 
 # stdlib
 require 'timeout'
+require 'logger'
 
 # third party
 require 'rubygems'
@@ -29,9 +30,13 @@ require 'grit/index'
 module Grit
   class << self
     attr_accessor :debug
+    attr_accessor :logger
+    def log(str)
+      logger.debug { str }
+    end
   end
-  
   self.debug = false
+  @logger ||= ::Logger.new(STDOUT)
   
   VERSION = '0.8.1'
 end
