@@ -525,9 +525,7 @@ module Grit
     
       def look_for_commits(commit_sha, path, looking_for, options = {})        
         return [] if @already_searched[commit_sha] # to prevent rechecking branches
-        
-        puts looking_for.inspect
-        
+                
         @already_searched[commit_sha] = true
         
         commit = get_object_by_sha1(commit_sha)

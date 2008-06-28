@@ -148,7 +148,7 @@ if __FILE__ == $0
     end
     x.report('commit count') do
       i = Grit::GitRuby::FileIndex.new(repo)
-      puts i.count(commit)
+      i.count(commit)
     end
     x.report('commits list') do
       i = Grit::GitRuby::FileIndex.new(repo)

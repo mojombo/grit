@@ -76,15 +76,49 @@ module Grit
     end
     
     def blame_tree(commit, path = nil)
-      temp = Repository.new(@git_dir, :map_packfile => true)
-      temp.blame_tree(rev_parse({}, commit), path)
+      begin # try index file, sooooo much faster
+        index = FileIndex.new(@git_dir)
+        commits = index.last_commits(commit, looking_for(commit, path))
+        clean_paths(commits, path)
+      rescue
+        temp = Repository.new(@git_dir, :map_packfile => true)
+        temp.blame_tree(rev_parse({}, commit), path)
+      end
     end
     
     def ruby_git
       @ruby_git_repo ||= Repository.new(@git_dir)
     end
     
+    private
     
+      def looking_for(commit, path = nil)
+        tree_sha = ruby_git.get_subtree(rev_parse({}, commit), path)
+
+        looking_for = []
+        ruby_git.get_object_by_sha1(tree_sha).entry.each do |e|
+          if path && !(path == '' || path == '.' || path == './')
+            file = File.join(path, e.name)
+          else
+            file = e.name
+          end
+          looking_for << file
+        end
+        looking_for
+      end
+    
+      def clean_paths(commit_array, path)
+        return commit_array if !path || (path == '' || path == '.' || path == './')
+        
+        new_commits = {}
+        path_match = Regexp.new(path + '/')
+        commit_array.each do |file, sha|
+          amended = file.sub(path_match, '')
+          new_commits[amended] = sha
+        end
+        new_commits
+      end
+
     # TODO     
     # git grep -n 'foo' 'master'
     # git log --pretty='raw' --max-count='1' 'master' -- 'LICENSE'

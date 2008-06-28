@@ -25,7 +25,7 @@ class TestBlameTree < Test::Unit::TestCase
     commit = '2d3acf90f35989df8f262dc50beadc4ee3ae1560'
     tree = @git.blame_tree(commit, 'lib/grit')
     last_commit_sha = tree['diff.rb']
-    assert_equal last_commit_sha, '28e7a1d3dd172a8e757ff777ab205a538b80385e'
+    assert_equal last_commit_sha, '22825175e37f22c9418d756ca69b574d75602994'
   end
   
 end
