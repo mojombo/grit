@@ -165,12 +165,12 @@ class TestCommit < Test::Unit::TestCase
 
   def test_to_hash
     @c = Commit.create(@r, :id => '4c8124ffcf4039d292442eeccabdeca5af5c5017')
-
+    date = Time.parse('Wed Oct 10 03:06:12 -0400 2007')
     expected = {
       'parents' => ['id' => "634396b2f541a9f2d58b00be1a07f0c358b999b3"],
-      'committed_date' => "2007-10-10T00:06:12-07:00",
+      'committed_date' => date.xmlschema,
       'tree' => "672eca9b7f9e09c22dcb128c283e8c3c8d7697a4",
-      'authored_date' => "2007-10-10T00:06:12-07:00",
+      'authored_date' => date.xmlschema,
       'committer' => {'email' => "tom@mojombo.com", 'name' => "Tom Preston-Werner"},
       'message' => "implement Grit#heads",
       'author' => {'email' => "tom@mojombo.com", 'name' => "Tom Preston-Werner"},
