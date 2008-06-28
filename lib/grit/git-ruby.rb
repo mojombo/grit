@@ -1,4 +1,5 @@
 require 'grit/git-ruby/repository'
+require 'grit/git-ruby/file_index'
 
 module Grit
   
@@ -75,37 +76,8 @@ module Grit
     end
     
     def blame_tree(commit, path = nil)
-      #temp = Repository.new(@git_dir, :map_packfile => true)
-      #temp.blame_tree(rev_parse({}, commit), path)
-      
-      tree_sha = ruby_git.get_subtree(rev_parse({}, commit), path)
-      puts tree_sha
-      
-      call = ''
-      looking_for = []
-      ruby_git.get_object_by_sha1(tree_sha).entry.each do |e|
-        if path && !(path == '' || path == '.' || path == './')
-          file = File.join(path, e.name)
-        else
-          file = e.name
-        end
-        looking_for << file
-        call += "#{Git.git_binary} --git-dir='#{self.git_dir}' log --pretty=\"raw\" --max-count=1 -- #{file}\n"
-      end
-      
-      puts call if Grit.debug
-      response = wild_sh(call)
-      puts response if Grit.debug
-      response
-            
-      commits = Grit::Commit.list_from_string(@git_dir, response)
-
-      blame = {}
-      looking_for.each_with_index do |name, index|
-        blame[name] = commits[index]
-      end
-      
-      blame
+      temp = Repository.new(@git_dir, :map_packfile => true)
+      temp.blame_tree(rev_parse({}, commit), path)
     end
     
     def ruby_git

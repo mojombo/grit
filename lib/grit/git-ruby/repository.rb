@@ -514,6 +514,7 @@ module Grit
         @already_searched = {}
         commits = look_for_commits(commit_sha, path, looking_for)
         
+        # cleaning up array
         arr = {}
         commits.each do |commit_array|
           key = commit_array[0].gsub('./', '')
@@ -524,6 +525,8 @@ module Grit
     
       def look_for_commits(commit_sha, path, looking_for, options = {})        
         return [] if @already_searched[commit_sha] # to prevent rechecking branches
+        
+        puts looking_for.inspect
         
         @already_searched[commit_sha] = true
         
