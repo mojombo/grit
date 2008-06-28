@@ -8,7 +8,7 @@ module Grit
   # if it will be faster, or if the git binary is not available (!!TODO!!)
   module GitRuby
     
-    attr_accessor :ruby_git_repo
+    attr_accessor :ruby_git_repo, :git_file_index
     
     def cat_file(options, ref)
       if options[:t]
@@ -34,8 +34,15 @@ module Grit
     def rev_list(options, ref = 'master')
       options.delete(:skip) if options[:skip].to_i == 0
       allowed_options = [:max_count, :since, :until, :pretty]  # this is all I can do right now
-      if (options.size == 0) || ((options.keys - allowed_options).size > 0)
+      if ((options.keys - allowed_options).size > 0)
         return method_missing('rev-list', options, ref)
+      elsif (options.size == 0)
+        # pure rev-list
+        begin
+          return file_index.commits_from(rev_parse({}, ref)).join("\n")
+        rescue
+          return method_missing('rev-list', options, ref) 
+        end
       else
         return ruby_git.rev_list(rev_parse({}, ref), options)      
       end
@@ -76,14 +83,16 @@ module Grit
     end
     
     def blame_tree(commit, path = nil)
-      begin # try index file, sooooo much faster
-        index = FileIndex.new(@git_dir)
-        commits = index.last_commits(commit, looking_for(commit, path))
-        clean_paths(commits, path)
-      rescue
-        temp = Repository.new(@git_dir, :map_packfile => true)
-        temp.blame_tree(rev_parse({}, commit), path)
+      begin
+        commits = file_index.last_commits(rev_parse({}, commit), looking_for(commit, path))
+        clean_paths(commits)
+      rescue FileIndex::IndexFileNotFound
+        {}
       end
+    end
+    
+    def file_index
+      @git_file_index ||= FileIndex.new(@git_dir)
     end
     
     def ruby_git
@@ -102,19 +111,17 @@ module Grit
           else
             file = e.name
           end
+          file += '/' if e.type == :directory
           looking_for << file
         end
         looking_for
       end
     
-      def clean_paths(commit_array, path)
-        return commit_array if !path || (path == '' || path == '.' || path == './')
-        
+      def clean_paths(commit_array)
         new_commits = {}
-        path_match = Regexp.new(path + '/')
         commit_array.each do |file, sha|
-          amended = file.sub(path_match, '')
-          new_commits[amended] = sha
+          file = file.chop if file[file.size - 1 , 1] == '/'
+          new_commits[file] = sha
         end
         new_commits
       end

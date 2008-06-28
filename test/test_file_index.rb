@@ -37,9 +37,14 @@ class TestFileIndex < Test::Unit::TestCase
   
   def test_last_commits_pattern
     arr = @index.last_commits(@commit, /lib\/grit\/[^\/]*$/)
-    assert_equal 9, arr.size
+    assert_equal 10, arr.size
     assert_equal @commit, arr['lib/grit/commit.rb']
     assert_equal nil, arr['lib/grit/actor.rb']
+  end
+  
+  def test_last_commits_array
+    arr = @index.last_commits(@commit, ['lib/grit.rb', 'lib/grit/'])
+    assert_equal @commit, arr['lib/grit/']
   end
   
 end

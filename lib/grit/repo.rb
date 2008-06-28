@@ -94,7 +94,13 @@ module Grit
     
 
     def blame_tree(commit, path = nil)
-      self.git.blame_tree(commit, path)
+      commit_array = self.git.blame_tree(commit, path)
+      
+      final_array = {}
+      commit_array.each do |file, sha|
+        final_array[file] = commit(sha)
+      end
+      final_array
     end
     
     def status
