@@ -28,8 +28,11 @@ require 'grit/repo'
 require 'grit/index'
 
 module Grit
+  
   class << self
+    # Set +debug+ to true to log all git calls and responses
     attr_accessor :debug
+    # The standard +logger+ for debugging git calls - this defaults to a plain STDOUT logger
     attr_accessor :logger
     def log(str)
       logger.debug { str }
