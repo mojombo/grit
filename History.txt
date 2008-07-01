@@ -1,3 +1,6 @@
+== 0.8.2 / 2008-06-27
+  * Allow user provided logger (rsanheim)
+  
 == 0.8.0 / 2008-04-24
   * Lots of fixes and additions
 
