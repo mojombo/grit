@@ -56,16 +56,18 @@ module Grit
       
       call = "#{prefix}#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{postfix}"
       Grit.log(call) if Grit.debug
-      response = timeout ? sh(call) : wild_sh(call)
+      response, err = timeout ? sh(call) : wild_sh(call)
       Grit.log(response) if Grit.debug
+      Grit.log(err) if Grit.debug
       response
     end
 
     def sh(command)
-      ret, pid = nil, nil
-      Open4.popen4(command) do |id, _, io, _|
+      ret, pid, err = nil, nil, nil
+      Open4.popen4(command) do |id, _, stdout, stderr|
         pid = id
-        ret = Timeout.timeout(self.class.git_timeout) { io.read }
+        ret = Timeout.timeout(self.class.git_timeout) { stdout.read }
+        err = stderr.read
         @bytes_read += ret.size
 
         if @bytes_read > 5242880 # 5.megabytes
@@ -74,9 +76,9 @@ module Grit
           raise GitTimeout.new(command, bytes) 
         end
       end
-      ret
+      [ret, err]
     rescue Errno::ECHILD
-      ret
+      [ret, err]
     rescue Object => e
       Process.kill('KILL', pid) rescue nil
       bytes = @bytes_read
@@ -85,12 +87,14 @@ module Grit
     end
 
     def wild_sh(command)
-      ret = nil
-      Open4.popen4(command) {|pid, _, io, _|
-        ret = io.read
+      ret, err = nil, nil
+      Open4.popen4(command) {|pid, _, stdout, stderr|
+        ret = stdout.read
+        err = stderr.read
       }
+      [ret, err]
     rescue Errno::ECHILD
-      ret
+      [ret, err]
     end
 
     # Transform Ruby style options into git command line options
