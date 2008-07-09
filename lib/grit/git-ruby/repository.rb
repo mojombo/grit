@@ -11,7 +11,7 @@
 require 'grit/git-ruby/internal/raw_object'
 require 'grit/git-ruby/internal/pack'
 require 'grit/git-ruby/internal/loose'
-require 'grit/git-ruby/object'
+require 'grit/git-ruby/git_object'
 
 require 'rubygems'
 require 'diff/lcs'
@@ -27,6 +27,9 @@ module Grit
     class Repository
       
       class NoSuchShaFound < StandardError
+      end
+
+      class NoSuchPath < StandardError
       end
       
       attr_accessor :git_dir, :options
@@ -96,7 +99,7 @@ module Grit
       def get_object_by_sha1(sha1)
         r = get_raw_object_by_sha1(sha1)
         return nil if !r
-        Object.from_raw(r)
+        GitObject.from_raw(r)
       end
       
       # writes a raw object into the git repo
@@ -149,7 +152,7 @@ module Grit
       # ['blob']['FILENAME'] = {:mode => '100644', :sha => SHA}
       # ['tree']['DIRNAME'] = {:mode => '040000', :sha => SHA}
       def list_tree(sha)        
-        data = {'blob' => {}, 'tree' => {}}
+        data = {'blob' => {}, 'tree' => {}, 'link' => {}, 'commit' => {}}
         get_object_by_sha1(sha).entry.each do |e|
           data[e.format_type][e.name] = {:mode => e.format_mode, :sha => e.sha1}
         end 
@@ -176,6 +179,9 @@ module Grit
         o = get_raw_object_by_sha1(sha)
         if o.type == :commit
           tree = cat_file(get_object_by_sha1(sha).tree)
+        elsif o.type == :tag
+          commit_sha = get_object_by_sha1(sha).object
+          tree = cat_file(get_object_by_sha1(commit_sha).tree)
         else
           tree = cat_file(sha)
         end
@@ -192,6 +198,7 @@ module Grit
           if (last == '/') && (paths.size == 1)
             append = append ? File.join(append, paths.first) : paths.first
             dir_name = tree.split("\n").select { |p| p.split("\t")[1] == paths.first }.first
+            raise NoSuchPath if !dir_name
             next_sha = dir_name.split(' ')[2]
             tree = get_raw_tree(next_sha)
             tree = tree.split("\n")
@@ -208,6 +215,7 @@ module Grit
           else
             next_path = paths.shift
             dir_name = tree.split("\n").select { |p| p.split("\t")[1] == next_path }.first
+            raise NoSuchPath if !dir_name
             next_sha = dir_name.split(' ')[2]
             next_path = append ? File.join(append, next_path) : next_path
             if (last == '/')
@@ -264,7 +272,7 @@ module Grit
         
         log = log(sha, options)
         log = log.sort { |a, b| a[2] <=> b[2] }.reverse
-        
+                
         if end_sha
           log = truncate_arr(log, end_sha)
         end
@@ -282,9 +290,14 @@ module Grit
         @already_searched[sha] = true
         
         array = []          
-        if (sha)
+        if (sha)          
           o = get_raw_object_by_sha1(sha)
-          c = Object.from_raw(o)
+          if o.type == :tag
+            commit_sha = get_object_by_sha1(sha).object
+            c = get_object_by_sha1(commit_sha)
+          else
+            c = GitObject.from_raw(o)
+          end
 
           add_sha = true
           
@@ -347,7 +360,9 @@ module Grit
         else
           tree2 = get_object_by_sha1(commit_obj1.parent.first).tree
         end
+        
         qdiff = quick_diff(tree1, tree2)
+        
         qdiff.sort.each do |diff_arr|
           format, lines, output = :unified, 3, ''
           file_length_difference = 0
@@ -362,7 +377,7 @@ module Grit
           data_new = fileB.split(/\n/).map! { |e| e.chomp }
           
           diffs = Difference::LCS.diff(data_old, data_new)    
-          return if diffs.empty?
+          return '' if diffs.empty?
 
           header = 'diff --git a/' + diff_arr[0].gsub('./', '') + ' b/' + diff_arr[0].gsub('./', '')
           if options[:full_index]
@@ -402,6 +417,8 @@ module Grit
           patch << header + output.lstrip      
         end
         patch
+      rescue
+        '' # one of the trees was bad or lcs isn't there - no diff 
       end
       
       # takes 2 tree shas and recursively walks them to find out what
@@ -418,7 +435,7 @@ module Grit
          
          t1 = list_tree(tree1) if tree1
          t2 = list_tree(tree2) if tree2
-
+        
          # finding files that are different
          t1['blob'].each do |file, hsh|
            t2_file = t2['blob'][file] rescue nil
@@ -430,9 +447,9 @@ module Grit
            end
          end if t1
          t2['blob'].each do |file, hsh|
-           if !t1['blob'][file]
+           if !t1 || !t1['blob'][file]
              changed << [File.join(path, file), 'removed', nil, hsh[:sha]]
-           end if t1
+           end
          end if t2
 
          t1['tree'].each do |dir, hsh|
@@ -453,7 +470,7 @@ module Grit
            end
          end if t1
          t2['tree'].each do |dir, hsh|
-           t1_tree = t2['tree'][dir] rescue nil
+           t1_tree = t1['tree'][dir] rescue nil
            full = File.join(path, dir)
            if !t1_tree
              if recurse
@@ -585,22 +602,34 @@ module Grit
       
         def initpacks
           close
-          
           @packs = []
-          if f = File.exists?(git_path("objects/pack"))
-            Dir.open(git_path("objects/pack/")) do |dir|
-              dir.each do |entry|
-                if entry =~ /\.pack$/i
-                  pack = Grit::GitRuby::Internal::PackStorage.new(git_path("objects/pack/" + entry))
-                  if @options[:map_packfile]
-                    pack.cache_objects
-                  end
-                  @packs << pack
-                end
-              end
+          
+          load_packs(git_path("objects/pack"))
+
+          # load alternate packs, too
+          alt = git_path('objects/info/alternates')
+          if File.exists?(alt)
+            File.readlines(alt).each do |line|
+              full_pack = File.join(line.chomp, 'pack')
+              load_packs(full_pack)
             end
           end
+          
           @packs
+        end
+        
+        def load_packs(path)
+          return if !File.exists?(path)
+           Dir.open(path) do |dir|
+            dir.each do |entry|
+              next if !(entry =~ /\.pack$/i)
+              pack = Grit::GitRuby::Internal::PackStorage.new(File.join(path,entry))
+              if @options[:map_packfile]
+                pack.cache_objects
+              end
+              @packs << pack
+            end
+          end
         end
       
     end

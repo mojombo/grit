@@ -18,4 +18,14 @@ class TestHead < Test::Unit::TestCase
     head = @r.heads[1]
     assert_equal %Q{#<Grit::Head "test/chacon">}, head.inspect
   end
+
+  def test_head_count
+    assert_equal 4, @r.heads.size
+  end
+
+
+  def test_nonpack
+    assert @r.heads.map { |h| h.name }.include?('nonpack')
+  end
+
 end

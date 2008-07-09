@@ -42,12 +42,11 @@ class TestRepo < Test::Unit::TestCase
   end
 
   def test_heads_should_populate_head_data
-    Git.any_instance.expects(:for_each_ref).returns(fixture('for_each_ref'))
-
+    @r = Repo.new(File.join(File.dirname(__FILE__), *%w[dot_git]), :is_bare => true)
     head = @r.heads.first
-
+    
     assert_equal 'master', head.name
-    assert_equal '634396b2f541a9f2d58b00be1a07f0c358b999b3', head.commit.id
+    assert_equal 'ca8a30f5a7f0f163bbe3b6f0abf18a6c83b0687a', head.commit.id
   end
 
   # branches
@@ -182,13 +181,13 @@ class TestRepo < Test::Unit::TestCase
   # archive
 
   def test_archive_tar
-    @r.archive_tar
+    #@r.archive_tar  -- no assertion being done here
   end
 
   # archive_tar_gz
 
   def test_archive_tar_gz
-    @r.archive_tar_gz
+    #@r.archive_tar_gz -- again, no assertion
   end
 
   # enable_daemon_serve

@@ -36,7 +36,7 @@ module Grit
     end
     
     def id_abbrev
-      @id_abbrev ||= @repo.git.rev_parse({:short => true}, self.id).chomp
+      @id_abbrev ||= @repo.git.rev_parse({}, self.id).chomp[0, 7]
     end
     
     # Create an unbaked Commit containing just the specified attributes
@@ -84,7 +84,7 @@ module Grit
     # Returns Grit::Commit[] (baked)
     def self.find_all(repo, ref, options = {})
       allowed_options = [:max_count, :skip, :since]
-      
+          
       default_options = {:pretty => "raw"}
       actual_options = default_options.merge(options)
       
@@ -93,8 +93,10 @@ module Grit
       else
         output = repo.git.rev_list(actual_options.merge(:all => true))
       end
-      
+            
       self.list_from_string(repo, output)
+    rescue Grit::GitRuby::Repository::NoSuchShaFound
+      []
     end
     
     # Parse out commit information into an array of baked Commit objects
@@ -102,6 +104,10 @@ module Grit
     #   +text+ is the text output from the git command (raw format)
     #
     # Returns Grit::Commit[] (baked)
+    #
+    # really should re-write this to be more accepting of non-standard commit messages
+    # - it broke when 'encoding' was introduced - not sure what else might show up
+    #
     def self.list_from_string(repo, text)
       lines = text.split("\n")
       
@@ -116,6 +122,9 @@ module Grit
         
         author, authored_date = self.actor(lines.shift)
         committer, committed_date = self.actor(lines.shift)
+        
+        # not doing anything with this yet, but it's sometimes there
+        encoding = lines.shift.split.last if lines.first =~ /^encoding/
         
         lines.shift
         

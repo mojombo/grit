@@ -110,7 +110,7 @@ class TestRubyGit < Test::Unit::TestCase
   def test_rev_list_range
     range = '30e367cef2203eba2b341dc9050993b06fd1e108..3fa4e130fa18c92e3030d4accb5d3e0cadd40157'
     out = @git.rev_list({}, range)
-    assert_equal out, fixture('rev_list_range').chomp
+    assert_equal fixture('rev_list_range'), out
   end
 
   def test_ls_tree_paths_multi

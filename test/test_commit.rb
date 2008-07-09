@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/helper'
 
 class TestCommit < Test::Unit::TestCase
   def setup
-    @r = Repo.new(GRIT_REPO)
+    @r = Repo.new(File.join(File.dirname(__FILE__), *%w[dot_git]), :is_bare => true)
   end
   
   # __bake__
@@ -19,7 +19,6 @@ class TestCommit < Test::Unit::TestCase
   # short_name
   
   def test_id_abbrev
-    Git.any_instance.expects(:rev_parse).returns(fixture('rev_parse'))
     assert_equal '80f136f', @r.commit('80f136f500dfdb8c3e8abf4ae716f875f0a1b57f').id_abbrev
   end
   

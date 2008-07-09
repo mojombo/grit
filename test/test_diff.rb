@@ -10,7 +10,7 @@ class TestDiff < Test::Unit::TestCase
   def test_list_from_string_new_mode
     output = fixture('diff_new_mode')
     
-    diffs = Diff.list_from_string(@r, output)
+    diffs = Grit::Diff.list_from_string(@r, output)
     assert_equal 2, diffs.size
     assert_equal 10, diffs.first.diff.split("\n").size
     assert_equal nil, diffs.last.diff

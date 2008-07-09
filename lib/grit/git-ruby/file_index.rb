@@ -14,10 +14,12 @@
 module Grit
   module GitRuby
 
-  # class for author/committer/tagger lines
   class FileIndex
     
     class IndexFileNotFound < StandardError
+    end
+
+    class UnsupportedRef < StandardError
     end
     
     attr_reader :files
@@ -45,6 +47,8 @@ module Grit
     end
     
     def commits_from(commit_sha)
+      raise UnsupportedRef if commit_sha.is_a? Array
+      
       already = {}
       final = []
       left_to_do = [commit_sha]
@@ -61,7 +65,11 @@ module Grit
         end if commit
       end
 
-      final
+      sort_commits(final)
+    end
+    
+    def sort_commits(sha_array)
+      sha_array.sort { |a, b| @commit_order[b] <=> @commit_order[a] }
     end
     
     # returns files changed at commit sha
@@ -109,6 +117,7 @@ module Grit
         f = File.new(@index_file)
         @sha_count = 0
         @commit_index = {}
+        @commit_order = {}
         @all_files = {}
         while line = f.gets
           if /^(\w{40})/.match(line)
@@ -116,6 +125,7 @@ module Grit
             current_sha = shas.shift.first
             parents = shas.map { |sha| sha.first }
             @commit_index[current_sha] = {:files => [], :parents => parents }
+            @commit_order[current_sha] = @sha_count
             @sha_count += 1
           else
             file_name = line.chomp

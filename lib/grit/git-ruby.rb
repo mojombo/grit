@@ -16,7 +16,7 @@ module Grit
       elsif options[:s]
         file_size(ref)
       elsif options[:p]
-        ruby_git.cat_file(ref)
+        try_run { ruby_git.cat_file(ref) }
       end
     end
     
@@ -28,7 +28,7 @@ module Grit
 
     # git diff --full-index 'ec037431382e83c3e95d4f2b3d145afbac8ea55d' 'f1ec1aea10986159456846b8a05615b87828d6c6'
     def diff(options, sha1, sha2)
-      ruby_git.diff(sha1, sha2, options)
+      try_run { ruby_git.diff(sha1, sha2, options) }
     end
     
     def rev_list(options, ref = 'master')
@@ -44,7 +44,12 @@ module Grit
           return method_missing('rev-list', options, ref) 
         end
       else
-        return ruby_git.rev_list(rev_parse({}, ref), options)      
+        aref = rev_parse({}, ref)
+        if aref.is_a? Array
+          return method_missing('rev-list', options, ref) 
+        else
+          return try_run { ruby_git.rev_list(aref, options) }
+        end
       end
     end
     
@@ -67,19 +72,29 @@ module Grit
       head = File.join(@git_dir, 'refs', 'tags', string)
       return File.read(head).chomp if File.file?(head)
       
-      ## !! check packed-refs file, too !! 
+      ## check packed-refs file, too 
+      packref = File.join(@git_dir, 'packed-refs')
+      if File.file?(packref)
+        File.readlines(packref).each do |line|
+          if m = /^(\w{40}) (.*?)$/.match(line)
+            next if !Regexp.new(string + '$').match(m[2])
+            return m[1].chomp
+          end
+        end
+      end
+      
       ## !! more - partials and such !!
       
       # revert to calling git - grr
-      return method_missing('rev-parse', {}, string)
+      return method_missing('rev-parse', {}, string).chomp
     end
     
     def file_size(ref)
-      ruby_git.cat_file_size(ref).to_s
+      try_run { ruby_git.cat_file_size(ref).to_s }
     end
     
     def file_type(ref)
-      ruby_git.cat_file_type(ref)
+      try_run { ruby_git.cat_file_type(ref).to_s }
     end
     
     def blame_tree(commit, path = nil)
@@ -100,6 +115,26 @@ module Grit
     end
     
     private
+    
+      def try_run
+        ret = ''
+        Timeout.timeout(self.class.git_timeout) do
+          ret = yield
+        end
+        @bytes_read += ret.size
+
+        #if @bytes_read > 5242880 # 5.megabytes
+        #  bytes = @bytes_read
+        #  @bytes_read = 0
+        #  raise Grit::Git::GitTimeout.new(command, bytes) 
+        #end
+
+        ret
+      rescue Timeout::Error => e
+        bytes = @bytes_read
+        @bytes_read = 0
+        raise Grit::Git::GitTimeout.new(command, bytes)
+      end
     
       def looking_for(commit, path = nil)
         tree_sha = ruby_git.get_subtree(rev_parse({}, commit), path)

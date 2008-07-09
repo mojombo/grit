@@ -309,7 +309,6 @@ module Grit
 
     # run archive directly to a file
     def archive_to_file(treeish = 'master', prefix = nil, filename = 'archive.tar.gz')
-      Grit.debug = true
       options = {}
       options[:prefix] = prefix if prefix
       self.git.archive(options, treeish, "| gzip > #{filename}")
