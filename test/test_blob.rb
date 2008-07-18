@@ -7,6 +7,11 @@ class TestBlob < Test::Unit::TestCase
   end
   
   # blob
+  def test_nosuch_blob
+    t = @r.blob('blahblah')
+    puts t.data
+    assert t.is_a?(Blob)
+  end
   
   def test_data_should_return_blob_contents
     Git.any_instance.expects(:cat_file).returns(fixture('cat_file_blob'))

@@ -7,6 +7,11 @@ class TestTree < Test::Unit::TestCase
   end
   
   # contents
+  def test_nosuch_tree
+    t = @r.tree('blahblah')
+    assert t.contents.is_a?(Array)
+    assert t.is_a?(Tree)
+  end
   
   def test_contents_should_cache
     Git.any_instance.expects(:ls_tree).returns(
