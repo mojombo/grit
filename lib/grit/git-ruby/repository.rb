@@ -25,7 +25,7 @@ end
 module Grit
   module GitRuby
     class Repository
-      
+
       class NoSuchShaFound < StandardError
       end
 
@@ -41,7 +41,7 @@ module Grit
       
       # returns the loose objects object lazily
       def loose
-        @loose ||= Grit::GitRuby::Internal::LooseStorage.new(git_path("objects"))
+        @loose ||= initloose
       end
       
       # returns the array of pack list objects
@@ -77,8 +77,10 @@ module Grit
         end
 
         # try loose storage
-        o = loose[sha1]
-        return o if o
+        loose.each do |lsobj|
+          o = lsobj[sha1]
+          return o if o
+        end
 
         # try packs again, maybe the object got packed in the meantime
         initpacks
@@ -87,7 +89,7 @@ module Grit
           return o if o
         end
 
-        puts "*#{sha1o}*"
+#        puts "*#{sha1o}*"
         raise NoSuchShaFound
       end
 
@@ -104,7 +106,7 @@ module Grit
       
       # writes a raw object into the git repo
       def put_raw_object(content, type)
-        loose.put_raw_object(content, type)
+        loose.first.put_raw_object(content, type)
       end
       
       # returns true or false if that sha exists in the db
@@ -128,7 +130,9 @@ module Grit
       
       # returns true if the hex-packed sha is in the loose objects
       def in_loose?(sha_hex)
-        return true if loose[sha_hex]
+        loose.each do |lsobj|
+          return true if lsobj[sha_hex]
+        end
         false
       end
       
@@ -299,6 +303,8 @@ module Grit
             c = GitObject.from_raw(o)
           end
 
+          return [] if c.type != :commit
+          
           add_sha = true
           
           if opts[:since] && opts[:since].is_a?(Time) && (opts[:since] > c.committer.date)
@@ -377,7 +383,7 @@ module Grit
           data_new = fileB.split(/\n/).map! { |e| e.chomp }
           
           diffs = Difference::LCS.diff(data_old, data_new)    
-          return '' if diffs.empty?
+          next if diffs.empty?
 
           header = 'diff --git a/' + diff_arr[0].gsub('./', '') + ' b/' + diff_arr[0].gsub('./', '')
           if options[:full_index]
@@ -600,22 +606,46 @@ module Grit
 
       private 
       
+        def initloose
+          @loose = []
+          load_loose(git_path('objects'))
+          load_alternate_loose(git_path('objects'))
+          @loose
+        end
+        
+        def load_alternate_loose(path)
+          # load alternate loose, too
+          alt = File.join(path, 'info/alternates')
+          if File.exists?(alt)
+            File.readlines(alt).each do |line|
+              load_loose(line.chomp)
+              load_alternate_loose(line.chomp)
+            end
+          end
+        end
+      
+        def load_loose(path)
+          return if !File.exists?(path)
+          @loose << Grit::GitRuby::Internal::LooseStorage.new(path)
+        end
+        
         def initpacks
           close
           @packs = []
-          
           load_packs(git_path("objects/pack"))
-
-          # load alternate packs, too
-          alt = git_path('objects/info/alternates')
+          load_alternate_packs(git_path('objects'))
+          @packs
+        end
+      
+        def load_alternate_packs(path)
+          alt = File.join(path, 'info/alternates')
           if File.exists?(alt)
             File.readlines(alt).each do |line|
               full_pack = File.join(line.chomp, 'pack')
               load_packs(full_pack)
+              load_alternate_packs(File.join(line.chomp))
             end
           end
-          
-          @packs
         end
         
         def load_packs(path)

@@ -18,12 +18,16 @@ module Grit
       elsif options[:p]
         try_run { ruby_git.cat_file(ref) }
       end
+    rescue Grit::GitRuby::Repository::NoSuchShaFound
+      ''
     end
     
     # lib/grit/tree.rb:16:      output = repo.git.ls_tree({}, treeish, *paths)
     def ls_tree(options, treeish, *paths)
       sha = rev_parse({}, treeish)
       ruby_git.ls_tree(sha, paths.flatten)
+    rescue Grit::GitRuby::Repository::NoSuchShaFound
+      ''
     end
 
     # git diff --full-index 'ec037431382e83c3e95d4f2b3d145afbac8ea55d' 'f1ec1aea10986159456846b8a05615b87828d6c6'
@@ -76,8 +80,8 @@ module Grit
       packref = File.join(@git_dir, 'packed-refs')
       if File.file?(packref)
         File.readlines(packref).each do |line|
-          if m = /^(\w{40}) (.*?)$/.match(line)
-            next if !Regexp.new(string + '$').match(m[2])
+          if m = /^(\w{40}) refs\/.+?\/(.*?)$/.match(line)
+            next if !Regexp.new(string + '$').match(m[3])
             return m[1].chomp
           end
         end

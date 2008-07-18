@@ -45,8 +45,8 @@ class TestRepo < Test::Unit::TestCase
     @r = Repo.new(File.join(File.dirname(__FILE__), *%w[dot_git]), :is_bare => true)
     head = @r.heads.first
     
-    assert_equal 'master', head.name
-    assert_equal 'ca8a30f5a7f0f163bbe3b6f0abf18a6c83b0687a', head.commit.id
+    assert_equal 'test/master', head.name
+    assert_equal '2d3acf90f35989df8f262dc50beadc4ee3ae1560', head.commit.id
   end
 
   # branches
