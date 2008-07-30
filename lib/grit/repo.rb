@@ -247,10 +247,10 @@ module Grit
     #   Grit::Repo.init_bare('/var/git/myrepo.git')
     #
     # Returns Grit::Repo (the newly created repo)
-    def self.init_bare(path, options = {})
+    def self.init_bare(path, git_options = {}, repo_options = {})
       git = Git.new(path)
-      git.init(options)
-      self.new(path, options)
+      git.init(git_options)
+      self.new(path, repo_options)
     end
     
     # Fork a bare git repository from this repo
