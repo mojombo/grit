@@ -88,7 +88,7 @@ module Grit
     #
     # Returns Grit::Blob or Grit::Tree or nil if not found
     def /(file)
-      self.contents.select { |c| c.name == file }.first
+      self.contents.find { |c| c.name == file }
     end
     
     # Pretty object inspection
