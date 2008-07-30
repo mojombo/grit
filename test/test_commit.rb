@@ -174,8 +174,8 @@ class TestCommit < Test::Unit::TestCase
       'message' => "implement Grit#heads",
       'author' => {'email' => "tom@mojombo.com", 'name' => "Tom Preston-Werner"},
       'id' => "4c8124ffcf4039d292442eeccabdeca5af5c5017"
-    }
+    }.reject{|k,v| k =~ /date$/}
 
-    assert_equal expected, @c.to_hash
+    assert_equal expected, @c.to_hash.reject{|k,v| k =~ /date$/}
   end
 end
