@@ -1,5 +1,6 @@
 require 'grit/git-ruby/repository'
 require 'grit/git-ruby/file_index'
+require 'grit/git-ruby/commit_db'
 
 module Grit
   
