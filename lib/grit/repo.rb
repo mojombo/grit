@@ -250,7 +250,7 @@ module Grit
     def self.init_bare(path, options = {})
       git = Git.new(path)
       git.init(options)
-      self.new(path)
+      self.new(path, options)
     end
     
     # Fork a bare git repository from this repo
