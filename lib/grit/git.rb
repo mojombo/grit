@@ -46,6 +46,10 @@ module Grit
     #
     # Returns String
     def method_missing(cmd, options = {}, *args)
+      run('', cmd, '', options, args)
+    end
+
+    def run(prefix, cmd, postfix, options, args)
       timeout  = options.delete(:timeout)
       timeout  = true if timeout.nil?
 
