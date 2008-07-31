@@ -140,7 +140,7 @@ module Grit
     
     # An array of Commit objects representing the history of a given ref/commit
     #   +start+ is the branch/commit name (default 'master')
-    #   +max_count+ is the maximum number of commits to return (default 10)
+    #   +max_count+ is the maximum number of commits to return (default 10, use +false+ for all)
     #   +skip+ is the number of commits to skip (default 0)
     #
     # Returns Grit::Commit[] (baked)
