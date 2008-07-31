@@ -7,6 +7,7 @@ lib/grit.rb
 lib/grit/actor.rb
 lib/grit/blob.rb
 lib/grit/commit.rb
+lib/grit/commit_stats.rb
 lib/grit/config.rb
 lib/grit/diff.rb
 lib/grit/errors.rb
