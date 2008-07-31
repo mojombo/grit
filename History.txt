@@ -1,6 +1,13 @@
+== 0.8.3 / 2008-07-07
+  * Capture stderr and log if debug is true (rsanheim)
+  
+== 0.8.2 / 2008-06-27
+  * Allow user provided logger (rsanheim)
+  
 == 0.8.0 / 2008-04-24
   * Lots of fixes and additions
 
 == 0.7.0 / 2008-01-07
   * First public release!
 
+ 
