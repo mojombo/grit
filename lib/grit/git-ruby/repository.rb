@@ -281,6 +281,13 @@ module Grit
           log = truncate_arr(log, end_sha)
         end
         
+        # shorten the list if it's longer than max_count (had to get everything in branches)
+        if options[:max_count]
+          if (opt_len = options[:max_count].to_i) < log.size
+            log = log[0, opt_len]
+          end
+        end
+        
         if options[:pretty] == 'raw'
           log.map {|k, v| v }.join('')
         else
@@ -337,7 +344,7 @@ module Grit
                                         opts[:path_limiter])
                 add_sha = false 
               end
-              subarray += walk_log(psha, opts, (array.size + subarray.size + total_size)) 
+              subarray += walk_log(psha, opts, (array.size + total_size)) 
               next if opts[:first_parent]
             end
           
