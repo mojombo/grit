@@ -6,6 +6,7 @@ require 'time'
 
 # stdlib
 require 'timeout'
+require 'logger'
 
 # third party
 require 'rubygems'
@@ -32,13 +33,21 @@ require 'grit/status'
 
 
 module Grit
+  
   class << self
+    # Set +debug+ to true to log all git calls and responses
     attr_accessor :debug
     attr_accessor :use_git_ruby
+    # The standard +logger+ for debugging git calls - this defaults to a plain STDOUT logger
+    attr_accessor :logger
+    def log(str)
+      logger.debug { str }
+    end
   end
-  
   self.debug = false
   self.use_git_ruby = true
   
-  VERSION = '0.8.2'
+  @logger ||= ::Logger.new(STDOUT)
+  
+  VERSION = '0.9.1'
 end

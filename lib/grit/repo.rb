@@ -140,7 +140,7 @@ module Grit
     
     # An array of Commit objects representing the history of a given ref/commit
     #   +start+ is the branch/commit name (default 'master')
-    #   +max_count+ is the maximum number of commits to return (default 10)
+    #   +max_count+ is the maximum number of commits to return (default 10, use +false+ for all)
     #   +skip+ is the number of commits to skip (default 0)
     #
     # Returns Grit::Commit[] (baked)
@@ -247,10 +247,10 @@ module Grit
     #   Grit::Repo.init_bare('/var/git/myrepo.git')
     #
     # Returns Grit::Repo (the newly created repo)
-    def self.init_bare(path, options = {})
+    def self.init_bare(path, git_options = {}, repo_options = {})
       git = Git.new(path)
-      git.init(options)
-      self.new(path)
+      git.init(git_options)
+      self.new(path, repo_options)
     end
     
     # Fork a bare git repository from this repo
