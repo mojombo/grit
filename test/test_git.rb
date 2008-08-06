@@ -5,8 +5,26 @@ class TestGit < Test::Unit::TestCase
     @git = Git.new(File.join(File.dirname(__FILE__), *%w[..]))
   end
   
+  def teardown
+    Grit.debug = false
+  end
+  
   def test_method_missing
     assert_match(/^git version [\w\.]*$/, @git.version)
+  end
+  
+  def test_logs_stderr
+    Grit.debug = true
+    Grit.stubs(:log)
+    Grit.expects(:log).with(includes("git: 'bad' is not a git-command"))
+    @git.bad
+  end
+  
+  def testl_logs_stderr_when_skipping_timeout 
+    Grit.debug = true
+    Grit.stubs(:log)
+    Grit.expects(:log).with(includes("git: 'bad' is not a git-command"))
+    @git.bad :timeout => false
   end
   
   def test_transform_options
@@ -38,7 +56,7 @@ class TestGit < Test::Unit::TestCase
 
   def test_raises_on_slow_shell
     Grit::Git.git_timeout = 0.5
-    Open4.expects(:popen4).returns([ nil, nil, mock(:read => proc { sleep 1 }), nil ])
+    Open4.expects(:popen4).yields( nil, nil, mock(:read => proc { sleep 1 }), nil )
     assert_raises Grit::Git::GitTimeout do
       @git.something
     end
@@ -46,7 +64,7 @@ class TestGit < Test::Unit::TestCase
 
   def test_works_fine_if_quick
     output = 'output'
-    Open4.expects(:popen4).returns([ nil, nil, mock(:read => output), nil ])
+    Open4.expects(:popen4).yields( nil, nil, mock(:read => output), stub(:read => nil) )
     assert_equal output, @git.something
   end
 end
