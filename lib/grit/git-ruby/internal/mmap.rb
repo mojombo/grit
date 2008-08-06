@@ -9,17 +9,18 @@
 # provides native ruby access to git objects and pack files
 #
 
-begin
-  require 'mmap'
-rescue LoadError
-
 module Grit 
   module GitRuby 
     module Internal
       class Mmap
-        def initialize(file)
+        def initialize(file, version = 1)
           @file = file
           @offset = nil
+          if version == 2
+            @global_offset = 8
+          else
+            @global_offset = 0
+          end
         end
 
         def unmap
@@ -41,7 +42,7 @@ module Grit
             raise RuntimeError, "invalid index param: #{idx.class}"
           end
           if @offset != offset
-            @file.seek(offset)
+            @file.seek(offset + @global_offset)
           end
           @offset = offset + len ? len : 1
           if not len
@@ -54,6 +55,4 @@ module Grit
     end
   end 
 end
-
-end     # rescue LoadError
 

@@ -9,6 +9,19 @@ class TestRubyGit < Test::Unit::TestCase
     @blob_sha = '4232d073306f01cf0b895864e5a5cfad7dd76fce'
   end
 
+  def test_log_merge
+    c1 = '420eac97a826bfac8724b6b0eef35c20922124b7'
+    c2 = '30e367cef2203eba2b341dc9050993b06fd1e108'
+    out = @git.rev_list({:pretty => 'raw', :max_count => 10}, 'master')
+    assert_match "commit #{c1}", out
+    assert_match "commit #{c2}", out
+  end
+
+  def test_log_max_count
+    out = @git.rev_list({:max_count => 10}, 'master')
+    assert_equal 10, out.split("\n").size
+  end
+  
   def test_diff
     commit1 = '2d3acf90f35989df8f262dc50beadc4ee3ae1560'
     commit2 = '420eac97a826bfac8724b6b0eef35c20922124b7'

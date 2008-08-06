@@ -13,6 +13,9 @@ require 'zlib'
 require 'grit/git-ruby/internal/raw_object'
 require 'grit/git-ruby/internal/mmap'
 
+PACK_SIGNATURE = "PACK" 
+PACK_IDX_SIGNATURE = "\377tOc" 
+
 module Grit 
   module GitRuby 
     module Internal
@@ -27,30 +30,19 @@ module Grit
         SHA1Size = 20
         IdxOffsetSize = 4
         OffsetSize = 4
+        CrcSize = 4
         OffsetStart = FanOutCount * IdxOffsetSize
         SHA1Start = OffsetStart + OffsetSize
         EntrySize = OffsetSize + SHA1Size
+        EntrySizeV2 = SHA1Size + CrcSize + OffsetSize
 
         def initialize(file)
           if file =~ /\.idx$/
             file = file[0...-3] + 'pack'
           end
-          
-          @cache = {}
           @name = file
-          
-          with_idx do |idx|
-            @offsets = [0]
-            FanOutCount.times do |i|
-              pos = idx[i * IdxOffsetSize,IdxOffsetSize].unpack('N')[0]
-              if pos < @offsets[i]
-                raise PackFormatError, "pack #@name has discontinuous index #{i}"
-              end
-              @offsets << pos
-            end
-
-            @size = @offsets[-1]
-          end
+          @cache = {}
+          init_pack
         end
         
         def with_idx(index_file = nil)
@@ -60,7 +52,21 @@ module Grit
           else
             idxfile = File.open(index_file)
           end
-          idx = Mmap.new(idxfile)
+          
+          # read header
+          sig = idxfile.read(4)
+          ver = idxfile.read(4).unpack("N")[0]
+          
+          if sig == PACK_IDX_SIGNATURE
+            if(ver != 2)
+              raise PackFormatError, "pack #@name has unknown pack file version #{ver}"
+            end            
+            @version = 2
+          else
+            @version = 1
+          end
+                    
+          idx = Mmap.new(idxfile, @version)
           yield idx
           idx.unmap
           idxfile.close
@@ -70,31 +76,6 @@ module Grit
           packfile = File.open(@name)
           yield packfile
           packfile.close
-        end
-        
-        # given an index file, list out the shas that it's packfile contains
-        def self.get_shas(index_file)
-          with_idx(index_file) do |idx|
-            @offsets = [0]
-            FanOutCount.times do |i|
-              pos = idx[i * IdxOffsetSize,IdxOffsetSize].unpack('N')[0]
-              if pos < @offsets[i]
-                raise PackFormatError, "pack #@name has discontinuous index #{i}"
-              end
-              @offsets << pos
-            end
-        
-            @size = @offsets[-1]
-            shas = []
-          
-            pos = SHA1Start
-            @size.times do
-              sha1 = idx[pos,SHA1Size]
-              pos += EntrySize
-              shas << sha1.unpack("H*").first
-            end
-            shas
-          end
         end
         
         def cache_objects
@@ -117,6 +98,13 @@ module Grit
           # shouldnt be anything open now
         end
 
+        # given an index file, list out the shas that it's packfile contains
+        def get_shas
+          shas = []
+          each_sha1 { |sha| shas << sha.unpack("H*")[0] }
+          shas
+        end
+        
         def [](sha1)
           if obj = @cache[sha1]
             return obj 
@@ -128,31 +116,116 @@ module Grit
           return obj
         end
 
+        def init_pack
+          with_idx do |idx|
+            @offsets = [0]
+            FanOutCount.times do |i|
+              pos = idx[i * IdxOffsetSize,IdxOffsetSize].unpack('N')[0]
+              if pos < @offsets[i]
+                raise PackFormatError, "pack #@name has discontinuous index #{i}"
+              end
+              @offsets << pos
+            end
+            @size = @offsets[-1]
+          end
+        end
+        
         def each_entry
           with_idx do |idx|
-            pos = OffsetStart
-            @size.times do
-              offset = idx[pos,OffsetSize].unpack('N')[0]
-              sha1 = idx[pos+OffsetSize,SHA1Size]
-              pos += EntrySize
-              yield sha1, offset
+            if @version == 2
+              data = read_data_v2(idx)
+              data.each do |sha1, crc, offset|
+                yield sha1, offset
+              end
+            else
+              pos = OffsetStart
+              @size.times do
+                offset = idx[pos,OffsetSize].unpack('N')[0]
+                sha1 = idx[pos+OffsetSize,SHA1Size]
+                pos += EntrySize
+                yield sha1, offset
+              end
             end
           end
         end
-
+        
+        def read_data_v2(idx)
+          data = []
+          pos = OffsetStart
+          @size.times do |i|
+            data[i] = [idx[pos,SHA1Size], 0, 0]
+            pos += SHA1Size
+          end
+          @size.times do |i|
+            crc = idx[pos,CrcSize]
+            data[i][1] = crc
+            pos += CrcSize
+          end
+          @size.times do |i|
+            puts "#{i} : #{pos}"
+            offset = idx[pos,OffsetSize].unpack('N')[0]
+            data[i][2] = offset
+            pos += OffsetSize
+          end
+          data
+        end
+        private :read_data_v2
+        
         def each_sha1
           with_idx do |idx|
-            # unpacking the offset is quite expensive, so
-            # we avoid using #each
-            pos = SHA1Start
-            @size.times do
-              sha1 = idx[pos,SHA1Size]
-              pos += EntrySize
-              yield sha1
+            if @version == 2
+              data = read_data_v2(idx)
+              data.each do |sha1, crc, offset|
+                yield sha1
+              end
+            else
+              pos = SHA1Start
+              @size.times do
+                sha1 = idx[pos,SHA1Size]
+                pos += EntrySize
+                yield sha1
+              end
             end
           end
         end
 
+        def find_object_in_index(idx, sha1)
+          slot = sha1[0]
+          return nil if !slot
+          first, last = @offsets[slot,2] 
+          while first < last
+            mid = (first + last) / 2
+            if @version == 2
+              midsha1 = idx[OffsetStart + (mid * SHA1Size), SHA1Size]
+              cmp = midsha1 <=> sha1
+
+              if cmp < 0
+                first = mid + 1
+              elsif cmp > 0
+                last = mid
+              else
+                pos = OffsetStart + (@size * (SHA1Size + CrcSize)) + (mid * OffsetSize)
+                offset = idx[pos, OffsetSize].unpack('N')[0]
+                return offset
+              end
+            else
+              midsha1 = idx[SHA1Start + mid * EntrySize,SHA1Size]
+              cmp = midsha1 <=> sha1
+
+              if cmp < 0
+                first = mid + 1
+              elsif cmp > 0
+                last = mid
+              else
+                pos = OffsetStart + mid * EntrySize
+                offset = idx[pos,OffsetSize].unpack('N')[0]
+                return offset
+              end
+            end
+          end
+          nil
+        end
+        
         def find_object(sha1)
           obj = nil
           with_idx do |idx|
@@ -161,29 +234,7 @@ module Grit
           obj
         end    
         private :find_object
-
-        def find_object_in_index(idx, sha1)
-          slot = sha1[0]
-          return nil if !slot
-          first, last = @offsets[slot,2] 
-          while first < last
-            mid = (first + last) / 2
-            midsha1 = idx[SHA1Start + mid * EntrySize,SHA1Size]
-            cmp = midsha1 <=> sha1
-
-            if cmp < 0
-              first = mid + 1
-            elsif cmp > 0
-              last = mid
-            else
-              pos = OffsetStart + mid * EntrySize
-              offset = idx[pos,OffsetSize].unpack('N')[0]
-              return offset
-            end
-          end
-          nil
-        end
-
+        
         def parse_object(offset)
           obj = nil
           with_packfile do |packfile|
