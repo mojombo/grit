@@ -182,6 +182,10 @@ module Grit
     def to_s
       @id
     end
+
+    def sha
+      @id
+    end
     
     # Pretty object inspection
     def inspect

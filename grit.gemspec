@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name     = "grit"
-  s.version  = "0.9.1"
+  s.version  = "0.9.3"
   s.date     = "2008-04-24"
   s.summary  = "Object model interface to a git repo"
   s.email    = "tom@rubyisawesome.com"
