@@ -187,6 +187,10 @@ module Grit
       @id
     end
     
+    def date
+      @committed_date
+    end
+    
     # Pretty object inspection
     def inspect
       %Q{#<Grit::Commit "#{@id}">}

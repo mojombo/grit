@@ -625,6 +625,9 @@ module Grit
           alt = File.join(path, 'info/alternates')
           if File.exists?(alt)
             File.readlines(alt).each do |line|
+              if line[0, 2] == '..'
+                line = File.expand_path(File.join(@git_dir, line))
+              end
               load_loose(line.chomp)
               load_alternate_loose(line.chomp)
             end
@@ -648,6 +651,9 @@ module Grit
           alt = File.join(path, 'info/alternates')
           if File.exists?(alt)
             File.readlines(alt).each do |line|
+              if line[0, 2] == '..'
+                line = File.expand_path(File.join(@git_dir, line))
+              end
               full_pack = File.join(line.chomp, 'pack')
               load_packs(full_pack)
               load_alternate_packs(File.join(line.chomp))
