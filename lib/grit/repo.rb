@@ -5,6 +5,7 @@ module Grit
     
     # The path of the git repo as a String
     attr_accessor :path
+    attr_accessor :working_dir
     attr_reader :bare
     
     # The git command line interface object
@@ -22,6 +23,7 @@ module Grit
       epath = File.expand_path(path)
       
       if File.exist?(File.join(epath, '.git'))
+        self.working_dir = epath
         self.path = File.join(epath, '.git')
         @bare = false
       elsif File.exist?(epath) && (epath =~ /\.git$/ || options[:is_bare])
@@ -60,6 +62,10 @@ module Grit
     
     alias_method :branches, :heads
 
+    def is_head?(head_name)
+      heads.find { |h| h.name == head_name }
+    end
+    
     # Object reprsenting the current repo head.
     #
     # Returns Grit::Head (baked)

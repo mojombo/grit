@@ -162,7 +162,6 @@ module Grit
             pos += CrcSize
           end
           @size.times do |i|
-            puts "#{i} : #{pos}"
             offset = idx[pos,OffsetSize].unpack('N')[0]
             data[i][2] = offset
             pos += OffsetSize

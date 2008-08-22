@@ -28,6 +28,12 @@ class TestHead < Test::Unit::TestCase
     head = @r.heads[2]
     assert_equal %Q{#<Grit::Head "test/chacon">}, head.inspect
   end
+  
+  def test_is_head
+    assert @r.is_head?('master')
+    assert @r.is_head?('test/chacon')
+    assert !@r.is_head?('masterblah')
+  end
 
   def test_head_count
     assert_equal 5, @r.heads.size

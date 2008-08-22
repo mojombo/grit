@@ -7,21 +7,10 @@ class TestRubyGitIv2 < Test::Unit::TestCase
     @git = Grit::Repo.new(File.join(File.dirname(__FILE__), *%w[dot_git_iv2]), :is_bare => true)
     @rgit = @git.git.ruby_git
     @commit_sha = 'ca8a30f5a7f0f163bbe3b6f0abf18a6c83b0687a'
-    @tree_sha = 'cd7422af5a2e0fff3e94d6fb1a8fff03b2841881'
-    @blob_sha = '4232d073306f01cf0b895864e5a5cfad7dd76fce'
+    @tree_sha   = 'cd7422af5a2e0fff3e94d6fb1a8fff03b2841881'
+    @blob_sha   = '4232d073306f01cf0b895864e5a5cfad7dd76fce'
   end
-  
-=begin
-  def test_sha
-    i = 0
-    @rgit.packs[0].each_sha1 do |sha|
-      i += 1
-      sha = sha.unpack("H*")[0]
-      #puts "#{i} : #{sha}"
-    end
-  end
-=end
- 
+
   def test_basic
     assert @rgit.object_exists?(@commit_sha)
     assert_equal 10, @git.commits.size

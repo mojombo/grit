@@ -1,4 +1,5 @@
 require File.dirname(__FILE__) + '/helper'
+require 'tempfile'
 
 class TestRubyGit < Test::Unit::TestCase
   
@@ -9,6 +10,16 @@ class TestRubyGit < Test::Unit::TestCase
     @blob_sha = '4232d073306f01cf0b895864e5a5cfad7dd76fce'
   end
 
+  def test_init_gitdir
+    tf = Tempfile.new('gitdir')
+    temppath = tf.path
+    tf.unlink
+    
+    git = Git.new(temppath)
+    git.init({})
+    assert File.exists?(File.join(temppath, 'config'))
+  end
+  
   def test_log_merge
     c1 = '420eac97a826bfac8724b6b0eef35c20922124b7'
     c2 = '30e367cef2203eba2b341dc9050993b06fd1e108'

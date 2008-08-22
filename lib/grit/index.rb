@@ -1,11 +1,12 @@
 module Grit
   
   class Index
-    attr_accessor :repo, :tree
+    attr_accessor :repo, :tree, :current_tree
     
     def initialize(repo)
       self.repo = repo
       self.tree = {}
+      self.current_tree = nil
     end
     
     # Add a file to the index
@@ -28,12 +29,16 @@ module Grit
       current[filename] = data
     end
         
+    def read_tree(tree)
+      self.current_tree = self.repo.tree(tree)
+    end
+    
     # Commit the contents of the index
     #   +message+ is the commit message
     #
     # Returns a String of the SHA1 of the commit
-    def commit(message, parents = nil, actor = nil, last_tree = nil)
-      tree_sha1 = write_tree(self.tree)
+    def commit(message, parents = nil, actor = nil, last_tree = nil, head = 'master')
+      tree_sha1 = write_tree(self.tree, self.current_tree)
       return false if tree_sha1 == last_tree # don't write identical commits
       
       contents = []
@@ -60,7 +65,7 @@ module Grit
       commit_sha1 = self.repo.git.ruby_git.put_raw_object(contents.join("\n"), 'commit')      
       
       # self.repo.git.update_ref({}, 'HEAD', commit_sha1)
-      File.open(File.join(self.repo.path, 'refs', 'heads', 'master'), 'w') do |f|
+      File.open(File.join(self.repo.path, 'refs', 'heads', head), 'w') do |f|
         f.write(commit_sha1)
       end if commit_sha1
       
@@ -71,23 +76,35 @@ module Grit
     #   +tree+ is the tree
     #
     # Returns the SHA1 String of the tree
-    def write_tree(tree)
-      tree_contents = ''
+    def write_tree(tree, now_tree = nil)
+      tree_contents = {}
+            
+      # fill in original tree
+      now_tree.contents.each do |obj|
+        sha = [obj.id].pack("H*")
+        k = obj.name
+        k += '/' if (obj.class == Grit::Tree)
+        tree_contents[k] = "%s %s\0%s" % [obj.mode.to_s, obj.name, sha]
+      end if now_tree
+      
+      # overwrite with new tree contents
       tree.each do |k, v|
         case v
           when String:
             sha = write_blob(v)
             sha = [sha].pack("H*")
             str = "%s %s\0%s" % ['100644', k, sha]
-            tree_contents += str
+            tree_contents[k] = str
           when Hash:
-            sha = write_tree(v)
+            ctree = now_tree/k if now_tree
+            sha = write_tree(v, ctree)
             sha = [sha].pack("H*")
             str = "%s %s\0%s" % ['040000', k, sha]
-            tree_contents += str
+            tree_contents[k + '/'] = str
         end
       end
-      self.repo.git.ruby_git.put_raw_object(tree_contents, 'tree')
+      tr = tree_contents.sort.map { |k, v| v }.join('')
+      self.repo.git.ruby_git.put_raw_object(tr, 'tree')
     end
     
     # Write the blob to the index
