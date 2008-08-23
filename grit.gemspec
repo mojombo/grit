@@ -56,6 +56,7 @@ Gem::Specification.new do |s|
       "test/test_tree.rb"]
   s.rdoc_options = ["--main", "README.txt"]
   s.extra_rdoc_files = ["History.txt", "Manifest.txt", "README.txt"]
+  s.add_dependency("diff-lcs", ["> 0.0.0"])
   s.add_dependency("mime-types", ["> 0.0.0"])
   s.add_dependency("open4", ["> 0.0.0"])
 end
