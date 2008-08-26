@@ -65,7 +65,9 @@ module Grit
       commit_sha1 = self.repo.git.ruby_git.put_raw_object(contents.join("\n"), 'commit')      
       
       # self.repo.git.update_ref({}, 'HEAD', commit_sha1)
-      File.open(File.join(self.repo.path, 'refs', 'heads', head), 'w') do |f|
+      ref_heads = File.join(self.repo.path, 'refs', 'heads')
+      FileUtils.mkdir_p(ref_heads)
+      File.open(File.join(ref_heads, head), 'w') do |f|
         f.write(commit_sha1)
       end if commit_sha1
       
