@@ -30,6 +30,7 @@ require 'grit/config'
 require 'grit/repo'
 require 'grit/index'
 require 'grit/status'
+require 'grit/submodule'
 
 
 module Grit

@@ -50,12 +50,12 @@ class TestTree < Test::Unit::TestCase
     assert_equal "grit.rb", tree.name
   end
   
-  def test_content_from_string_tree_should_return_commit
-    text = fixture('ls_tree_commit').split("\n")[1]
+  def test_content_from_string_tree_should_return_submodule
+    text = fixture('ls_tree_submodule').split("\n").first
     
-    tree = @t.content_from_string(nil, text)
+    sm = @t.content_from_string(nil, text)
     
-    assert_nil tree
+    assert_kind_of Submodule, sm
   end
   
   def test_content_from_string_invalid_type_should_raise
@@ -82,7 +82,7 @@ class TestTree < Test::Unit::TestCase
     )
     tree = @r.tree('master')
     
-    assert_nil tree/'bar'
+    assert_equal 'd35b34c6e931b9da8f6941007a92c9c9a9b0141a', (tree/'bar').id
     assert_equal '2afb47bcedf21663580d5e6d2f406f08f3f65f19', (tree/'foo').id
     assert_equal 'f623ee576a09ca491c4a27e48c0dfe04be5f4a2e', (tree/'baz').id
   end

@@ -72,7 +72,7 @@ module Grit
         when "link"
           Blob.create(repo, :id => id, :mode => mode, :name => name)
         when "commit"
-          nil
+          Submodule.create(repo, :id => id, :mode => mode, :name => name)
         else
           raise "Invalid type: #{type}"
       end
@@ -88,7 +88,11 @@ module Grit
     #
     # Returns Grit::Blob or Grit::Tree or nil if not found
     def /(file)
-      self.contents.find { |c| c.name == file }
+      if file =~ /\//
+        file.split("/").inject(self) { |acc, x| acc/x } rescue nil
+      else
+        self.contents.find { |c| c.name == file }
+      end
     end
     
     # Pretty object inspection

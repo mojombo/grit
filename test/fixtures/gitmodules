@@ -1,0 +1,6 @@
+[submodule "god"]
+	path = god
+	url = git://github.com/mojombo/god
+[submodule "test/glowstick"]
+	path = test/glowstick
+	url = git://github.com/mojombo/glowstick

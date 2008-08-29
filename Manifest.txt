@@ -27,6 +27,7 @@ lib/grit/lazy.rb
 lib/grit/ref.rb
 lib/grit/repo.rb
 lib/grit/status.rb
+lib/grit/submodule.rb
 lib/grit/tag.rb
 lib/grit/tree.rb
 lib/grit.rb
