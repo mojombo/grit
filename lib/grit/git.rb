@@ -1,10 +1,3 @@
-trap("CHLD") do
-  begin
-    Process.wait(-1, Process::WNOHANG)
-  rescue Object
-  end
-end
-
 module Grit
   
   class Git
@@ -82,7 +75,6 @@ module Grit
     rescue Errno::ECHILD
       [ret, err]
     rescue Object => e
-      Process.kill('KILL', pid) rescue nil
       bytes = @bytes_read
       @bytes_read = 0
       raise GitTimeout.new(command, bytes)
@@ -90,10 +82,10 @@ module Grit
 
     def wild_sh(command)
       ret, err = nil, nil
-      Open4.popen4(command) {|pid, _, stdout, stderr|
+      Open4.popen4(command) do |pid, _, stdout, stderr|
         ret = stdout.read
         err = stderr.read
-      }
+      end
       [ret, err]
     rescue Errno::ECHILD
       [ret, err]
