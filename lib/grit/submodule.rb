@@ -66,6 +66,7 @@ module Grit
           config[current]['id'] = (commit.tree/current).id
         elsif line =~ /^\t(\w+) = (.+)$/
           config[current][$1] = $2
+          config[current]['id'] = (commit.tree/$2).id if $1 == 'path'
         else
           # ignore
         end
