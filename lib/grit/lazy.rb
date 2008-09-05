@@ -20,8 +20,10 @@ module Lazy
     args.each do |arg|
       ivar = "@#{arg}"
       define_method(arg) do
-        val = instance_variable_get(ivar) 
-        return val if val
+        if instance_variable_defined?(ivar)
+          val = instance_variable_get(ivar)
+          return val if val
+        end
         instance_variable_set(ivar, (@lazy_source ||= lazy_source).send(arg))
       end
     end
