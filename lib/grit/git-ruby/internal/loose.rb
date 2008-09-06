@@ -27,7 +27,8 @@ module Grit
         def [](sha1)
           sha1 = sha1.unpack("H*")[0]
           begin
-            path = @directory+'/'+sha1[0...2]+'/'+sha1[2..39]
+            return nil unless sha1[0...2] && sha1[2..39]
+            path = @directory + '/' + sha1[0...2] + '/' + sha1[2..39]
             get_raw_object(File.read(path))
           rescue Errno::ENOENT
             nil
