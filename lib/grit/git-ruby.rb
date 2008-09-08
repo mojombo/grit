@@ -66,7 +66,7 @@ module Grit
     end
     
     def rev_parse(options, string)
-      string = string.to_s
+      raise RuntimeError, "invalid string: #{string}" unless string.is_a?(String)
 
       if string =~ /\.\./
         (sha1, sha2) = string.split('..')
