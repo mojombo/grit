@@ -65,7 +65,9 @@ module Grit
       end
     end
     
-    def rev_parse(options, string)      
+    def rev_parse(options, string)
+      string = string.to_s
+
       if string =~ /\.\./
         (sha1, sha2) = string.split('..')
         return [rev_parse({}, sha1), rev_parse({}, sha2)]
