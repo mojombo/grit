@@ -89,7 +89,7 @@ module Grit
       if File.file?(packref)
         File.readlines(packref).each do |line|
           if m = /^(\w{40}) refs\/.+?\/(.*?)$/.match(line)
-            next if !Regexp.new(string + '$').match(m[3])
+            next if !Regexp.new(Regexp.escape(string) + '$').match(m[3])
             return m[1].chomp
           end
         end
