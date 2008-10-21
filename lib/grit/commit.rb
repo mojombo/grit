@@ -71,7 +71,7 @@ module Grit
     #
     # Returns Integer
     def self.count(repo, ref)
-      repo.git.rev_list({}, ref).strip.split("\n").size
+      repo.git.rev_list({}, ref).size / 41
     end
     
     # Find all commits matching the given criteria.

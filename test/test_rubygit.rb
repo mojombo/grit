@@ -128,7 +128,7 @@ class TestRubyGit < Test::Unit::TestCase
 
   def test_rev_list
     out = @git.rev_list({}, 'master')
-    assert_equal out, fixture('rev_list_lines').chomp
+    assert_equal out, fixture('rev_list_lines')
   end
   
   def test_rev_list_range
