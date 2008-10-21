@@ -19,7 +19,7 @@ module Grit
     end
   
     self.git_binary  = "/usr/bin/env git"
-    self.git_timeout = 5
+    self.git_timeout = 10
     
     attr_accessor :git_dir, :bytes_read
     
