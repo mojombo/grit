@@ -8,10 +8,15 @@ require 'time'
 require 'timeout'
 require 'logger'
 
+if defined? RUBY_ENGINE && RUBY_ENGINE == 'jruby'
+  require 'open3'
+else
+  require 'open3_detach'
+end
+
 # third party
 require 'rubygems'
 require 'mime/types'
-require 'open4'
 require 'digest/sha1'
 
 # internal requires
