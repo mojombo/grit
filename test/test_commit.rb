@@ -22,6 +22,12 @@ class TestCommit < Test::Unit::TestCase
     assert_equal '80f136f', @r.commit('80f136f500dfdb8c3e8abf4ae716f875f0a1b57f').id_abbrev
   end
   
+  # count
+  
+  def test_count
+    assert_equal 107, Commit.count(@r, 'master')
+  end
+  
   # diff
   
   def test_diff

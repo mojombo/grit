@@ -51,7 +51,7 @@ module Grit
       elsif (options.size == 0)
         # pure rev-list
         begin
-          return file_index.commits_from(rev_parse({}, ref)).join("\n")
+          return file_index.commits_from(rev_parse({}, ref)).join("\n") + "\n"
         rescue
           return method_missing('rev-list', options, ref) 
         end
