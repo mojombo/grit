@@ -7,11 +7,11 @@ require 'time'
 # stdlib
 require 'timeout'
 require 'logger'
+require 'open3'
 
 # third party
 require 'rubygems'
 require 'mime/types'
-require 'open4'
 require 'digest/sha1'
 
 # internal requires

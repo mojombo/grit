@@ -58,21 +58,23 @@ module Grit
     end
 
     def sh(command)
-      ret, pid, err = nil, nil, nil
-      Open4.popen4(command) do |id, _, stdout, stderr|
-        pid = id
-        ret = Timeout.timeout(self.class.git_timeout) { stdout.read }
-        err = stderr.read
-        @bytes_read += ret.size
+      ret, err = '', ''
+      Open3.popen3(command) do |_, stdout, stderr|
+        Timeout.timeout(self.class.git_timeout) do
+          while tmp = stdout.read(1024)
+            ret += tmp
+            if (@bytes_read += tmp.size) > 5242880 # 5.megabytes
+              bytes = @bytes_read
+              @bytes_read = 0
+              raise GitTimeout.new(command, bytes)
+            end
+          end
+        end
 
-        if @bytes_read > 5242880 # 5.megabytes
-          bytes = @bytes_read
-          @bytes_read = 0
-          raise GitTimeout.new(command, bytes) 
+        while tmp = stderr.read(1024)
+          err += tmp
         end
       end
-      [ret, err]
-    rescue Errno::ECHILD
       [ret, err]
     rescue Timeout::Error, Grit::Git::GitTimeout
       bytes = @bytes_read
@@ -81,13 +83,16 @@ module Grit
     end
 
     def wild_sh(command)
-      ret, err = nil, nil
-      Open4.popen4(command) do |pid, _, stdout, stderr|
-        ret = stdout.read
-        err = stderr.read
+      ret, err = '', ''
+      Open3.popen3(command) do |_, stdout, stderr|
+        while tmp = stdout.read(1024)
+          ret += tmp
+        end
+
+        while tmp = stderr.read(1024)
+          err += tmp
+        end
       end
-      [ret, err]
-    rescue Errno::ECHILD
       [ret, err]
     end
 
