@@ -7,7 +7,8 @@ require 'time'
 # stdlib
 require 'timeout'
 require 'logger'
-require 'open3'
+
+require 'open3_detach'
 
 # third party
 require 'rubygems'
