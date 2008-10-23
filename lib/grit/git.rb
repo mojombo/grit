@@ -74,12 +74,10 @@ module Grit
       [ret, err]
     rescue Errno::ECHILD
       [ret, err]
-    rescue Object => e
+    rescue Timeout::Error, Grit::Git::GitTimeout
       bytes = @bytes_read
       @bytes_read = 0
-      if %w( Timeout::Error Grit::Git::GitTimeout ).include?(e.class.to_s)
-        raise GitTimeout.new(command, bytes)
-      end
+      raise GitTimeout.new(command, bytes)
     end
 
     def wild_sh(command)
