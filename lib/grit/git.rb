@@ -77,7 +77,9 @@ module Grit
     rescue Object => e
       bytes = @bytes_read
       @bytes_read = 0
-      raise GitTimeout.new(command, bytes)
+      if %w( Timeout::Error Grit::Git::GitTimeout ).include?(e.class.to_s)
+        raise GitTimeout.new(command, bytes)
+      end
     end
 
     def wild_sh(command)
