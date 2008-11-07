@@ -23,7 +23,6 @@ Gem::Specification.new do |s|
 		"lib/grit/git-ruby/commit_db.rb", 
 		"lib/grit/git-ruby/file_index.rb", 
 		"lib/grit/git-ruby/git_object.rb", 
-		"lib/grit/git-ruby/internal", 
 		"lib/grit/git-ruby/internal/loose.rb", 
 		"lib/grit/git-ruby/internal/mmap.rb", 
 		"lib/grit/git-ruby/internal/pack.rb", 
@@ -38,6 +37,7 @@ Gem::Specification.new do |s|
 		"lib/grit/ref.rb", 
 		"lib/grit/repo.rb", 
 		"lib/grit/status.rb", 
+		"lib/grit/submodule.rb", 
 		"lib/grit/tag.rb", 
 		"lib/grit/tree.rb", 
 		"lib/grit.rb"]
