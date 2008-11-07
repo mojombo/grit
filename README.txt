@@ -1,5 +1,5 @@
 grit
-    by Tom Preston-Werner, Chris Wanstrath
+    by Tom Preston-Werner, Scott Chacon
     http://github.com/mojombo/grit
 
 == DESCRIPTION:
@@ -9,7 +9,7 @@ object oriented manner.
 
 == REQUIREMENTS:
 
-* git (http://git.or.cz) tested with 1.5.3.4
+* git (http://git-scm.com) tested with 1.6.0.2
 
 == INSTALL:
 
