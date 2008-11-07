@@ -7,6 +7,7 @@ require 'time'
 # stdlib
 require 'timeout'
 require 'logger'
+require 'digest/sha1'
 
 if defined? RUBY_ENGINE && RUBY_ENGINE == 'jruby'
   require 'open3'
@@ -17,7 +18,6 @@ end
 # third party
 require 'rubygems'
 require 'mime/types'
-require 'digest/sha1'
 
 # internal requires
 require 'grit/lazy'
