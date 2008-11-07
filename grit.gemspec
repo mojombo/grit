@@ -1,15 +1,14 @@
 Gem::Specification.new do |s|
   s.name     = "grit"
-  s.version  = "0.9.3"
-  s.date     = "2008-04-24"
+  s.version  = "0.9.4"
+  s.date     = "2008-11-07"
   s.summary  = "Object model interface to a git repo"
   s.email    = "tom@rubyisawesome.com"
-  s.homepage = "http://github.com/schacon/grit"
+  s.homepage = "http://github.com/mojombo/grit"
   s.description = "Grit is a Ruby library for extracting information from a git repository in and object oriented manner."
   s.has_rdoc = true
   s.authors  = ["Tom Preston-Werner", "Scott Chacon"]
   s.files    = ["History.txt", 
-		"Manifest.txt", 
 		"README.txt", 
 		"Rakefile", 
 		"grit.gemspec", 
