@@ -39,7 +39,8 @@ Gem::Specification.new do |s|
 		"lib/grit/submodule.rb", 
 		"lib/grit/tag.rb", 
 		"lib/grit/tree.rb", 
-		"lib/grit.rb"]
+		"lib/grit.rb",
+		"lib/open3_detach.rb"]
   s.test_files = ["test/test_actor.rb", 
       "test/test_blob.rb", "test/test_commit.rb", 
       "test/test_config.rb", 
