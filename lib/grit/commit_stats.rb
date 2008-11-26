@@ -115,6 +115,10 @@ module Grit
     def initialize(filename, additions, deletions, total=nil)
       @filename, @additions, @deletions = filename, additions, deletions
     end
+    
+    def net
+      additions - deletions
+    end
 
     def inspect
       "#{filename}: +#{additions} -#{deletions}"
