@@ -88,6 +88,13 @@ module Grit
       %Q{#<Grit::CommitStats "#{@id}">}
     end
     
+    # Convert to an easy-to-traverse structure
+    def to_diffstat
+      files.map do |metadata|
+        DiffStat.new(*metadata)
+      end
+    end
+    
     # private
     
     def to_hash
@@ -99,6 +106,19 @@ module Grit
         'total'     => total
       }
     end
+    
   end # CommitStats
+  
+  class DiffStat
+    attr_reader :filename, :additions, :deletions
+
+    def initialize(filename, additions, deletions, total=nil)
+      @filename, @additions, @deletions = filename, additions, deletions
+    end
+
+    def inspect
+      "#{filename}: +#{additions} -#{deletions}"
+    end
+  end
   
 end # Grit
