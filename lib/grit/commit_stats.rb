@@ -67,7 +67,7 @@ module Grit
         lines.shift while lines.first && lines.first.empty?
 
         files = []
-        while lines.first =~ /^(\d+)\s+(\d+)\s+(.+)/
+        while lines.first =~ /^([-\d]+)\s+([-\d]+)\s+(.+)/
           (additions, deletions, filename) = lines.shift.split
           additions = additions.to_i
           deletions = deletions.to_i
