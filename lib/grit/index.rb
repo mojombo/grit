@@ -29,12 +29,20 @@ module Grit
       current[filename] = data
     end
         
+    # Sets the current tree
+    #   +tree+ the branch/tag/sha... to use - a string
+    #
+    # Returns index (self)
     def read_tree(tree)
       self.current_tree = self.repo.tree(tree)
     end
     
     # Commit the contents of the index
-    #   +message+ is the commit message
+    #   +message+ is the commit message [nil]
+    #   +parents+ is one or more commits to attach this commit to to form a new head [nil]
+    #   +actor+ is the details of the user making the commit [nil]
+    #   +last_tree+ is a tree to compare with - to avoid making empty commits [nil]
+    #   +head+ is the branch to write this head to [master]
     #
     # Returns a String of the SHA1 of the commit
     def commit(message, parents = nil, actor = nil, last_tree = nil, head = 'master')
