@@ -13,6 +13,7 @@ module Grit
     
     # Create a new Repo instance
     #   +path+ is the path to either the root git directory or the bare git repo
+    #   +options+ :is_bare force to load a bare repo
     #
     # Examples
     #   g = Repo.new("/Users/tom/dev/grit")
@@ -37,7 +38,8 @@ module Grit
       
       self.git = Git.new(self.path)
     end
-    
+   
+    # Does nothing yet...
     def self.init(path)
       # !! TODO !!
       # create directory
@@ -102,7 +104,7 @@ module Grit
       self.git.add({}, *files.flatten)
     end
 
-    # Adds files to the index
+    # Remove files from the index
     def remove(*files)
       self.git.rm({}, *files.flatten)
     end
@@ -270,7 +272,7 @@ module Grit
     
     # Fork a bare git repository from this repo
     #   +path+ is the full path of the new repo (traditionally ends with /<name>.git)
-    #   +options+ is any additional options to the git clone command
+    #   +options+ is any additional options to the git clone command (:bare and :shared are true by default)
     #
     # Returns Grit::Repo (the newly forked repo)
     def fork_bare(path, options = {})
