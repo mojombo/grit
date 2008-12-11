@@ -21,6 +21,13 @@ module Grit
     self.git_binary  = "/usr/bin/env git"
     self.git_timeout = 10
     
+    def self.with_timeout(timeout = 10.seconds)
+      old_timeout = Grit::Git.git_timeout
+      Grit::Git.git_timeout = timeout
+      yield
+      Grit::Git.git_timeout = old_timeout
+    end
+    
     attr_accessor :git_dir, :bytes_read
     
     def initialize(git_dir)
@@ -43,12 +50,12 @@ module Grit
     end
 
     def run(prefix, cmd, postfix, options, args)
-      timeout  = options.delete(:timeout)
+      timeout  = options.delete(:timeout) rescue nil
       timeout  = true if timeout.nil?
 
       opt_args = transform_options(options)
       ext_args = args.reject { |a| a.empty? }.map { |a| (a == '--' || a[0].chr == '|') ? a : "'#{a}'" }
-      
+
       call = "#{prefix}#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{postfix}"
       Grit.log(call) if Grit.debug
       response, err = timeout ? sh(call) : wild_sh(call)

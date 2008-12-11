@@ -51,6 +51,11 @@ module Grit
     def description
       File.open(File.join(self.path, 'description')).read.chomp
     end
+
+    def blame(file, commit = nil)
+      Blame.new(self, file, commit)
+    end
+
     
     # An array of Head objects representing the branch heads in
     # this repo
@@ -62,8 +67,12 @@ module Grit
     
     alias_method :branches, :heads
 
-    def is_head?(head_name)
+    def get_head(head_name)
       heads.find { |h| h.name == head_name }
+    end
+    
+    def is_head?(head_name)
+      get_head(head_name)
     end
     
     # Object reprsenting the current repo head.
@@ -320,7 +329,6 @@ module Grit
       self.git.archive(options, treeish, "| gzip > #{filename}")
     end
 
-    
     # Enable git-daemon serving of this repository by writing the
     # git-daemon-export-ok file to its git directory
     #
@@ -376,6 +384,30 @@ module Grit
     
     def index
       Index.new(self)
+    end
+    
+    def update_ref(head, commit_sha)
+      return nil if !commit_sha || (commit_sha.size != 40)
+      
+      # check packed refs - remove head if it's there
+      packed_refs = File.join(self.path, 'packed-refs')
+      if File.file?(packed_refs)
+        pr = File.read(packed_refs)
+        refs = pr.split("\n")
+        refs = refs.reject { |ref| /[0-9a-z]{40} refs\/heads\/#{head}/.match(ref) }
+        pr = refs.join("\n")
+        File.open(packed_refs, 'w') do |f|
+          f.write(pr)
+        end
+      end
+   
+      ref_heads = File.join(self.path, 'refs', 'heads')
+      FileUtils.mkdir_p(ref_heads)
+      File.open(File.join(ref_heads, head), 'w') do |f|
+        f.write(commit_sha)
+      end
+      commit_sha
+
     end
     
     # Pretty object inspection

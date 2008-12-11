@@ -22,12 +22,18 @@ module Grit
     class UnsupportedRef < StandardError
     end
     
+    class << self
+      attr_accessor :max_file_size
+    end
+  
+    self.max_file_size = 10_000_000 # ~10M
+    
     attr_reader :files
     
     # initializes index given repo_path
     def initialize(repo_path)
       @index_file = File.join(repo_path, 'file-index')
-      if File.file?(@index_file)
+      if File.file?(@index_file) && (File.size(@index_file) < Grit::GitRuby::FileIndex.max_file_size)
         read_index
       else
         raise IndexFileNotFound
@@ -46,6 +52,7 @@ module Grit
       commits_from(commit_sha).size
     end
     
+    # builds a list of all commits reachable from a single commit
     def commits_from(commit_sha)
       raise UnsupportedRef if commit_sha.is_a? Array
       
@@ -69,7 +76,7 @@ module Grit
     end
     
     def sort_commits(sha_array)
-      sha_array.sort { |a, b| @commit_order[b] <=> @commit_order[a] }
+      sha_array.sort { |a, b| @commit_order[b].to_i <=> @commit_order[a].to_i }
     end
     
     # returns files changed at commit sha

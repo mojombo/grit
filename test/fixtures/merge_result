@@ -1,0 +1,76 @@
+require File.dirname(__FILE__) + '/helper'
+
+class TestRepo < Test::Unit::TestCase
+  def setup
+    @r = Repo.new(GRIT_REPO)
+  end
+  
+  # init_bar
+  
+  def test_init_bare
+    Git.any_instance.expects(:init).returns(true)
+    Repo.expects(:new).with("/foo/bar.git")
+    Repo.init_bare("/foo/bar.git")
+  end
+  
+<<<<<<< /var/folders/rX/rXo+hpkxGhuGDjRsHj5Plk+++TI/-Tmp-/merge1.584.1
+	def test_tree
+	  Git.any_instance.expects(:ls_tree).returns(fixture('ls_tree_a'))
+	  tree = @r.tree('master')
+  
+	  assert_equal 4, tree.contents.select { |c| c.instance_of?(Blob) }.size
+	  assert_equal 3, tree.contents.select { |c| c.instance_of?(Tree) }.size
+	end
+
+	# blob
+
+	def test_blob
+	  Git.any_instance.expects(:cat_file).returns(fixture('cat_file_blob'))
+	  blob = @r.blob("abc")
+	  assert_equal "Hello world", blob.data
+	end
+=======
+  def test_init_bare_with_options
+    Git.any_instance.expects(:init).with(
+      :template => "/baz/sweet").returns(true)
+    Repo.expects(:new).with("/foo/bar.git")
+    Repo.init_bare("/foo/bar.git", :template => "/baz/sweet")
+  end
+  
+  # fork_bare
+  
+  def test_fork_bare
+    Git.any_instance.expects(:clone).with(
+      {:bare => true, :shared => true}, 
+      '/Users/tom/dev/mojombo/grit/.git',
+      "/foo/bar.git").returns(nil)
+    Repo.expects(:new)
+      
+    @r.fork_bare("/foo/bar.git")
+  end
+  
+  def test_fork_bare_with_options
+    Git.any_instance.expects(:clone).with(
+      {:bare => true, :shared => true, :template => '/awesome'}, 
+      '/Users/tom/dev/mojombo/grit/.git',
+      "/foo/bar.git").returns(nil)
+    Repo.expects(:new)
+      
+    @r.fork_bare("/foo/bar.git", :template => '/awesome')
+  end
+>>>>>>> /var/folders/rX/rXo+hpkxGhuGDjRsHj5Plk+++TI/-Tmp-/merge3.584.1
+  # diff
+  
+  def test_diff
+    Git.any_instance.expects(:diff).with({}, 'master^', 'master', '--')
+    @r.diff('master^', 'master')
+    
+    Git.any_instance.expects(:diff).with({}, 'master^', 'master', '--', 'foo/bar')
+    @r.diff('master^', 'master', 'foo/bar')
+    
+    Git.any_instance.expects(:diff).with({}, 'master^', 'master', '--', 'foo/bar', 'foo/baz')
+    @r.diff('master^', 'master', 'foo/bar', 'foo/baz')
+  end
+  
+
+end

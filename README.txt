@@ -4,7 +4,7 @@ grit
 
 == DESCRIPTION:
 
-Grit is a Ruby library for extracting information from a git repository in and
+Grit is a Ruby library for extracting information from a git repository in an
 object oriented manner.
 
 == REQUIREMENTS:

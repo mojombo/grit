@@ -10,6 +10,7 @@ module Grit
     lazy_reader :committed_date
     lazy_reader :message
     lazy_reader :short_message
+    lazy_reader :author_string
     
     # Instantiate a new Commit
     #   +id+ is the id of the commit
@@ -205,7 +206,11 @@ module Grit
       m, actor, epoch = *line.match(/^.+? (.*) (\d+) .*$/)
       [Actor.from_string(actor), Time.at(epoch.to_i)]
     end
-
+    
+    def author_string
+      "%s <%s> %s %+05d" % [author.name, author.email, authored_date.to_i, 800]
+    end
+    
     def to_hash
       {
         'id'       => id,

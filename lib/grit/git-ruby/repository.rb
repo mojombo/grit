@@ -664,6 +664,7 @@ module Grit
       private 
       
         def initloose
+          @loaded = []
           @loose = []
           load_loose(git_path('objects'))
           load_alternate_loose(git_path('objects'))
@@ -675,6 +676,7 @@ module Grit
           alt = File.join(path, 'info/alternates')
           if File.exists?(alt)
             File.readlines(alt).each do |line|
+              next if @loaded.include?(line.chomp)
               if line[0, 2] == '..'
                 line = File.expand_path(File.join(@git_dir, line))
               end
@@ -685,12 +687,14 @@ module Grit
         end
       
         def load_loose(path)
+          @loaded << path
           return if !File.exists?(path)
           @loose << Grit::GitRuby::Internal::LooseStorage.new(path)
         end
         
         def initpacks
           close
+          @loaded_packs = []
           @packs = []
           load_packs(git_path("objects/pack"))
           load_alternate_packs(git_path('objects'))
@@ -705,6 +709,7 @@ module Grit
                 line = File.expand_path(File.join(@git_dir, line))
               end
               full_pack = File.join(line.chomp, 'pack')
+              next if @loaded_packs.include?(full_pack)
               load_packs(full_pack)
               load_alternate_packs(File.join(line.chomp))
             end
@@ -712,6 +717,7 @@ module Grit
         end
         
         def load_packs(path)
+          @loaded_packs << path
           return if !File.exists?(path)
            Dir.open(path) do |dir|
             dir.each do |entry|
