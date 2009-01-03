@@ -10,7 +10,7 @@ class TestTag < Test::Unit::TestCase
   def test_list_from_string
     tags = @r.tags
     
-    assert_equal 2, tags.size
+    assert_equal 1, tags.size
     assert_equal 'v0.7.0', tags.first.name
     assert_equal 'f0055fda16c18fd8b27986dbf038c735b82198d7', tags.first.commit.id
   end

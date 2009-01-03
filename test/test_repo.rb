@@ -83,7 +83,7 @@ class TestRepo < Test::Unit::TestCase
 
   def test_heads_should_populate_head_data
     @r = Repo.new(File.join(File.dirname(__FILE__), *%w[dot_git]), :is_bare => true)
-    head = @r.heads.first
+    head = @r.heads[1]
     
     assert_equal 'test/master', head.name
     assert_equal '2d3acf90f35989df8f262dc50beadc4ee3ae1560', head.commit.id
@@ -244,6 +244,11 @@ class TestRepo < Test::Unit::TestCase
     @r.disable_daemon_serve
   end
 
+  def test_gc_auto
+    Git.any_instance.expects(:gc).with({:auto => true})
+    @r.gc_auto
+  end
+  
   # alternates
 
   def test_alternates_with_two_alternates
@@ -290,8 +295,7 @@ class TestRepo < Test::Unit::TestCase
   end
 
   def test_alternates_setter_empty
-    File.expects(:delete)
-
+    File.any_instance.expects(:write)
     @r.alternates = []
   end
 

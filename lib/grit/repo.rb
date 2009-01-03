@@ -347,6 +347,10 @@ module Grit
       FileUtils.rm_f(File.join(self.path, DAEMON_EXPORT_FILE))
     end
     
+    def gc_auto
+      self.git.gc({:auto => true})
+    end
+    
     # The list of alternates for this repo
     #
     # Returns Array[String] (pathnames of alternates)
@@ -372,7 +376,9 @@ module Grit
       end
       
       if alts.empty?
-        File.delete(File.join(self.path, *%w{objects info alternates}))
+        File.open(File.join(self.path, *%w{objects info alternates}), 'w') do |f|
+          f.write ''
+        end
       else
         File.open(File.join(self.path, *%w{objects info alternates}), 'w') do |f|
           f.write alts.join("\n")
@@ -390,18 +396,6 @@ module Grit
     
     def update_ref(head, commit_sha)
       return nil if !commit_sha || (commit_sha.size != 40)
-      
-      # check packed refs - remove head if it's there
-      packed_refs = File.join(self.path, 'packed-refs')
-      if File.file?(packed_refs)
-        pr = File.read(packed_refs)
-        refs = pr.split("\n")
-        refs = refs.reject { |ref| /[0-9a-z]{40} refs\/heads\/#{head}/.match(ref) }
-        pr = refs.join("\n")
-        File.open(packed_refs, 'w') do |f|
-          f.write(pr)
-        end
-      end
    
       ref_heads = File.join(self.path, 'refs', 'heads')
       FileUtils.mkdir_p(ref_heads)
