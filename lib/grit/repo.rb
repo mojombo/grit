@@ -325,10 +325,11 @@ module Grit
     end
 
     # run archive directly to a file
-    def archive_to_file(treeish = 'master', prefix = nil, filename = 'archive.tar.gz')
+    def archive_to_file(treeish = 'master', prefix = nil, filename = 'archive.tar.gz', format = nil, pipe = "| gzip")
       options = {}
       options[:prefix] = prefix if prefix
-      self.git.archive(options, treeish, "| gzip > #{filename}")
+      options[:format] = format if format
+      self.git.archive(options, treeish, "#{pipe} > #{filename}")
     end
 
     # Enable git-daemon serving of this repository by writing the
