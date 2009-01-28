@@ -1,3 +1,7 @@
+== 1.0.0 / 2008-01-27
+  * Tons of awesome in here. Also, we suck at updating the history.
+  * Let's do better at that from now on.
+
 == 0.8.3 / 2008-07-07
   * Capture stderr and log if debug is true (rsanheim)
   
@@ -9,5 +13,3 @@
 
 == 0.7.0 / 2008-01-07
   * First public release!
-
- 

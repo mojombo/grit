@@ -1,16 +1,39 @@
-require 'rubygems'
-require 'hoe'
-require './lib/grit.rb'
+require 'rake'
+require 'rake/testtask'
+require 'rake/rdoctask'
 
-Hoe.new('grit', Grit::VERSION) do |p|
-  p.author = 'Tom Preston-Werner'
-  p.email = 'tom@rubyisawesome.com'
-  p.summary = 'Object model interface to a git repo'
-  p.description = p.paragraphs_of('README.txt', 2..2).join("\n\n")
-  p.url = p.paragraphs_of('README.txt', 0).first.split(/\n/)[2..-1].map { |u| u.strip }
-  p.changes = p.paragraphs_of('History.txt', 0..1).join("\n\n")
-  p.extra_deps << ['mime-types']
+begin
+  require 'jeweler'
+  Jeweler::Tasks.new do |s|
+    s.name = "grit"
+    s.summary = "Object model interface to a git repo"
+    s.email = "tom@mojombo.com"
+    s.homepage = "http://github.com/mojombo/grit"
+    s.description = "Object model interface to a git repo"
+    s.authors = ["Tom Preston-Werner", "Scott Chacon"]
+    s.add_dependency('mime-types', '>= 1.15')
+  end
+rescue LoadError
+  puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
 end
+
+Rake::TestTask.new do |t|
+  t.libs << 'lib'
+  t.pattern = 'test/**/test_*.rb'
+  t.verbose = false
+end
+
+Rake::RDocTask.new do |rdoc|
+  rdoc.rdoc_dir = 'rdoc'
+  rdoc.title    = 'grit'
+  rdoc.options << '--line-numbers' << '--inline-source'
+  rdoc.rdoc_files.include('README*')
+  rdoc.rdoc_files.include('lib/**/*.rb')
+end
+
+task :default => :test
+
+# custom
 
 desc "Open an irb session preloaded with this library"
 task :console do
