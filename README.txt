@@ -46,7 +46,7 @@ trees, blobs, etc.
 The first step is to create a Grit::Repo object to represent your repo. I
 include the Grit module so reduce typing.
 
-  require 'mojombo-grit'
+  require 'grit'
   include Grit
   repo = Repo.new("/Users/tom/dev/grit")
   
