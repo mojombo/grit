@@ -13,8 +13,17 @@ object oriented manner.
 
 == INSTALL:
 
+Easiest install is via RubyGems:
+
+  $ gem install grit
+
+or
+
   $ gem sources -a http://gems.github.com/ (you only need to do this once)
   $ gem install mojombo-grit
+
+The gem from GitHub will generally be available sooner than the gem from
+Rubyforge. Both sources will eventually contain the same releases.
 
 == SOURCE:
 
