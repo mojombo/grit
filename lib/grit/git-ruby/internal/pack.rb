@@ -48,9 +48,9 @@ module Grit
         def with_idx(index_file = nil)
           if !index_file
             index_file = @name
-            idxfile = File.open(@name[0...-4]+'idx')
+            idxfile = File.open(@name[0...-4]+'idx', 'rb')
           else
-            idxfile = File.open(index_file)
+            idxfile = File.open(index_file, 'rb')
           end
           
           # read header
@@ -73,7 +73,7 @@ module Grit
         end
         
         def with_packfile
-          packfile = File.open(@name)
+          packfile = File.open(@name, 'rb')
           yield packfile
           packfile.close
         end

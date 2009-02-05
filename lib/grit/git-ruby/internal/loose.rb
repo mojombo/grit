@@ -29,7 +29,7 @@ module Grit
           begin
             return nil unless sha1[0...2] && sha1[2..39]
             path = @directory + '/' + sha1[0...2] + '/' + sha1[2..39]
-            get_raw_object(File.read(path))
+            get_raw_object(File.open(path, 'rb').read)
           rescue Errno::ENOENT
             nil
           end
@@ -76,7 +76,7 @@ module Grit
             content = Zlib::Deflate.deflate(store)
           
             FileUtils.mkdir_p(@directory+'/'+sha1[0...2])
-            File.open(path, 'w') do |f|
+            File.open(path, 'wb') do |f|
               f.write content
             end
           end
