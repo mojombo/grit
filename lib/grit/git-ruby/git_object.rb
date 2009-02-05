@@ -115,7 +115,7 @@ module Grit
     def initialize(mode, filename, sha1o)
       @mode = 0
       mode.each_byte do |i|
-        @mode = (@mode << 3) | (i-'0'[0])
+        @mode = (@mode << 3) | (i-'0'.getord(0))
       end
       @name = filename
       @sha1 = sha1o

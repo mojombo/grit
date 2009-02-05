@@ -102,7 +102,7 @@ module Grit
         # private
         def unpack_object_header_gently(buf)
           used = 0
-          c = buf[used]
+          c = buf.getord(used)
           used += 1
 
           type = (c >> 4) & 7;
@@ -112,7 +112,7 @@ module Grit
             if buf.length <= used
               raise LooseObjectError, "object file too short"
             end
-            c = buf[used]
+            c = buf.getord(used)
             used += 1
 
             size += (c & 0x7f) << shift
@@ -127,8 +127,8 @@ module Grit
         private :unpack_object_header_gently
 
         def legacy_loose_object?(buf)
-          word = (buf[0] << 8) + buf[1]
-          buf[0] == 0x78 && word % 31 == 0
+          word = (buf.getord(0) << 8) + buf.getord(1)
+          buf.getord(0) == 0x78 && word % 31 == 0
         end
         private :legacy_loose_object?
       end

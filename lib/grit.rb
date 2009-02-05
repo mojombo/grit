@@ -19,6 +19,9 @@ end
 require 'rubygems'
 require 'mime/types'
 
+# ruby 1.9 compatibility
+require 'grit/ruby1.9'
+
 # internal requires
 require 'grit/lazy'
 require 'grit/errors'
