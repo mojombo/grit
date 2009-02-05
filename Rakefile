@@ -6,10 +6,10 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |s|
     s.name = "grit"
-    s.summary = "Object model interface to a git repo"
+    s.summary = "Grit is a Ruby library for extracting information from a git repository in an object oriented manner."
     s.email = "tom@mojombo.com"
     s.homepage = "http://github.com/mojombo/grit"
-    s.description = "Object model interface to a git repo"
+    s.description = "Grit is a Ruby library for extracting information from a git repository in an object oriented manner."
     s.authors = ["Tom Preston-Werner", "Scott Chacon"]
     s.add_dependency('mime-types', '>= 1.15')
   end
