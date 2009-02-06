@@ -17,6 +17,7 @@ end
 
 # third party
 require 'rubygems'
+gem "mime-types", ">=0"
 require 'mime/types'
 
 # ruby 1.9 compatibility
