@@ -55,7 +55,7 @@ class TestGit < Test::Unit::TestCase
   end
 
   def test_raises_on_slow_shell
-    Grit::Git.git_timeout = 0.001
+    Grit::Git.git_timeout = 0.0000001
     assert_raises Grit::Git::GitTimeout do
       @git.version
     end
