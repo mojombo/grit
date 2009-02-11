@@ -6,12 +6,14 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |s|
     s.name = "grit"
+    s.rubyforge_project = "grit"
     s.summary = "Grit is a Ruby library for extracting information from a git repository in an object oriented manner."
     s.email = "tom@mojombo.com"
     s.homepage = "http://github.com/mojombo/grit"
     s.description = "Grit is a Ruby library for extracting information from a git repository in an object oriented manner."
     s.authors = ["Tom Preston-Werner", "Scott Chacon"]
     s.add_dependency('mime-types', '>= 1.15')
+    s.add_dependency('diff-lcs', '>= 1.1.2')
   end
 rescue LoadError
   puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
