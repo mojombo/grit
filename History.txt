@@ -1,3 +1,7 @@
+== 1.0.2 / 2009-02-10
+  * Minor Enhancements
+    * Implement Grit.version to use VERSION.yml file
+
 == 1.0.1 / 2009-02-10
   * Bug Fixes
     * Add diff-lcs as a dependency

@@ -41,7 +41,6 @@ require 'grit/merge'
 
 
 module Grit
-  
   class << self
     # Set +debug+ to true to log all git calls and responses
     attr_accessor :debug
@@ -57,5 +56,8 @@ module Grit
   
   @logger ||= ::Logger.new(STDOUT)
   
-  VERSION = '1.0.0'
+  def self.version
+    yml = YAML.load(File.read(File.join(File.dirname(__FILE__), *%w[.. VERSION.yml])))
+    "#{yml[:major]}.#{yml[:minor]}.#{yml[:patch]}"
+  end
 end
