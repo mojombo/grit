@@ -4,7 +4,6 @@ module Grit
     def self.find_all(repo, options = {})
       refs = []
       already = {}
-      git_ruby_repo = GitRuby::Repository.new(repo.path)
 
       Dir.chdir(repo.path) do
         files = Dir.glob(prefix + '/**/*')
@@ -14,15 +13,7 @@ module Grit
 
           id = File.read(ref).chomp
           name = ref.sub("#{prefix}/", '')
-          object = git_ruby_repo.get_object_by_sha1(id)
-
-          if object.type == :commit
-            commit = Commit.create(repo, :id => id)
-          elsif object.type == :tag
-            commit = Commit.create(repo, :id => object.object)
-          else
-            raise "Unknown object type."
-          end
+          commit = commit_from_sha(repo, id)
 
           if !already[name]
             refs << self.new(name, commit)
@@ -31,11 +22,21 @@ module Grit
         end
 
         if File.file?('packed-refs')
-          File.readlines('packed-refs').each do |line|
+          lines = File.readlines('packed-refs')
+          lines.each_with_index do |line, i|
             if m = /^(\w{40}) (.*?)$/.match(line)
               next if !Regexp.new('^' + prefix).match(m[2])
               name = m[2].sub("#{prefix}/", '')
-              commit = Commit.create(repo, :id => m[1])
+
+              # Annotated tags in packed-refs include a reference
+              # to the commit object on the following line.
+              next_line = lines[i+1]
+              if next_line && next_line[0] == ?^
+                commit = Commit.create(repo, :id => lines[i+1][1..-1].chomp)
+              else
+                commit = commit_from_sha(repo, m[1])
+              end
+
               if !already[name]
                 refs << self.new(name, commit)
                 already[name] = true
@@ -46,6 +47,19 @@ module Grit
       end
 
       refs
+    end
+
+    def self.commit_from_sha(repo, id)
+      git_ruby_repo = GitRuby::Repository.new(repo.path)
+      object = git_ruby_repo.get_object_by_sha1(id)
+
+      if object.type == :commit
+        Commit.create(repo, :id => id)
+      elsif object.type == :tag
+        Commit.create(repo, :id => object.object)
+      else
+        raise "Unknown object type."
+      end
     end
   end
 

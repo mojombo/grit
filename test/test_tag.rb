@@ -10,7 +10,7 @@ class TestTag < Test::Unit::TestCase
   def test_list_from_string
     tags = @r.tags
 
-    assert_equal 3, tags.size
+    assert_equal 5, tags.size
     assert_equal 'not_annotated', tags[1].name
     assert_equal 'ca8a30f5a7f0f163bbe3b6f0abf18a6c83b0687a', tags[1].commit.id
   end
@@ -20,8 +20,8 @@ class TestTag < Test::Unit::TestCase
   def test_list_from_string_for_signed_tag
     tags = @r.tags
 
-    assert_equal 'v0.7.0', tags.last.name
-    assert_equal '7bcc0ee821cdd133d8a53e8e7173a334fef448aa', tags.last.commit.id
+    assert_equal 'v0.7.0', tags[2].name
+    assert_equal '7bcc0ee821cdd133d8a53e8e7173a334fef448aa', tags[2].commit.id
   end
 
   # list_from_string_for_annotated_tag
@@ -32,6 +32,25 @@ class TestTag < Test::Unit::TestCase
     assert_equal 'annotated', tags.first.name
     assert_equal 'ca8a30f5a7f0f163bbe3b6f0abf18a6c83b0687a', tags.first.commit.id
   end
+
+  # list_from_string_for_packed_tag
+
+  def test_list_from_string_for_packed_tag
+    tags = @r.tags
+
+    assert_equal 'packed', tags[4].name
+    assert_equal 'ca8a30f5a7f0f163bbe3b6f0abf18a6c83b0687a', tags[4].commit.id
+  end
+
+  # list_from_string_for_packed_annotated_tag
+
+  def test_list_from_string_for_packed_annotated_tag
+    tags = @r.tags
+
+    assert_equal 'packed_annotated', tags[3].name
+    assert_equal '7bcc0ee821cdd133d8a53e8e7173a334fef448aa', tags[3].commit.id
+  end
+
 
   # inspect
 
