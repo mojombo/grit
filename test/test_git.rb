@@ -76,4 +76,9 @@ class TestGit < Test::Unit::TestCase
     @git.expects(:sh).with("#{Git.git_binary} --git-dir='#{@git.git_dir}' foo 'bar' '\\; echo \\'noooo\\''")
     @git.foo({}, "bar", "; echo 'noooo'")
   end
+  
+  def test_piping_should_work_on_1_9
+    @git.expects(:sh).with("#{Git.git_binary} --git-dir='#{@git.git_dir}' archive 'master' | gzip")
+    @git.archive({}, "master", "| gzip")
+  end
 end
