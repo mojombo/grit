@@ -25,6 +25,7 @@ require 'grit/errors'
 require 'grit/git-ruby'
 require 'grit/git'
 require 'grit/ref'
+require 'grit/tag'
 require 'grit/commit'
 require 'grit/commit_stats'
 require 'grit/tree'
@@ -53,9 +54,9 @@ module Grit
   end
   self.debug = false
   self.use_git_ruby = true
-  
+
   @logger ||= ::Logger.new(STDOUT)
-  
+
   def self.version
     yml = YAML.load(File.read(File.join(File.dirname(__FILE__), *%w[.. VERSION.yml])))
     "#{yml[:major]}.#{yml[:minor]}.#{yml[:patch]}"

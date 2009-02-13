@@ -9,7 +9,7 @@ module Grit
       #   +options+ is a Hash of options
       #
       # Returns Grit::Ref[] (baked)
-      def find_all(repo, options = {})      
+      def find_all(repo, options = {})
         refs = []
         already = {}
         Dir.chdir(repo.path) do
@@ -37,9 +37,9 @@ module Grit
                 end
               end
             end
-          end          
+          end
         end
-                
+
         refs
       end
 
@@ -94,8 +94,6 @@ module Grit
 
   end # Head
 
-  class Tag < Ref ; end
-
   class Remote < Ref; end
-  
+
 end # Grit

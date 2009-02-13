@@ -1,71 +1,52 @@
 module Grit
-  
-  class Tag
-    attr_reader :name
-    attr_reader :commit
-    
-    # Instantiate a new Tag
-    #   +name+ is the name of the head
-    #   +commit+ is the Commit that the head points to
-    #
-    # Returns Grit::Tag (baked)
-    def initialize(name, commit)
-      @name = name
-      @commit = commit
-    end
-    
-    # Find all Tags
-    #   +repo+ is the Repo
-    #   +options+ is a Hash of options
-    #
-    # Returns Grit::Tag[] (baked)
+
+  class Tag < Ref
     def self.find_all(repo, options = {})
-      default_options = {:sort => "committerdate",
-                         :format => "%(refname)%00%(objectname)"}
-                         
-      actual_options = default_options.merge(options)
-      
-      output = repo.git.for_each_ref(actual_options, "refs/tags")
-                 
-      self.list_from_string(repo, output)
-    end
-    
-    # Parse out tag information into an array of baked Tag objects
-    #   +repo+ is the Repo
-    #   +text+ is the text output from the git command
-    #
-    # Returns Grit::Tag[] (baked)
-    def self.list_from_string(repo, text)
-      tags = []
-      
-      text.split("\n").each do |line|
-        tags << self.from_string(repo, line)
+      refs = []
+      already = {}
+      git_ruby_repo = GitRuby::Repository.new(repo.path)
+
+      Dir.chdir(repo.path) do
+        files = Dir.glob(prefix + '/**/*')
+
+        files.each do |ref|
+          next if !File.file?(ref)
+
+          id = File.read(ref).chomp
+          name = ref.sub("#{prefix}/", '')
+          object = git_ruby_repo.get_object_by_sha1(id)
+
+          if object.type == :commit
+            commit = Commit.create(repo, :id => id)
+          elsif object.type == :tag
+            commit = Commit.create(repo, :id => object.object)
+          else
+            raise "Unknown object type."
+          end
+
+          if !already[name]
+            refs << self.new(name, commit)
+            already[name] = true
+          end
+        end
+
+        if File.file?('packed-refs')
+          File.readlines('packed-refs').each do |line|
+            if m = /^(\w{40}) (.*?)$/.match(line)
+              next if !Regexp.new('^' + prefix).match(m[2])
+              name = m[2].sub("#{prefix}/", '')
+              commit = Commit.create(repo, :id => m[1])
+              if !already[name]
+                refs << self.new(name, commit)
+                already[name] = true
+              end
+            end
+          end
+        end
       end
-      
-      tags
+
+      refs
     end
-    
-    # Create a new Tag instance from the given string.
-    #   +repo+ is the Repo
-    #   +line+ is the formatted tag information
-    #
-    # Format
-    #   name: [a-zA-Z_/]+
-    #   <null byte>
-    #   id: [0-9A-Fa-f]{40}
-    #
-    # Returns Grit::Tag (baked)
-    def self.from_string(repo, line)
-      full_name, id = line.split("\0")
-      name = full_name.split("/").last
-      commit = Commit.create(repo, :id => id)
-      self.new(name, commit)
-    end
-    
-    # Pretty object inspection
-    def inspect
-      %Q{#<Grit::Tag "#{@name}">}
-    end
-  end # Tag
-  
-end # Grit
+  end
+
+end
