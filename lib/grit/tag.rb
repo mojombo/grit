@@ -32,7 +32,7 @@ module Grit
               # to the commit object on the following line.
               next_line = lines[i+1]
               if next_line && next_line[0] == ?^
-                commit = Commit.create(repo, :id => lines[i+1][1..-1].chomp)
+                commit = Commit.create(repo, :id => next_line[1..-1].chomp)
               else
                 commit = commit_from_sha(repo, m[1])
               end
