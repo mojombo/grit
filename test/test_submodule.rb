@@ -21,6 +21,19 @@ class TestSubmodule < Test::Unit::TestCase
     assert_equal "git://github.com/mojombo/god", config['god']['url']
   end
   
+  def test_config_with_windows_lineendings
+    data = fixture('gitmodules').gsub(/\n/, "\r\n")
+    blob = stub(:data => data, :id => 'abc')
+    tree = stub(:'/' => blob)
+    commit = stub(:tree => tree)
+    repo = stub(:commit => commit)
+    
+    config = Submodule.config(repo)
+    
+    assert_equal "git://github.com/mojombo/glowstick", config['test/glowstick']['url']
+    assert_equal "git://github.com/mojombo/god", config['god']['url']
+  end
+  
   def test_no_config
     tree = stub(:'/' => nil)
     commit = stub(:tree => tree)
