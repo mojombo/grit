@@ -11,7 +11,7 @@
 
 require 'zlib'
 require 'grit/git-ruby/internal/raw_object'
-require 'grit/git-ruby/internal/mmap'
+require 'grit/git-ruby/internal/file_window'
 
 PACK_SIGNATURE = "PACK" 
 PACK_IDX_SIGNATURE = "\377tOc" 
@@ -66,7 +66,7 @@ module Grit
             @version = 1
           end
                     
-          idx = Mmap.new(idxfile, @version)
+          idx = FileWindow.new(idxfile, @version)
           yield idx
           idx.unmap
           idxfile.close

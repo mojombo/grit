@@ -12,7 +12,7 @@
 module Grit 
   module GitRuby 
     module Internal
-      class Mmap
+      class FileWindow
         def initialize(file, version = 1)
           @file = file
           @offset = nil
