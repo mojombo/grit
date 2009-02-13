@@ -93,4 +93,9 @@ class TestTree < Test::Unit::TestCase
     @t = Tree.create(@r, :id => 'abc')
     assert_equal %Q{#<Grit::Tree "abc">}, @t.inspect
   end
+  
+  def test_basename
+    @t = Tree.create(@r, :name => 'foo/bar')
+    assert_equal "bar", @t.basename
+  end
 end

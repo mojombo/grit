@@ -61,4 +61,9 @@ class TestSubmodule < Test::Unit::TestCase
     @t = Submodule.create(@r, :id => 'abc')
     assert_equal %Q{#<Grit::Submodule "abc">}, @t.inspect
   end
+  
+  def test_basename
+    @submodule = Submodule.create(@r, :name => 'foo/bar')
+    assert_equal "bar", @submodule.basename
+  end
 end
