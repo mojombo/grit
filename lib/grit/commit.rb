@@ -1,5 +1,5 @@
 module Grit
-  
+
   class Commit
     attr_reader :id
     lazy_reader :parents
@@ -11,7 +11,7 @@ module Grit
     lazy_reader :message
     lazy_reader :short_message
     lazy_reader :author_string
-    
+
     # Instantiate a new Commit
     #   +id+ is the id of the commit
     #   +parents+ is an array of commit ids (will be converted into Commit instances)
@@ -35,11 +35,11 @@ module Grit
       @message = message.join("\n")
       @short_message = message[0] || ''
     end
-    
+
     def id_abbrev
       @id_abbrev ||= @repo.git.rev_parse({}, self.id).chomp[0, 7]
     end
-    
+
     # Create an unbaked Commit containing just the specified attributes
     #   +repo+ is the Repo
     #   +atts+ is a Hash of instance variable data
@@ -48,7 +48,7 @@ module Grit
     def self.create(repo, atts)
       self.allocate.create_initialize(repo, atts)
     end
-    
+
     # Initializer for Commit.create
     #   +repo+ is the Repo
     #   +atts+ is a Hash of instance variable data
@@ -61,11 +61,11 @@ module Grit
       end
       self
     end
-    
+
     def lazy_source
       self.class.find_all(@repo, @id, {:max_count => 1}).first
     end
-    
+
     # Count the number of commits reachable from this ref
     #   +repo+ is the Repo
     #   +ref+ is the ref from which to begin (SHA1 or name)
@@ -74,7 +74,7 @@ module Grit
     def self.count(repo, ref)
       repo.git.rev_list({}, ref).size / 41
     end
-    
+
     # Find all commits matching the given criteria.
     #   +repo+ is the Repo
     #   +ref+ is the ref from which to begin (SHA1 or name) or nil for --all
@@ -85,21 +85,21 @@ module Grit
     # Returns Grit::Commit[] (baked)
     def self.find_all(repo, ref, options = {})
       allowed_options = [:max_count, :skip, :since]
-          
+
       default_options = {:pretty => "raw"}
       actual_options = default_options.merge(options)
-      
+
       if ref
         output = repo.git.rev_list(actual_options, ref)
       else
         output = repo.git.rev_list(actual_options.merge(:all => true))
       end
-            
+
       self.list_from_string(repo, output)
     rescue Grit::GitRuby::Repository::NoSuchShaFound
       []
     end
-    
+
     # Parse out commit information into an array of baked Commit objects
     #   +repo+ is the Repo
     #   +text+ is the text output from the git command (raw format)
@@ -111,40 +111,40 @@ module Grit
     #
     def self.list_from_string(repo, text)
       lines = text.split("\n")
-      
+
       commits = []
-            
+
       while !lines.empty?
         id = lines.shift.split.last
         tree = lines.shift.split.last
-        
+
         parents = []
         parents << lines.shift.split.last while lines.first =~ /^parent/
-        
+
         author, authored_date = self.actor(lines.shift)
         committer, committed_date = self.actor(lines.shift)
-        
+
         # not doing anything with this yet, but it's sometimes there
         encoding = lines.shift.split.last if lines.first =~ /^encoding/
-        
+
         lines.shift
-        
+
         message_lines = []
         message_lines << lines.shift[4..-1] while lines.first =~ /^ {4}/
-        
+
         lines.shift while lines.first && lines.first.empty?
-        
+
         commits << Commit.new(repo, id, parents, tree, author, authored_date, committer, committed_date, message_lines)
       end
-      
+
       commits
     end
-    
+
     # Show diffs between two trees:
     #   +repo+ is the Repo
     #   +a+ is a named commit
-    #   +b+ is an optional named commit.  Passing an array assumes you 
-    #     wish to omit the second named commit and limit the diff to the 
+    #   +b+ is an optional named commit.  Passing an array assumes you
+    #     wish to omit the second named commit and limit the diff to the
     #     given paths.
     #   +paths* is an array of paths to limit the diff.
     #
@@ -175,10 +175,10 @@ module Grit
       if parents.empty?
         show
       else
-        self.class.diff(@repo, parents.first.id, @id) 
+        self.class.diff(@repo, parents.first.id, @id)
       end
     end
-    
+
     # Convert this Commit to a String which is just the SHA1 id
     def to_s
       @id
@@ -187,18 +187,22 @@ module Grit
     def sha
       @id
     end
-    
+
     def date
       @committed_date
     end
-    
+
+    def to_patch
+      @repo.git.format_patch({'1' => true, :stdout => true}, to_s)
+    end
+
     # Pretty object inspection
     def inspect
       %Q{#<Grit::Commit "#{@id}">}
     end
-    
+
     # private
-    
+
     # Parse out the actor (author or committer) info
     #
     # Returns [String (actor name and email), Time (acted at time)]
@@ -206,11 +210,11 @@ module Grit
       m, actor, epoch = *line.match(/^.+? (.*) (\d+) .*$/)
       [Actor.from_string(actor), Time.at(epoch.to_i)]
     end
-    
+
     def author_string
       "%s <%s> %s %+05d" % [author.name, author.email, authored_date.to_i, 800]
     end
-    
+
     def to_hash
       {
         'id'       => id,
@@ -230,5 +234,5 @@ module Grit
       }
     end
   end # Commit
-  
+
 end # Grit
