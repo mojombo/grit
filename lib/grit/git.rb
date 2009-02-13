@@ -35,6 +35,11 @@ module Grit
       self.bytes_read = 0
     end
     
+    def shell_escape(str)
+      str.to_s.gsub("'", "\\\\'").gsub(";", '\\;')
+    end
+    alias_method :e, :shell_escape
+    
     # Run the given git command with the specified arguments and return
     # the result as a String
     #   +cmd+ is the command
@@ -54,9 +59,9 @@ module Grit
       timeout  = true if timeout.nil?
 
       opt_args = transform_options(options)
-      ext_args = args.reject { |a| a.empty? }.map { |a| (a == '--' || a[0].chr == '|') ? a : "'#{a}'" }
+      ext_args = args.reject { |a| a.empty? }.map { |a| (a == '--' || a[0].chr == '|') ? a : "'#{e(a)}'" }
 
-      call = "#{prefix}#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{postfix}"
+      call = "#{prefix}#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
       Grit.log(call) if Grit.debug
       response, err = timeout ? sh(call) : wild_sh(call)
       Grit.log(response) if Grit.debug
@@ -116,14 +121,14 @@ module Grit
             args << "-#{opt}"
           else
             val = options.delete(opt)
-            args << "-#{opt.to_s} '#{val}'"
+            args << "-#{opt.to_s} '#{e(val)}'"
           end
         else
           if options[opt] == true
             args << "--#{opt.to_s.gsub(/_/, '-')}"
           else
             val = options.delete(opt)
-            args << "--#{opt.to_s.gsub(/_/, '-')}='#{val}'"
+            args << "--#{opt.to_s.gsub(/_/, '-')}='#{e(val)}'"
           end
         end
       end
