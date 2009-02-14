@@ -185,16 +185,15 @@ module Grit
       def get_raw_tree(sha)
         o = get_raw_object_by_sha1(sha)
         if o.type == :commit
-          tree = cat_file(get_object_by_sha1(sha).tree)
+          cat_file(get_object_by_sha1(sha).tree)
         elsif o.type == :tag
           commit_sha = get_object_by_sha1(sha).object
-          tree = cat_file(get_object_by_sha1(commit_sha).tree)
-        else
-          tree = cat_file(sha)
+          cat_file(get_object_by_sha1(commit_sha).tree)
+        elsif o.type == :tree
+          cat_file(sha)
         end
-        return tree
       end
-      
+
       # return array of tree entries
       ## TODO : refactor this to remove the fugly
       def ls_tree_path(sha, path, append = nil)
