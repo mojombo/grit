@@ -5,51 +5,50 @@ class TestBlob < Test::Unit::TestCase
     @r = Repo.new(GRIT_REPO)
     @b = Blob.allocate
   end
-  
+
   # blob
   def test_nosuch_blob
     t = @r.blob('blahblah')
-    puts t.data
     assert t.is_a?(Blob)
   end
-  
+
   def test_data_should_return_blob_contents
     Git.any_instance.expects(:cat_file).returns(fixture('cat_file_blob'))
     blob = Blob.create(@r, :id => 'abc')
     assert_equal "Hello world", blob.data
   end
-  
+
   def test_data_should_cache
     Git.any_instance.expects(:cat_file).returns(fixture('cat_file_blob')).times(1)
     blob = Blob.create(@r, :id => 'abc')
     blob.data
     blob.data
   end
-  
+
   # size
-  
+
   def test_size_should_return_file_size
     Git.any_instance.expects(:cat_file).returns(fixture('cat_file_blob_size'))
     blob = Blob.create(@r, :id => 'abc')
     assert_equal 11, blob.size
   end
-  
+
   # data
-  
+
   # mime_type
-  
+
   def test_mime_type_should_return_mime_type_for_known_types
     blob = Blob.create(@r, :id => 'abc', :name => 'foo.png')
     assert_equal "image/png", blob.mime_type
   end
-  
+
   def test_mime_type_should_return_text_plain_for_unknown_types
     blob = Blob.create(@r, :id => 'abc')
     assert_equal "text/plain", blob.mime_type
   end
-  
+
   # blame
-  
+
   def test_blame
     Git.any_instance.expects(:blame).returns(fixture('blame'))
     b = Blob.blame(@r, 'master', 'lib/grit.rb')
@@ -69,9 +68,9 @@ class TestBlob < Test::Unit::TestCase
     # c.expects(:__bake__).times(1)
     # assert_equal Tree, c.tree.class
   end
-  
+
   # inspect
-  
+
   def test_inspect
     @b = Blob.create(@r, :id => 'abc')
     assert_equal %Q{#<Grit::Blob "abc">}, @b.inspect
