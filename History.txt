@@ -1,3 +1,8 @@
+== 1.0.3 / 2009-02-13
+  * Minor Enhancements
+    * Added Grit::Commit#to_patch for plaintext formatted patches.
+    * Fixed Grit::Tag to work with annotated tags.
+
 == 1.0.2 / 2009-02-10
   * Minor Enhancements
     * Implement Grit.version to use VERSION.yml file
