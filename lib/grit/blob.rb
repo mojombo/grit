@@ -104,14 +104,19 @@ module Grit
             info = nil
         end
       end
-      
+
       blames
     end
-    
+
     # Pretty object inspection
     def inspect
       %Q{#<Grit::Blob "#{@id}">}
     end
+
+    # Compares blobs by name
+    def <=>(other)
+      name <=> other.name
+    end
   end # Blob
-  
+
 end # Grit
