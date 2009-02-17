@@ -94,11 +94,26 @@ module Grit
         self.contents.find { |c| c.name == file }
       end
     end
-    
+
     # Pretty object inspection
     def inspect
       %Q{#<Grit::Tree "#{@id}">}
     end
+
+    # Find only Tree objects from contents
+    def trees
+      contents.select {|v| v.kind_of? Tree}
+    end
+
+    # Find only Blob objects from contents
+    def blobs
+      contents.select {|v| v.kind_of? Blob}
+    end
+
+    # Compares trees by name
+    def <=>(other)
+      name <=> other.name
+    end
   end # Tree
-  
+
 end # Grit
