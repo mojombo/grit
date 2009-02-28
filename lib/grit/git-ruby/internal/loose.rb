@@ -29,7 +29,7 @@ module Grit
           begin
             return nil unless sha1[0...2] && sha1[2..39]
             path = @directory + '/' + sha1[0...2] + '/' + sha1[2..39]
-            get_raw_object(File.read(path))
+            get_raw_object(File.open(path, 'rb').read)
           rescue Errno::ENOENT
             nil
           end
@@ -76,7 +76,7 @@ module Grit
             content = Zlib::Deflate.deflate(store)
           
             FileUtils.mkdir_p(@directory+'/'+sha1[0...2])
-            File.open(path, 'w') do |f|
+            File.open(path, 'wb') do |f|
               f.write content
             end
           end
@@ -102,7 +102,7 @@ module Grit
         # private
         def unpack_object_header_gently(buf)
           used = 0
-          c = buf[used]
+          c = buf.getord(used)
           used += 1
 
           type = (c >> 4) & 7;
@@ -112,7 +112,7 @@ module Grit
             if buf.length <= used
               raise LooseObjectError, "object file too short"
             end
-            c = buf[used]
+            c = buf.getord(used)
             used += 1
 
             size += (c & 0x7f) << shift
@@ -127,8 +127,8 @@ module Grit
         private :unpack_object_header_gently
 
         def legacy_loose_object?(buf)
-          word = (buf[0] << 8) + buf[1]
-          buf[0] == 0x78 && word % 31 == 0
+          word = (buf.getord(0) << 8) + buf.getord(1)
+          buf.getord(0) == 0x78 && word % 31 == 0
         end
         private :legacy_loose_object?
       end

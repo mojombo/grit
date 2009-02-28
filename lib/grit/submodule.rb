@@ -54,7 +54,7 @@ module Grit
       blob = commit.tree/'.gitmodules'
       return {} unless blob
       
-      lines = blob.data.split("\n")
+      lines = blob.data.gsub(/\r\n?/, "\n" ).split("\n")
       
       config = {}
       current = nil
@@ -74,6 +74,10 @@ module Grit
       
       config
     end
+    
+    def basename
+      File.basename(name)
+    end    
     
     # Pretty object inspection
     def inspect

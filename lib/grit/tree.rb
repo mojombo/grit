@@ -95,6 +95,10 @@ module Grit
       end
     end
     
+    def basename
+      File.basename(name)
+    end
+    
     # Pretty object inspection
     def inspect
       %Q{#<Grit::Tree "#{@id}">}

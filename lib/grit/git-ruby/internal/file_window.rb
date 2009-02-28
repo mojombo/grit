@@ -12,7 +12,7 @@
 module Grit 
   module GitRuby 
     module Internal
-      class Mmap
+      class FileWindow
         def initialize(file, version = 1)
           @file = file
           @offset = nil
@@ -46,7 +46,7 @@ module Grit
           end
           @offset = offset + len ? len : 1
           if not len
-            @file.read(1)[0]
+            @file.read(1).getord(0)
           else
             @file.read(len)
           end

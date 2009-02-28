@@ -113,7 +113,7 @@ module Grit
     
     def blame_tree(commit, path = nil)
       begin
-        path = path.to_a.join('/').to_s + '/' if (path && path != '')
+        path = [path].join('/').to_s + '/' if (path && path != '')
         path = '' if !path.is_a? String
         commits = file_index.last_commits(rev_parse({}, commit), looking_for(commit, path))
         clean_paths(commits)

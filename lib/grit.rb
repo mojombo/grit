@@ -17,7 +17,11 @@ end
 
 # third party
 require 'rubygems'
+gem "mime-types", ">=0"
 require 'mime/types'
+
+# ruby 1.9 compatibility
+require 'grit/ruby1.9'
 
 # internal requires
 require 'grit/lazy'

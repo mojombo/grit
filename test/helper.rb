@@ -2,6 +2,7 @@ require File.join(File.dirname(__FILE__), *%w[.. lib grit])
 
 require 'rubygems'
 require 'test/unit'
+gem "mocha", ">=0"
 require 'mocha'
 
 GRIT_REPO = File.join(File.dirname(__FILE__), *%w[..])

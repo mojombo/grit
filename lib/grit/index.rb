@@ -93,12 +93,12 @@ module Grit
       # overwrite with new tree contents
       tree.each do |k, v|
         case v
-          when String:
+          when String
             sha = write_blob(v)
             sha = [sha].pack("H*")
             str = "%s %s\0%s" % ['100644', k, sha]
             tree_contents[k] = str
-          when Hash:
+          when Hash
             ctree = now_tree/k if now_tree
             sha = write_tree(v, ctree)
             sha = [sha].pack("H*")

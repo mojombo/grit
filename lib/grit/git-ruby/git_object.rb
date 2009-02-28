@@ -115,7 +115,7 @@ module Grit
     def initialize(mode, filename, sha1o)
       @mode = 0
       mode.each_byte do |i|
-        @mode = (@mode << 3) | (i-'0'[0])
+        @mode = (@mode << 3) | (i-'0'.getord(0))
       end
       @name = filename
       @sha1 = sha1o
@@ -179,8 +179,14 @@ module Grit
 
   def self.read_bytes_until(io, char)
     string = ''
-    while ((next_char = io.getc.chr) != char) && !io.eof
-      string += next_char
+    if RUBY_VERSION > '1.9'
+      while ((next_char = io.getc) != char) && !io.eof
+        string += next_char
+      end
+    else
+      while ((next_char = io.getc.chr) != char) && !io.eof
+        string += next_char
+      end
     end
     string
   end

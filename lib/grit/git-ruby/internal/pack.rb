@@ -11,7 +11,7 @@
 
 require 'zlib'
 require 'grit/git-ruby/internal/raw_object'
-require 'grit/git-ruby/internal/mmap'
+require 'grit/git-ruby/internal/file_window'
 
 PACK_SIGNATURE = "PACK" 
 PACK_IDX_SIGNATURE = "\377tOc" 
@@ -48,9 +48,9 @@ module Grit
         def with_idx(index_file = nil)
           if !index_file
             index_file = @name
-            idxfile = File.open(@name[0...-4]+'idx')
+            idxfile = File.open(@name[0...-4]+'idx', 'rb')
           else
-            idxfile = File.open(index_file)
+            idxfile = File.open(index_file, 'rb')
           end
           
           # read header
@@ -66,14 +66,14 @@ module Grit
             @version = 1
           end
                     
-          idx = Mmap.new(idxfile, @version)
+          idx = FileWindow.new(idxfile, @version)
           yield idx
           idx.unmap
           idxfile.close
         end
         
         def with_packfile
-          packfile = File.open(@name)
+          packfile = File.open(@name, 'rb')
           yield packfile
           packfile.close
         end
@@ -189,7 +189,7 @@ module Grit
         end
 
         def find_object_in_index(idx, sha1)
-          slot = sha1[0]
+          slot = sha1.getord(0)
           return nil if !slot
           first, last = @offsets[slot,2] 
           while first < last
@@ -248,13 +248,13 @@ module Grit
           obj_offset = offset
           packfile.seek(offset)
 
-          c = packfile.read(1)[0]
+          c = packfile.read(1).getord(0)
           size = c & 0xf
           type = (c >> 4) & 7
           shift = 4
           offset += 1
           while c & 0x80 != 0
-            c = packfile.read(1)[0]
+            c = packfile.read(1).getord(0)
             size |= ((c & 0x7f) << shift)
             shift += 7
             offset += 1
@@ -281,10 +281,10 @@ module Grit
 
           if type == OBJ_OFS_DELTA
             i = 0
-            c = data[i]
+            c = data.getord(i)
             base_offset = c & 0x7f
             while c & 0x80 != 0
-              c = data[i += 1]
+              c = data.getord(i += 1)
               base_offset += 1
               base_offset <<= 7
               base_offset |= c & 0x7f
@@ -335,18 +335,18 @@ module Grit
           dest_size, pos = patch_delta_header_size(delta, pos)
           dest = ""
           while pos < delta.size
-            c = delta[pos]
+            c = delta.getord(pos)
             pos += 1
             if c & 0x80 != 0
               pos -= 1
               cp_off = cp_size = 0
-              cp_off = delta[pos += 1] if c & 0x01 != 0
-              cp_off |= delta[pos += 1] << 8 if c & 0x02 != 0
-              cp_off |= delta[pos += 1] << 16 if c & 0x04 != 0
-              cp_off |= delta[pos += 1] << 24 if c & 0x08 != 0
-              cp_size = delta[pos += 1] if c & 0x10 != 0
-              cp_size |= delta[pos += 1] << 8 if c & 0x20 != 0
-              cp_size |= delta[pos += 1] << 16 if c & 0x40 != 0
+              cp_off = delta.getord(pos += 1) if c & 0x01 != 0
+              cp_off |= delta.getord(pos += 1) << 8 if c & 0x02 != 0
+              cp_off |= delta.getord(pos += 1) << 16 if c & 0x04 != 0
+              cp_off |= delta.getord(pos += 1) << 24 if c & 0x08 != 0
+              cp_size = delta.getord(pos += 1) if c & 0x10 != 0
+              cp_size |= delta.getord(pos += 1) << 8 if c & 0x20 != 0
+              cp_size |= delta.getord(pos += 1) << 16 if c & 0x40 != 0
               cp_size = 0x10000 if cp_size == 0
               pos += 1
               dest += base[cp_off,cp_size]
@@ -365,7 +365,7 @@ module Grit
           size = 0
           shift = 0
           begin
-            c = delta[pos]
+            c = delta.getord(pos)
             if c == nil
               raise PackFormatError, 'invalid delta header'
             end
