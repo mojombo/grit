@@ -1,6 +1,13 @@
 ==
+  * Major Enhancments
+    * Ruby 1.9 compatibility [github.com/chapados, github.com/js]
   * Minor Enhancements
     * Convert readme to markdown
+    * Added a shortcut for commit_stats as Commit#stats [github.com/js]
+    * Add a #basename method to Submodule, Blob and Tree for retrieving the name [github.com/js]
+    * Make Grit::Submodule grasp the concept of non-unix lineendings [github.com/js]
+    * Added Repo#commit_deltas_from [github.com/js]
+    * do some mild shell escaping when running commands [github.com/js]
 
 == 1.0.3 / 2009-02-13
   * Minor Enhancements
