@@ -62,12 +62,12 @@ module Grit
         lines.shift
         
         message_lines = []
-        message_lines << lines.shift[4..-1] while lines.first =~ /^ {4}/
+        message_lines << lines.shift[4..-1] while lines.first =~ /^ {4}/ || lines.first == ''
         
         lines.shift while lines.first && lines.first.empty?
 
         files = []
-        while lines.first =~ /^(\d+)\s+(\d+)\s+(.+)/
+        while lines.first =~ /^([-\d]+)\s+([-\d]+)\s+(.+)/
           (additions, deletions, filename) = lines.shift.split
           additions = additions.to_i
           deletions = deletions.to_i
@@ -88,6 +88,13 @@ module Grit
       %Q{#<Grit::CommitStats "#{@id}">}
     end
     
+    # Convert to an easy-to-traverse structure
+    def to_diffstat
+      files.map do |metadata|
+        DiffStat.new(*metadata)
+      end
+    end
+    
     # private
     
     def to_hash
@@ -99,6 +106,23 @@ module Grit
         'total'     => total
       }
     end
+    
   end # CommitStats
+  
+  class DiffStat
+    attr_reader :filename, :additions, :deletions
+
+    def initialize(filename, additions, deletions, total=nil)
+      @filename, @additions, @deletions = filename, additions, deletions
+    end
+    
+    def net
+      additions - deletions
+    end
+
+    def inspect
+      "#{filename}: +#{additions} -#{deletions}"
+    end
+  end
   
 end # Grit
