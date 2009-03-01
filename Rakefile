@@ -3,6 +3,7 @@ require 'rake/testtask'
 require 'rake/rdoctask'
 
 begin
+  require 'rubygems'
   require 'jeweler'
   Jeweler::Tasks.new do |s|
     s.name = "grit"
