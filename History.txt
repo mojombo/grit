@@ -8,6 +8,8 @@
     * Make Grit::Submodule grasp the concept of non-unix lineendings [github.com/js]
     * Added Repo#commit_deltas_from [github.com/js]
     * do some mild shell escaping when running commands [github.com/js]
+    * Added two shortcut methods to Tree, for picking trees/blobs only [github.com/Voker57]
+    * Added <=> method to Blob, needed for sorting tree [github.com/Voker57]
 
 == 1.0.3 / 2009-02-13
   * Minor Enhancements
