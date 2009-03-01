@@ -11,6 +11,7 @@
     * Added two shortcut methods to Tree, for picking trees/blobs only [github.com/Voker57]
     * Added <=> method to Blob, needed for sorting tree [github.com/Voker57]
     * Make the number of bytes to be read from git's stdout configurable [github.com/josb]
+    * Repo.archive_to_file accepts extra parameters making plain zipping possible [github.com/darwin]
 
 == 1.0.3 / 2009-02-13
   * Minor Enhancements
