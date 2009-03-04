@@ -2,17 +2,17 @@ module Grit
   
   class Diff
     attr_reader :a_path, :b_path
-    attr_reader :a_commit, :b_commit
+    attr_reader :a_blob, :b_blob
     attr_reader :a_mode, :b_mode
     attr_reader :new_file, :deleted_file
     attr_reader :diff
     
-    def initialize(repo, a_path, b_path, a_commit, b_commit, a_mode, b_mode, new_file, deleted_file, diff)
+    def initialize(repo, a_path, b_path, a_blob, b_blob, a_mode, b_mode, new_file, deleted_file, diff)
       @repo = repo
       @a_path = a_path
       @b_path = b_path
-      @a_commit = a_commit =~ /^0{40}$/ ? nil : Commit.create(repo, :id => a_commit)
-      @b_commit = b_commit =~ /^0{40}$/ ? nil : Commit.create(repo, :id => b_commit)
+      @a_blob = a_blob =~ /^0{40}$/ ? nil : Blob.create(repo, :id => a_blob)
+      @b_blob = b_blob =~ /^0{40}$/ ? nil : Blob.create(repo, :id => b_blob)
       @a_mode = a_mode
       @b_mode = b_mode
       @new_file = new_file
@@ -51,7 +51,7 @@ module Grit
           deleted_file = true
         end
         
-        m, a_commit, b_commit, b_mode = *lines.shift.match(%r{^index ([0-9A-Fa-f]+)\.\.([0-9A-Fa-f]+) ?(.+)?$})
+        m, a_blob, b_blob, b_mode = *lines.shift.match(%r{^index ([0-9A-Fa-f]+)\.\.([0-9A-Fa-f]+) ?(.+)?$})
         b_mode.strip! if b_mode
         
         diff_lines = []
@@ -60,7 +60,7 @@ module Grit
         end
         diff = diff_lines.join("\n")
         
-        diffs << Diff.new(repo, a_path, b_path, a_commit, b_commit, a_mode, b_mode, new_file, deleted_file, diff)
+        diffs << Diff.new(repo, a_path, b_path, a_blob, b_blob, a_mode, b_mode, new_file, deleted_file, diff)
       end
       
       diffs

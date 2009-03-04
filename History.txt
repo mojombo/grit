@@ -1,4 +1,6 @@
 ==
+  * Backwards breaking changes
+    * Diff#a_commit -> Diff#a_blob, Diff#b_commit -> Diff#b_blob
   * Major Enhancments
     * Ruby 1.9 compatibility [github.com/chapados, github.com/js]
   * Minor Enhancements

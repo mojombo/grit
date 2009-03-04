@@ -326,8 +326,8 @@ class TestRepo < Test::Unit::TestCase
     @r.git.expects(:rev_list).with({}, "master").returns(fixture("rev_list_delta_b"))
     other_repo.git.expects(:rev_list).with({}, "master").returns(fixture("rev_list_delta_a"))
     
-    delta_commits = @r.commit_deltas_from(other_repo)
-    assert_equal 0, delta_commits.size
+    delta_blobs = @r.commit_deltas_from(other_repo)
+    assert_equal 0, delta_blobs.size
   end
   
   def test_commit_deltas_from_when_other_has_new
@@ -341,7 +341,7 @@ class TestRepo < Test::Unit::TestCase
     ].each do |ref|
       Commit.expects(:find_all).with(other_repo, ref, :max_count => 1).returns([stub()])
     end
-    delta_commits = @r.commit_deltas_from(other_repo)
-    assert_equal 3, delta_commits.size
+    delta_blobs = @r.commit_deltas_from(other_repo)
+    assert_equal 3, delta_blobs.size
   end
 end
