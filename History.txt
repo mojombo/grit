@@ -1,4 +1,4 @@
-==
+== 1.1.0 / 2009-03-29
   * Backwards breaking changes
     * Diff#a_commit -> Diff#a_blob, Diff#b_commit -> Diff#b_blob
   * Major Enhancments
