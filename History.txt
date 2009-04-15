@@ -1,3 +1,7 @@
+== 1.1.1 / 2009-03-31
+  * Changes
+    * Don't include test directory in gem package (it's too big)
+
 == 1.1.0 / 2009-03-29
   * Backwards breaking changes
     * Diff#a_commit -> Diff#a_blob, Diff#b_commit -> Diff#b_blob
