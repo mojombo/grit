@@ -81,4 +81,24 @@ class TestGit < Test::Unit::TestCase
     @git.expects(:sh).with("#{Git.git_binary} --git-dir='#{@git.git_dir}' archive 'master' | gzip")
     @git.archive({}, "master", "| gzip")
   end
+  
+  def test_fs_read
+    f = stub
+    f.expects(:read).returns('bar')
+    File.expects(:open).with(File.join(@git.git_dir, 'foo')).returns(f)
+    assert_equal 'bar', @git.fs_read('foo')
+  end
+  
+  def test_fs_write
+    f = stub
+    f.expects(:write).with('baz')
+    FileUtils.expects(:mkdir_p).with(File.join(@git.git_dir, 'foo'))
+    File.expects(:open).with(File.join(@git.git_dir, 'foo/bar'), 'w').yields(f)
+    @git.fs_write('foo/bar', 'baz')
+  end
+  
+  def test_fs_delete
+    FileUtils.expects(:rm_f).with(File.join(@git.git_dir, 'foo'))
+    @git.fs_delete('foo')
+  end
 end

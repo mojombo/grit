@@ -51,7 +51,7 @@ module Grit
     #
     # Returns String
     def description
-      File.open(File.join(self.path, 'description')).read.chomp
+      self.git.fs_read('description').chomp
     end
 
     def blame(file, commit = nil)
@@ -358,7 +358,7 @@ module Grit
     #
     # Returns nothing
     def enable_daemon_serve
-      FileUtils.touch(File.join(self.path, DAEMON_EXPORT_FILE))
+      self.git.fs_write(DAEMON_EXPORT_FILE, '')
     end
     
     # Disable git-daemon serving of this repository by ensuring there is no
@@ -366,7 +366,7 @@ module Grit
     #
     # Returns nothing
     def disable_daemon_serve
-      FileUtils.rm_f(File.join(self.path, DAEMON_EXPORT_FILE))
+      self.git.fs_delete(DAEMON_EXPORT_FILE)
     end
     
     def gc_auto
@@ -398,13 +398,9 @@ module Grit
       end
       
       if alts.empty?
-        File.open(File.join(self.path, *%w{objects info alternates}), 'w') do |f|
-          f.write ''
-        end
+        self.git.fs_write('objects/info/alternates', '')
       else
-        File.open(File.join(self.path, *%w{objects info alternates}), 'w') do |f|
-          f.write alts.join("\n")
-        end
+        self.git.fs_write('objects/info/alternates', alts.join("\n"))
       end
     end
     
@@ -418,14 +414,8 @@ module Grit
     
     def update_ref(head, commit_sha)
       return nil if !commit_sha || (commit_sha.size != 40)
-   
-      ref_heads = File.join(self.path, 'refs', 'heads')
-      FileUtils.mkdir_p(ref_heads)
-      File.open(File.join(ref_heads, head), 'w') do |f|
-        f.write(commit_sha)
-      end
+      self.git.fs_write("refs/heads/#{head}", commit_sha)
       commit_sha
-
     end
     
     # Pretty object inspection

@@ -41,6 +41,35 @@ module Grit
     end
     alias_method :e, :shell_escape
     
+    # Read a normal file from the filesystem.
+    #   +file+ is the relative path from the Git dir
+    #
+    # Returns the String contents of the file
+    def fs_read(file)
+      File.open(File.join(self.git_dir, file)).read
+    end
+    
+    # Write a normal file to the filesystem.
+    #   +file+ is the relative path from the Git dir
+    #   +contents+ is the String content to be written
+    #
+    # Returns nothing
+    def fs_write(file, contents)
+      path = File.join(self.git_dir, file)
+      FileUtils.mkdir_p(File.dirname(path))
+      File.open(path, 'w') do |f|
+        f.write(contents)
+      end
+    end
+    
+    # Delete a normal file from the filesystem
+    #   +file+ is the relative path from the Git dir
+    #
+    # Returns nothing
+    def fs_delete(file)
+      FileUtils.rm_f(File.join(self.git_dir,file))
+    end
+    
     # Run the given git command with the specified arguments and return
     # the result as a String
     #   +cmd+ is the command
