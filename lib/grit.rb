@@ -27,7 +27,7 @@ require 'grit/ruby1.9'
 require 'grit/lazy'
 require 'grit/errors'
 require 'grit/git-ruby'
-require 'grit/git'
+require 'grit/git' unless defined? Grit::Git # to allow proxying
 require 'grit/ref'
 require 'grit/tag'
 require 'grit/commit'
