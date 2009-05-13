@@ -10,37 +10,12 @@ module Grit
       #
       # Returns Grit::Ref[] (baked)
       def find_all(repo, options = {})
-        refs = []
-        already = {}
-        Dir.chdir(repo.path) do
-          files = Dir.glob(prefix + '/**/*')
-          files.each do |ref|
-            next if !File.file?(ref)
-            id = File.read(ref).chomp
-            name = ref.sub("#{prefix}/", '')
-            commit = Commit.create(repo, :id => id)
-            if !already[name]
-              refs << self.new(name, commit)
-              already[name] = true
-            end
-          end
-
-          if File.file?('packed-refs')
-            File.readlines('packed-refs').each do |line|
-              if m = /^(\w{40}) (.*?)$/.match(line)
-                next if !Regexp.new('^' + prefix).match(m[2])
-                name = m[2].sub("#{prefix}/", '')
-                commit = Commit.create(repo, :id => m[1])
-                if !already[name]
-                  refs << self.new(name, commit)
-                  already[name] = true
-                end
-              end
-            end
-          end
+        refs = repo.git.refs(options, prefix)
+        refs.split("\n").map do |ref|
+          name, id = *ref.split(' ')
+          commit = Commit.create(repo, :id => id)
+          self.new(name, commit)
         end
-
-        refs
       end
 
       protected

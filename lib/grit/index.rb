@@ -70,7 +70,7 @@ module Grit
       contents << ''
       contents << message
       
-      commit_sha1 = self.repo.git.ruby_git.put_raw_object(contents.join("\n"), 'commit')      
+      commit_sha1 = self.repo.git.put_raw_object(contents.join("\n"), 'commit')
       
       self.repo.update_ref(head, commit_sha1)
     end
@@ -107,7 +107,7 @@ module Grit
         end
       end
       tr = tree_contents.sort.map { |k, v| v }.join('')
-      self.repo.git.ruby_git.put_raw_object(tr, 'tree')
+      self.repo.git.put_raw_object(tr, 'tree')
     end
     
     # Write the blob to the index
@@ -115,7 +115,7 @@ module Grit
     #
     # Returns the SHA1 String of the blob
     def write_blob(data)
-      self.repo.git.ruby_git.put_raw_object(data, 'blob')
+      self.repo.git.put_raw_object(data, 'blob')
     end
   end # Index
   

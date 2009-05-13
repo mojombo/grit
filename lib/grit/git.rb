@@ -14,6 +14,14 @@ module Grit
     
     include GitRuby
     
+    def put_raw_object(content, type)
+      ruby_git.put_raw_object(content, type)
+    end
+
+    def object_exists?(object_id)
+      ruby_git.object_exists?(object_id)
+    end
+
     class << self
       attr_accessor :git_binary, :git_timeout, :git_max_size
     end
@@ -82,6 +90,13 @@ module Grit
     # Returns String
     def method_missing(cmd, options = {}, *args)
       run('', cmd, '', options, args)
+    end
+
+    # Bypass any pure Ruby implementations and go straight to the native Git command
+    #
+    # Returns String
+    def native(cmd, options = {}, *args)
+      method_missing(cmd, options, *args)
     end
 
     def run(prefix, cmd, postfix, options, args)
