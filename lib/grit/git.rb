@@ -33,7 +33,7 @@ module Grit
     
     def initialize(git_dir)
       self.git_dir    = git_dir
-      self.work_tree  = git_dir =~ /\.git$/ ? git_dir.gsub(/\/git$/,'') : git_dir
+      self.work_tree  = git_dir.gsub(/\/\.git$/,'')
       self.bytes_read = 0
     end
     
