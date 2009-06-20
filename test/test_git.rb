@@ -63,22 +63,22 @@ class TestGit < Test::Unit::TestCase
   end
   
   def test_it_really_shell_escapes_arguments_to_the_git_shell
-    @git.expects(:sh).with("#{Git.git_binary} --git-dir='#{@git.git_dir}' foo --bar='bazz\\'er'")
+    @git.expects(:sh).with("#{Git.git_binary} --work-tree='#{@git.work_tree}' --git-dir='#{@git.git_dir}' foo --bar='bazz\\'er'")
     @git.foo(:bar => "bazz'er")
-    @git.expects(:sh).with("#{Git.git_binary} --git-dir='#{@git.git_dir}' bar -x 'quu\\'x'")
+    @git.expects(:sh).with("#{Git.git_binary} --work-tree='#{@git.work_tree}' --git-dir='#{@git.git_dir}' bar -x 'quu\\'x'")
     @git.bar(:x => "quu'x")
   end
   
   def test_it_shell_escapes_the_standalone_argument
-    @git.expects(:sh).with("#{Git.git_binary} --git-dir='#{@git.git_dir}' foo 'bar\\'s'")
+    @git.expects(:sh).with("#{Git.git_binary} --work-tree='#{@git.work_tree}' --git-dir='#{@git.git_dir}' foo 'bar\\'s'")
     @git.foo({}, "bar's")
     
-    @git.expects(:sh).with("#{Git.git_binary} --git-dir='#{@git.git_dir}' foo 'bar' '\\; echo \\'noooo\\''")
+    @git.expects(:sh).with("#{Git.git_binary} --work-tree='#{@git.work_tree}' --git-dir='#{@git.git_dir}' foo 'bar' '\\; echo \\'noooo\\''")
     @git.foo({}, "bar", "; echo 'noooo'")
   end
   
   def test_piping_should_work_on_1_9
-    @git.expects(:sh).with("#{Git.git_binary} --git-dir='#{@git.git_dir}' archive 'master' | gzip")
+    @git.expects(:sh).with("#{Git.git_binary} --work-tree='#{@git.work_tree}' --git-dir='#{@git.git_dir}' archive 'master' | gzip")
     @git.archive({}, "master", "| gzip")
   end
 end

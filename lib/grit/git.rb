@@ -29,10 +29,11 @@ module Grit
       Grit::Git.git_timeout = old_timeout
     end
     
-    attr_accessor :git_dir, :bytes_read
+    attr_accessor :git_dir, :bytes_read, :work_tree
     
     def initialize(git_dir)
       self.git_dir    = git_dir
+      self.work_tree  = git_dir =~ /\.git$/ ? git_dir.gsub(/\/git$/,'') : git_dir
       self.bytes_read = 0
     end
     
@@ -62,7 +63,7 @@ module Grit
       opt_args = transform_options(options)
       ext_args = args.reject { |a| a.empty? }.map { |a| (a == '--' || a[0].chr == '|') ? a : "'#{e(a)}'" }
 
-      call = "#{prefix}#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
+      call = "#{prefix}#{Git.git_binary} --work-tree='#{self.work_tree}' --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
       Grit.log(call) if Grit.debug
       response, err = timeout ? sh(call) : wild_sh(call)
       Grit.log(response) if Grit.debug
