@@ -164,6 +164,8 @@ module Grit
         if opt.to_s.size == 1
           if options[opt] == true
             args << "-#{opt}"
+          elsif options[opt] == false
+            # ignore
           else
             val = options.delete(opt)
             args << "-#{opt.to_s} '#{e(val)}'"
@@ -171,6 +173,8 @@ module Grit
         else
           if options[opt] == true
             args << "--#{opt.to_s.gsub(/_/, '-')}"
+          elsif options[opt] == false
+            # ignore
           else
             val = options.delete(opt)
             args << "--#{opt.to_s.gsub(/_/, '-')}='#{e(val)}'"
