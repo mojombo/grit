@@ -1,3 +1,4 @@
+require 'tempfile'
 module Grit
   
   class Git
@@ -13,7 +14,11 @@ module Grit
     undef_method :clone
     
     include GitRuby
-    
+
+    def exist?
+      File.exist?(self.git_dir)
+    end
+
     def put_raw_object(content, type)
       ruby_git.put_raw_object(content, type)
     end
@@ -49,6 +54,14 @@ module Grit
     end
     alias_method :e, :shell_escape
     
+    # Check if a normal file exists on the filesystem
+    #   +file+ is the relative path from the Git dir
+    #
+    # Returns Boolean
+    def fs_exist?(file)
+      File.exist?(File.join(self.git_dir, file))
+    end
+    
     # Read a normal file from the filesystem.
     #   +file+ is the relative path from the Git dir
     #
@@ -75,8 +88,112 @@ module Grit
     #
     # Returns nothing
     def fs_delete(file)
-      FileUtils.rm_f(File.join(self.git_dir,file))
+      FileUtils.rm_rf(File.join(self.git_dir, file))
     end
+    
+    # Move a normal file
+    #   +from+ is the relative path to the current file
+    #   +to+ is the relative path to the destination file
+    #
+    # Returns nothing
+    def fs_move(from, to)
+      FileUtils.mv(File.join(self.git_dir, from), File.join(self.git_dir, to))
+    end
+    
+    # Make a directory
+    #   +dir+ is the relative path to the directory to create
+    #
+    # Returns nothing
+    def fs_mkdir(dir)
+      FileUtils.mkdir_p(File.join(self.git_dir, dir))
+    end
+    
+    # Chmod the the file or dir and everything beneath
+    #   +file+ is the relative path from the Git dir
+    #
+    # Returns nothing
+    def fs_chmod(mode, file = '/')
+      FileUtils.chmod_R(mode, File.join(self.git_dir, file))
+    end
+    
+    # Create a new directory
+    #   +path+ is an absolute path
+    #
+    # Returns nothing
+    def fs_mkdir(path)
+      FileUtils.mkdir_p(path)
+    end
+    
+    def fs_exist(path)
+      File.exist?(path)
+    end
+
+    def list_remotes
+      remotes = []
+      Dir.chdir(File.join(self.git_dir, 'refs/remotes')) do
+        remotes = Dir.glob('*')
+      end
+      remotes
+    rescue
+      []
+    end
+        
+    def create_tempfile(seed, unlink = false)
+      path = Tempfile.new(seed).path
+      File.unlink(path) if unlink
+      return path
+    end
+    
+    def check_applies(head_sha, applies_sha)
+      git_index = create_tempfile('index', true)
+      (o1, exit1) = raw_git("git read-tree #{head_sha} 2>/dev/null", git_index)
+      (o2, exit2) = raw_git("git diff #{applies_sha}^ #{applies_sha} | git apply --check --cached >/dev/null 2>/dev/null", git_index)
+      return (exit1 + exit2)
+    end
+    
+    def get_patch(applies_sha)
+      git_index = create_tempfile('index', true)
+      (patch, exit2) = raw_git("git diff #{applies_sha}^ #{applies_sha}", git_index)
+      patch
+    end
+    
+    def apply_patch(head_sha, patch)
+      git_index = create_tempfile('index', true)
+      
+      git_patch = create_tempfile('patch')
+      File.open(git_patch, 'w+') { |f| f.print patch }
+      
+      raw_git("git read-tree #{head_sha} 2>/dev/null", git_index)
+      (op, exit) = raw_git("git apply --cached < #{git_patch}", git_index)
+      if exit == 0
+        return raw_git("git write-tree", git_index).first.chomp
+      end
+      false
+    end
+    
+    # RAW CALLS WITH ENV SETTINGS
+    def raw_git_call(command, index)
+      tmp = ENV['GIT_INDEX_FILE']
+      ENV['GIT_INDEX_FILE'] = index
+      out = `#{command}`
+      after = ENV['GIT_INDEX_FILE'] # someone fucking with us ??
+      ENV['GIT_INDEX_FILE'] = tmp
+      if after != index
+        raise 'environment was changed for the git call'
+      end
+      [out, $?.exitstatus]
+    end
+
+    def raw_git(command, index)
+      output = nil
+      Dir.chdir(self.git_dir) do
+        output = raw_git_call(command, index)
+      end
+      output
+    end
+    # RAW CALLS WITH ENV SETTINGS END
+    
+    
     
     # Run the given git command with the specified arguments and return
     # the result as a String

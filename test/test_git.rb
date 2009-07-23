@@ -99,7 +99,7 @@ class TestGit < Test::Unit::TestCase
   end
   
   def test_fs_delete
-    FileUtils.expects(:rm_f).with(File.join(@git.git_dir, 'foo'))
+    FileUtils.expects(:rm_rf).with(File.join(@git.git_dir, 'foo'))
     @git.fs_delete('foo')
   end
 end

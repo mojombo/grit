@@ -242,7 +242,7 @@ class TestRepo < Test::Unit::TestCase
   # disable_daemon_serve
 
   def test_disable_daemon_serve
-    FileUtils.expects(:rm_f).with(File.join(@r.path, 'git-daemon-export-ok'))
+    FileUtils.expects(:rm_rf).with(File.join(@r.path, 'git-daemon-export-ok'))
     @r.disable_daemon_serve
   end
 
@@ -255,7 +255,7 @@ class TestRepo < Test::Unit::TestCase
 
   def test_alternates_with_two_alternates
     File.expects(:exist?).with("#{absolute_project_path}/.git/objects/info/alternates").returns(true)
-    File.expects(:read).returns("/path/to/repo1/.git/objects\n/path/to/repo2.git/objects\n")
+    File.any_instance.expects(:read).returns("/path/to/repo1/.git/objects\n/path/to/repo2.git/objects\n")
 
     assert_equal ["/path/to/repo1/.git/objects", "/path/to/repo2.git/objects"], @r.alternates
   end
