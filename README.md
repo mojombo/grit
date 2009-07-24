@@ -14,7 +14,7 @@ production ready. An extensive test suite is provided to verify its correctness.
 Grit is maintained by Tom Preston-Werner, Scott Chacon, Chris Wanstrath, and
 PJ Hyett.
 
-This documentation is accurate as of Grit 1.0.2.
+This documentation is accurate as of Grit 1.2.
 
 
 ## Requirements #############################################################
@@ -53,6 +53,13 @@ You will need these gems to get tests to pass:
 
 * technicalpickles-jeweler
 * mocha
+
+### Contributing
+
+If you'd like to contribute to Grit, we ask that you fork mojombo/grit on
+GitHub, and push up a topic branch for each feature you add or bug you fix.
+Then create an issue and link to the topic branch and explain what the
+code does. This allows us to discuss and merge each change separately.
 
 ## Usage ####################################################################
 
