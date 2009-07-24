@@ -9,8 +9,11 @@ require 'timeout'
 require 'logger'
 require 'digest/sha1'
 
+
 if defined? RUBY_ENGINE && RUBY_ENGINE == 'jruby'
   require 'open3'
+elsif RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/
+  require 'win32/open3'
 else
   require 'open3_detach'
 end

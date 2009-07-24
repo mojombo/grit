@@ -1,6 +1,7 @@
 ==
   * Major Enhancements
     * All filesystem calls have been moved into Grit::Git to allow proxying
+    * Windows support [github.com/mattn]
   * Bug Fixes
     * Repo.archive_tar_gz now passes -n option to gzip to be idempotent
 

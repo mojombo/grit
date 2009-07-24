@@ -31,7 +31,11 @@ module Grit
       attr_accessor :git_binary, :git_timeout, :git_max_size
     end
   
-    self.git_binary   = "/usr/bin/env git"
+    if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/
+      self.git_binary   = "git" # using search path
+    else
+      self.git_binary   = "/usr/bin/env git"
+    end
     self.git_timeout  = 10
     self.git_max_size = 5242880 # 5.megabytes
     
@@ -222,9 +226,15 @@ module Grit
       timeout  = true if timeout.nil?
 
       opt_args = transform_options(options)
-      ext_args = args.reject { |a| a.empty? }.map { |a| (a == '--' || a[0].chr == '|') ? a : "'#{e(a)}'" }
-
-      call = "#{prefix}#{Git.git_binary} --work-tree='#{self.work_tree}' --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
+      
+      if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/
+        ext_args = args.reject { |a| a.empty? }.map { |a| (a == '--' || a[0].chr == '|') ? a : "\"#{e(a)}\"" }
+        call = "#{prefix}#{Git.git_binary} --work-tree='#{self.work_tree}' --git-dir=\"#{self.git_dir}\" #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
+      else
+        ext_args = args.reject { |a| a.empty? }.map { |a| (a == '--' || a[0].chr == '|') ? a : "'#{e(a)}'" }
+        call = "#{prefix}#{Git.git_binary} --work-tree='#{self.work_tree}' --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
+      end
+      
       Grit.log(call) if Grit.debug
       response, err = timeout ? sh(call) : wild_sh(call)
       Grit.log(response) if Grit.debug
