@@ -47,6 +47,12 @@ and cloned with:
 
     git clone git://github.com/mojombo/grit.git
 
+### Development
+
+You will need these gems to get tests to pass:
+
+* technicalpickles-jeweler
+* mocha
 
 ## Usage ####################################################################
 
