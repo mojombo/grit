@@ -33,7 +33,7 @@ module Grit
       @committer = committer
       @committed_date = committed_date
       @message = message.join("\n")
-      @short_message = message[0] || ''
+      @short_message = message.select { |x| !x.strip.empty? }[0] || ''
     end
 
     def id_abbrev
