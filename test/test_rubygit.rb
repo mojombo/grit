@@ -58,6 +58,7 @@ class TestRubyGit < Test::Unit::TestCase
     commit2 = '7a8d32cb18a0ba2ff8bf86cadacc3fd2816da219'
     out = @git.diff({}, commit1, commit2)
     assert_match "--- /dev/null\n+++ b/test/test_tag.rb", out
+    assert_match "diff --git a/test/test_tag.rb b/test/test_tag.rb", out
     assert_match 'index 0000000..2e3b0cb', out
   end
 
@@ -65,7 +66,8 @@ class TestRubyGit < Test::Unit::TestCase
     commit1 = 'c9cf68fc61bd2634e90a4f6a12d88744e6297c4e'
     commit2 = '7a8d32cb18a0ba2ff8bf86cadacc3fd2816da219'
     out = @git.diff({}, commit1, commit2)
-    assert_match "a/test/fixtures/diff_2 /dev/null", out
+    assert_match "--- a/test/fixtures/diff_2\n+++ /dev/null", out
+    assert_match "diff --git a/test/fixtures/diff_2 b/test/fixtures/diff_2", out
     assert_match 'index 0000000..2e3b0cb', out
   end
 

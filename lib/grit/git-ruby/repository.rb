@@ -395,8 +395,8 @@ module Grit
           diffs = Difference::LCS.diff(data_old, data_new)
           next if diffs.empty?
 
-          a_path = treeSHA1 ? "a/#{path.gsub('./', '')}" : '/dev/null'
-          b_path = treeSHA2 ? "b/#{path.gsub('./', '')}" : '/dev/null'
+          a_path = "a/#{path.gsub('./', '')}"
+          b_path = "b/#{path.gsub('./', '')}"
 
           header = "diff --git #{a_path} #{b_path}"
           if options[:full_index]
@@ -406,8 +406,8 @@ module Grit
             header << "\n" + 'index ' + sha1[0,7] + '..' + sha2[0,7]
             header << ' 100644' if treeSHA2 # hard coding this because i don't think we use it
           end
-          header << "\n--- " + a_path
-          header << "\n+++ " + b_path
+          header << "\n--- " + (treeSHA1 ? a_path : '/dev/null')
+          header << "\n+++ " + (treeSHA2 ? b_path : '/dev/null')
           header += "\n"
 
           oldhunk = hunk = nil
