@@ -375,37 +375,41 @@ module Grit
         else
           tree2 = get_object_by_sha1(commit_obj1.parent.first).tree
         end
-        
+
         qdiff = quick_diff(tree1, tree2)
-        
+
         qdiff.sort.each do |diff_arr|
+          path, status, treeSHA1, treeSHA2 = *diff_arr
           format, lines, output = :unified, 3, ''
           file_length_difference = 0
-          
-          fileA = (diff_arr[2]) ? cat_file(diff_arr[2]) : ''
-          fileB = (diff_arr[3]) ? cat_file(diff_arr[3]) : ''
-          
-          sha1 = (diff_arr[2]) ? diff_arr[2] : '0000000000000000000000000000000000000000'
-          sha2 = (diff_arr[3]) ? diff_arr[3] : '0000000000000000000000000000000000000000'
+
+          fileA = treeSHA1 ? cat_file(treeSHA1) : ''
+          fileB = treeSHA2 ? cat_file(treeSHA2) : ''
+
+          sha1 = treeSHA1 || '0000000000000000000000000000000000000000'
+          sha2 = treeSHA2 || '0000000000000000000000000000000000000000'
 
           data_old = fileA.split(/\n/).map! { |e| e.chomp }
           data_new = fileB.split(/\n/).map! { |e| e.chomp }
-          
-          diffs = Difference::LCS.diff(data_old, data_new)    
+
+          diffs = Difference::LCS.diff(data_old, data_new)
           next if diffs.empty?
 
-          header = 'diff --git a/' + diff_arr[0].gsub('./', '') + ' b/' + diff_arr[0].gsub('./', '')
+          a_path = treeSHA1 ? "a/#{path.gsub('./', '')}" : '/dev/null'
+          b_path = treeSHA2 ? "b/#{path.gsub('./', '')}" : '/dev/null'
+
+          header = "diff --git #{a_path} #{b_path}"
           if options[:full_index]
             header << "\n" + 'index ' + sha1 + '..' + sha2
-            header << ' 100644' if diff_arr[3] # hard coding this because i don't think we use it
+            header << ' 100644' if treeSHA2 # hard coding this because i don't think we use it
           else
             header << "\n" + 'index ' + sha1[0,7] + '..' + sha2[0,7]
-            header << ' 100644' if diff_arr[3] # hard coding this because i don't think we use it
+            header << ' 100644' if treeSHA2 # hard coding this because i don't think we use it
           end
-          header << "\n--- " + 'a/' + diff_arr[0].gsub('./', '')
-          header << "\n+++ " + 'b/' + diff_arr[0].gsub('./', '')
+          header << "\n--- " + a_path
+          header << "\n+++ " + b_path
           header += "\n"
-          
+
           oldhunk = hunk = nil
 
           diffs.each do |piece|
