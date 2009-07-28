@@ -112,7 +112,7 @@ class TestRubyGit < Test::Unit::TestCase
   def test_ls_tree_paths_multi_single
     paths = ['lib/grit.rb']
     out = @git.ls_tree({}, @tree_sha, paths)
-    assert_equal out, '100644 blob 6afcf64c80da8253fa47228eb09bc0eea217e5d1	lib/grit.rb'
+    assert_equal out, "100644 blob 6afcf64c80da8253fa47228eb09bc0eea217e5d1\tlib/grit.rb"
   end
 
   def test_rev_list_pretty
