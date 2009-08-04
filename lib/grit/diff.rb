@@ -15,8 +15,8 @@ module Grit
       @b_blob = b_blob =~ /^0{40}$/ ? nil : Blob.create(repo, :id => b_blob)
       @a_mode = a_mode
       @b_mode = b_mode
-      @new_file = new_file
-      @deleted_file = deleted_file
+      @new_file = new_file || @a_blob.nil?
+      @deleted_file = deleted_file || @b_blob.nil?
       @diff = diff
     end
     
