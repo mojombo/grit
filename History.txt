@@ -4,6 +4,7 @@
     * Windows support [github.com/mattn]
   * Bug Fixes
     * Repo.archive_tar_gz now passes -n option to gzip to be idempotent
+    * Fix RubyGit's diff to detect additions and deletions [github.com/defunkt]
 
 == 1.1.1 / 2009-03-31
   * Changes
