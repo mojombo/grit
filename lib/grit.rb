@@ -20,8 +20,12 @@ end
 
 # third party
 require 'rubygems'
-gem "mime-types", ">=0"
-require 'mime/types'
+begin
+  gem "mime-types", ">=0"
+  require 'mime/types'
+rescue Gem::LoadError => e
+  puts "WARNING: Gem LoadError: #{e.message}"
+end
 
 # ruby 1.9 compatibility
 require 'grit/ruby1.9'
