@@ -606,7 +606,7 @@ module Grit
       end
       
       # initialize a git repository
-      def self.init(dir, bare = false)
+      def self.init(dir, bare = true)
 
         FileUtils.mkdir_p(dir) if !File.exists?(dir)
 
