@@ -165,7 +165,7 @@ class TestCommit < Test::Unit::TestCase
     @c = Commit.create(@r, :id => '80f136f500dfdb8c3e8abf4ae716f875f0a1b57f')
 
     patch = @c.to_patch
-    
+
     assert patch.include?('From 80f136f500dfdb8c3e8abf4ae716f875f0a1b57f Mon Sep 17 00:00:00 2001')
     assert patch.include?('From: tom <tom@taco.(none)>')
     assert patch.include?('Date: Tue, 20 Nov 2007 17:27:42 -0800')

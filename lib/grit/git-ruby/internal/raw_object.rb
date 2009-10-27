@@ -1,7 +1,7 @@
 #
 # converted from the gitrb project
 #
-# authors: 
+# authors:
 #    Matthias Lederhofer <matled@gmx.net>
 #    Simon 'corecode' Schubert <corecode@fs.ei.tum.de>
 #
@@ -10,8 +10,8 @@
 
 require 'digest/sha1'
 
-module Grit 
-  module GitRuby 
+module Grit
+  module GitRuby
     module Internal
       OBJ_NONE = 0
       OBJ_COMMIT = 1
@@ -32,6 +32,6 @@ module Grit
           Digest::SHA1.digest("%s %d\0" % [@type, @content.length] + @content)
         end
       end
-    end 
+    end
   end
 end

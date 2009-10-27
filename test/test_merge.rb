@@ -7,7 +7,7 @@ class TestMerge < Test::Unit::TestCase
     @r = Repo.new(File.join(File.dirname(__FILE__), *%w[dot_git]), :is_bare => true)
     @merge = fixture('merge_result')
   end
-  
+
   def test_from_string
     m = Grit::Merge.new(@merge)
     assert_equal m.sections, 3

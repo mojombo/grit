@@ -1,7 +1,7 @@
 #
 # converted from the gitrb project
 #
-# authors: 
+# authors:
 #    Matthias Lederhofer <matled@gmx.net>
 #    Simon 'corecode' Schubert <corecode@fs.ei.tum.de>
 #    Scott Chacon <schacon@gmail.com>
@@ -24,7 +24,7 @@ module Grit
       @email = ''
       @date = Time.now
       @offset = 0
-      
+
       m = /^(.*?) <(.*)> (\d+) ([+-])0*(\d+?)$/.match(str)
       if !m
         case str
@@ -50,7 +50,7 @@ module Grit
   class GitObject
     attr_accessor :repository
 
-    def GitObject.from_raw(rawobject, repository = nil)      
+    def GitObject.from_raw(rawobject, repository = nil)
       case rawobject.type
       when :blob
         return Blob.from_raw(rawobject, repository)
@@ -110,7 +110,7 @@ module Grit
     S_IFLNK =  0120000
     S_IFREG =  0100000
     S_IFDIR =  0040000
-    S_IFGITLINK = 0160000 
+    S_IFGITLINK = 0160000
     attr_accessor :mode, :name, :sha1
     def initialize(mode, filename, sha1o)
       @mode = 0
@@ -170,7 +170,7 @@ module Grit
     def format_mode
       "%06o" % @mode
     end
-    
+
     def raw
       "%o %s\0%s" % [@mode, @name, [@sha1].pack("H*")]
     end
@@ -191,20 +191,20 @@ module Grit
     string
   end
 
-  
+
   class Tree < GitObject
     attr_accessor :entry
 
     def self.from_raw(rawobject, repository=nil)
       raw = StringIO.new(rawobject.content)
-  
+
       entries = []
       while !raw.eof?
         mode      = Grit::GitRuby.read_bytes_until(raw, ' ')
         file_name = Grit::GitRuby.read_bytes_until(raw, "\0")
         raw_sha   = raw.read(20)
         sha = raw_sha.unpack("H*").first
-        
+
         entries << DirectoryEntry.new(mode, file_name, sha)
       end
       new(entries, repository)
@@ -224,7 +224,7 @@ module Grit
       #@entry.sort { |a,b| a.name <=> b.name }.
       @entry.collect { |e| [[e.format_mode, e.format_type, e.sha1].join(' '), e.name].join("\t") }.join("\n")
     end
-    
+
     def actual_raw
       #@entry.collect { |e| e.raw.join(' '), e.name].join("\t") }.join("\n")
     end
@@ -280,28 +280,28 @@ module Grit
         @parent.collect { |i| "parent %s\n" % i }.join,
         @author, @committer] + @message
     end
-    
+
     def raw_log(sha)
       output = "commit #{sha}\n"
       output += @headers + "\n\n"
       output += @message.split("\n").map { |l| '    ' + l }.join("\n") + "\n\n"
     end
-    
+
   end
 
   class Tag < GitObject
     attr_accessor :object, :type, :tag, :tagger, :message
 
     def self.from_raw(rawobject, repository=nil)
-      
+
       headers, message = rawobject.content.split(/\n\n/, 2)
       headers = headers.split(/\n/).map { |header| header.split(' ', 2) }
-      
+
       object = ''
       type = ''
       tag = ''
       tagger = ''
-      
+
       headers.each do |key, value|
         case key
         when "object"

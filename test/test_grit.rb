@@ -6,16 +6,16 @@ class TestGrit < Test::Unit::TestCase
     @old_logger = Grit.logger
     Grit.debug  = true
   end
-  
+
   def teardown
     Grit.debug  = @old_debug
     Grit.logger = @old_logger
-  end 
-  
+  end
+
   def test_uses_stdout_logger_by_default
     assert_equal STDOUT, Grit.logger.instance_variable_get(:@logdev).dev
   end
-  
+
   def test_can_override_logger
     my_logger = Logger.new(io = StringIO.new)
     Grit.logger = my_logger
@@ -28,5 +28,5 @@ class TestGrit < Test::Unit::TestCase
     io.rewind
     assert io.read.include?('hi mom')
   end
-  
+
 end

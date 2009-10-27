@@ -1,13 +1,13 @@
 require File.dirname(__FILE__) + '/helper'
 
 class TestFileIndex < Test::Unit::TestCase
-  
+
   def setup_a
     @findex = Grit::GitRuby::FileIndex.new(File.join(File.dirname(__FILE__), *%w[dot_git]))
     @commit = 'c12f398c2f3c4068ca5e01d736b1c9ae994b2138'
   end
 
-  def test_count_all 
+  def test_count_all
     setup_a
     assert_equal 107, @findex.count_all
   end
@@ -38,7 +38,7 @@ class TestFileIndex < Test::Unit::TestCase
     assert_equal @commit, arr['lib/grit/commit.rb']
     assert_equal nil, arr['lib/grit/actor.rb']
   end
-  
+
   def test_last_commits_pattern
     setup_a
     arr = @findex.last_commits(@commit, /lib\/grit\/[^\/]*$/)
@@ -46,11 +46,11 @@ class TestFileIndex < Test::Unit::TestCase
     assert_equal @commit, arr['lib/grit/commit.rb']
     assert_equal nil, arr['lib/grit/actor.rb']
   end
-  
+
   def test_last_commits_array
     setup_a
     arr = @findex.last_commits(@commit, ['lib/grit.rb', 'lib/grit/'])
     assert_equal @commit, arr['lib/grit/']
   end
-  
+
 end

@@ -1,6 +1,6 @@
 require 'tempfile'
 module Grit
-  
+
   class Git
     class GitTimeout < RuntimeError
       attr_reader :command, :bytes_read
@@ -12,7 +12,7 @@ module Grit
     end
 
     undef_method :clone
-    
+
     include GitRuby
 
     def exist?
@@ -30,7 +30,7 @@ module Grit
     class << self
       attr_accessor :git_binary, :git_timeout, :git_max_size
     end
-  
+
     if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/
       self.git_binary   = "git" # using search path
     else
@@ -38,27 +38,27 @@ module Grit
     end
     self.git_timeout  = 10
     self.git_max_size = 5242880 # 5.megabytes
-    
+
     def self.with_timeout(timeout = 10.seconds)
       old_timeout = Grit::Git.git_timeout
       Grit::Git.git_timeout = timeout
       yield
       Grit::Git.git_timeout = old_timeout
     end
-    
+
     attr_accessor :git_dir, :bytes_read, :work_tree
-    
+
     def initialize(git_dir)
       self.git_dir    = git_dir
       self.work_tree  = git_dir.gsub(/\/\.git$/,'')
       self.bytes_read = 0
     end
-    
+
     def shell_escape(str)
       str.to_s.gsub("'", "\\\\'").gsub(";", '\\;')
     end
     alias_method :e, :shell_escape
-    
+
     # Check if a normal file exists on the filesystem
     #   +file+ is the relative path from the Git dir
     #
@@ -66,7 +66,7 @@ module Grit
     def fs_exist?(file)
       File.exist?(File.join(self.git_dir, file))
     end
-    
+
     # Read a normal file from the filesystem.
     #   +file+ is the relative path from the Git dir
     #
@@ -74,7 +74,7 @@ module Grit
     def fs_read(file)
       File.open(File.join(self.git_dir, file)).read
     end
-    
+
     # Write a normal file to the filesystem.
     #   +file+ is the relative path from the Git dir
     #   +contents+ is the String content to be written
@@ -87,7 +87,7 @@ module Grit
         f.write(contents)
       end
     end
-    
+
     # Delete a normal file from the filesystem
     #   +file+ is the relative path from the Git dir
     #
@@ -95,7 +95,7 @@ module Grit
     def fs_delete(file)
       FileUtils.rm_rf(File.join(self.git_dir, file))
     end
-    
+
     # Move a normal file
     #   +from+ is the relative path to the current file
     #   +to+ is the relative path to the destination file
@@ -104,7 +104,7 @@ module Grit
     def fs_move(from, to)
       FileUtils.mv(File.join(self.git_dir, from), File.join(self.git_dir, to))
     end
-    
+
     # Make a directory
     #   +dir+ is the relative path to the directory to create
     #
@@ -112,7 +112,7 @@ module Grit
     def fs_mkdir(dir)
       FileUtils.mkdir_p(File.join(self.git_dir, dir))
     end
-    
+
     # Chmod the the file or dir and everything beneath
     #   +file+ is the relative path from the Git dir
     #
@@ -130,13 +130,13 @@ module Grit
     rescue
       []
     end
-        
+
     def create_tempfile(seed, unlink = false)
       path = Tempfile.new(seed).path
       File.unlink(path) if unlink
       return path
     end
-    
+
     def commit_from_sha(id)
       git_ruby_repo = GitRuby::Repository.new(self.git_dir)
       object = git_ruby_repo.get_object_by_sha1(id)
@@ -149,26 +149,26 @@ module Grit
         ''
       end
     end
-    
+
     def check_applies(head_sha, applies_sha)
       git_index = create_tempfile('index', true)
       (o1, exit1) = raw_git("git read-tree #{head_sha} 2>/dev/null", git_index)
       (o2, exit2) = raw_git("git diff #{applies_sha}^ #{applies_sha} | git apply --check --cached >/dev/null 2>/dev/null", git_index)
       return (exit1 + exit2)
     end
-    
+
     def get_patch(applies_sha)
       git_index = create_tempfile('index', true)
       (patch, exit2) = raw_git("git diff #{applies_sha}^ #{applies_sha}", git_index)
       patch
     end
-    
+
     def apply_patch(head_sha, patch)
       git_index = create_tempfile('index', true)
-      
+
       git_patch = create_tempfile('patch')
       File.open(git_patch, 'w+') { |f| f.print patch }
-      
+
       raw_git("git read-tree #{head_sha} 2>/dev/null", git_index)
       (op, exit) = raw_git("git apply --cached < #{git_patch}", git_index)
       if exit == 0
@@ -176,7 +176,7 @@ module Grit
       end
       false
     end
-    
+
     # RAW CALLS WITH ENV SETTINGS
     def raw_git_call(command, index)
       tmp = ENV['GIT_INDEX_FILE']
@@ -198,9 +198,9 @@ module Grit
       output
     end
     # RAW CALLS WITH ENV SETTINGS END
-    
-    
-    
+
+
+
     # Run the given git command with the specified arguments and return
     # the result as a String
     #   +cmd+ is the command
@@ -227,7 +227,7 @@ module Grit
       timeout  = true if timeout.nil?
 
       opt_args = transform_options(options)
-      
+
       if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/
         ext_args = args.reject { |a| a.empty? }.map { |a| (a == '--' || a[0].chr == '|') ? a : "\"#{e(a)}\"" }
         call = "#{prefix}#{Git.git_binary} --git-dir=\"#{self.git_dir}\" #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
@@ -235,7 +235,7 @@ module Grit
         ext_args = args.reject { |a| a.empty? }.map { |a| (a == '--' || a[0].chr == '|') ? a : "'#{e(a)}'" }
         call = "#{prefix}#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
       end
-      
+
       Grit.log(call) if Grit.debug
       response, err = timeout ? sh(call) : wild_sh(call)
       Grit.log(response) if Grit.debug
@@ -313,5 +313,5 @@ module Grit
       args
     end
   end # Git
-  
+
 end # Grit

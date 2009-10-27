@@ -4,9 +4,9 @@ class TestHead < Test::Unit::TestCase
   def setup
     @r = Repo.new(File.join(File.dirname(__FILE__), *%w[dot_git]), :is_bare => true)
   end
-  
+
   # inspect
-  
+
   def test_inspect
     head = @r.heads[1]
     assert_equal %Q{#<Grit::Head "test/master">}, head.inspect
@@ -21,14 +21,14 @@ class TestHead < Test::Unit::TestCase
     head = @r.commit('test/master')
     assert_equal '2d3acf90f35989df8f262dc50beadc4ee3ae1560', head.id
   end
-  
+
   # heads with slashes
 
   def test_heads_with_slashes
     head = @r.heads[3]
     assert_equal %Q{#<Grit::Head "test/chacon">}, head.inspect
   end
-  
+
   def test_is_head
     assert @r.is_head?('master')
     assert @r.is_head?('test/chacon')

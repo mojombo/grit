@@ -2,22 +2,22 @@ require 'grit/git-ruby/repository'
 require 'grit/git-ruby/file_index'
 
 module Grit
-  
+
   # the functions in this module intercept the calls to git binary
   # made buy the grit objects and attempts to run them in pure ruby
   # if it will be faster, or if the git binary is not available (!!TODO!!)
   module GitRuby
-    
+
     attr_accessor :ruby_git_repo, :git_file_index
-    
+
     def init(options)
       if options.size == 0
         Grit::GitRuby::Repository.init(@git_dir)
       else
-        method_missing('init', options) 
+        method_missing('init', options)
       end
     end
-    
+
     def cat_file(options, ref)
       if options[:t]
         file_type(ref)
@@ -29,7 +29,7 @@ module Grit
     rescue Grit::GitRuby::Repository::NoSuchShaFound
       ''
     end
-    
+
     # lib/grit/tree.rb:16:      output = repo.git.ls_tree({}, treeish, *paths)
     def ls_tree(options, treeish, *paths)
       sha = rev_parse({}, treeish)
@@ -42,7 +42,7 @@ module Grit
     def diff(options, sha1, sha2)
       try_run { ruby_git.diff(sha1, sha2, options) }
     end
-    
+
     def rev_list(options, ref = 'master')
       options.delete(:skip) if options[:skip].to_i == 0
       allowed_options = [:max_count, :since, :until, :pretty]  # this is all I can do right now
@@ -53,18 +53,18 @@ module Grit
         begin
           return file_index.commits_from(rev_parse({}, ref)).join("\n") + "\n"
         rescue
-          return method_missing('rev-list', options, ref) 
+          return method_missing('rev-list', options, ref)
         end
       else
         aref = rev_parse({}, ref)
         if aref.is_a? Array
-          return method_missing('rev-list', options, ref) 
+          return method_missing('rev-list', options, ref)
         else
           return try_run { ruby_git.rev_list(aref, options) }
         end
       end
     end
-    
+
     def rev_parse(options, string)
       raise RuntimeError, "invalid string: #{string}" unless string.is_a?(String)
 
@@ -82,11 +82,11 @@ module Grit
 
       head = File.join(@git_dir, 'refs', 'remotes', string)
       return File.read(head).chomp if File.file?(head)
-      
+
       head = File.join(@git_dir, 'refs', 'tags', string)
       return File.read(head).chomp if File.file?(head)
-      
-      ## check packed-refs file, too 
+
+      ## check packed-refs file, too
       packref = File.join(@git_dir, 'packed-refs')
       if File.file?(packref)
         File.readlines(packref).each do |line|
@@ -96,13 +96,13 @@ module Grit
           end
         end
       end
-      
+
       ## !! more - partials and such !!
-      
+
       # revert to calling git - grr
       return method_missing('rev-parse', {}, string).chomp
     end
-    
+
     def refs(options, prefix)
       refs = []
       already = {}
@@ -134,7 +134,7 @@ module Grit
 
       refs.join("\n")
     end
-    
+
     def tags(options, prefix)
       refs = []
       already = {}
@@ -164,7 +164,7 @@ module Grit
               # Annotated tags in packed-refs include a reference
               # to the commit object on the following line.
               next_line = lines[i + 1]
-              
+
               id =
               if next_line && next_line[0] == ?^
                 next_line[1..-1].chomp
@@ -183,15 +183,15 @@ module Grit
 
       refs.join("\n")
     end
-    
+
     def file_size(ref)
       try_run { ruby_git.cat_file_size(ref).to_s }
     end
-    
+
     def file_type(ref)
       try_run { ruby_git.cat_file_type(ref).to_s }
     end
-    
+
     def blame_tree(commit, path = nil)
       begin
         path = [path].join('/').to_s + '/' if (path && path != '')
@@ -202,17 +202,17 @@ module Grit
         {}
       end
     end
-    
+
     def file_index
       @git_file_index ||= FileIndex.new(@git_dir)
     end
-    
+
     def ruby_git
       @ruby_git_repo ||= Repository.new(@git_dir)
     end
-    
+
     private
-    
+
       def try_run
         ret = ''
         Timeout.timeout(self.class.git_timeout) do
@@ -223,7 +223,7 @@ module Grit
         #if @bytes_read > 5242880 # 5.megabytes
         #  bytes = @bytes_read
         #  @bytes_read = 0
-        #  raise Grit::Git::GitTimeout.new(command, bytes) 
+        #  raise Grit::Git::GitTimeout.new(command, bytes)
         #end
 
         ret
@@ -232,7 +232,7 @@ module Grit
         @bytes_read = 0
         raise Grit::Git::GitTimeout.new(command, bytes)
       end
-    
+
       def looking_for(commit, path = nil)
         tree_sha = ruby_git.get_subtree(rev_parse({}, commit), path)
 
@@ -248,7 +248,7 @@ module Grit
         end
         looking_for
       end
-    
+
       def clean_paths(commit_array)
         new_commits = {}
         commit_array.each do |file, sha|
@@ -258,10 +258,10 @@ module Grit
         new_commits
       end
 
-    # TODO     
+    # TODO
     # git grep -n 'foo' 'master'
     # git log --pretty='raw' --max-count='1' 'master' -- 'LICENSE'
     # git log --pretty='raw' --max-count='1' 'master' -- 'test'
-    
+
   end
 end

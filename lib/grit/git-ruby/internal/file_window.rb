@@ -1,7 +1,7 @@
 #
 # converted from the gitrb project
 #
-# authors: 
+# authors:
 #    Matthias Lederhofer <matled@gmx.net>
 #    Simon 'corecode' Schubert <corecode@fs.ei.tum.de>
 #    Scott Chacon <schacon@gmail.com>
@@ -9,8 +9,8 @@
 # provides native ruby access to git objects and pack files
 #
 
-module Grit 
-  module GitRuby 
+module Grit
+  module GitRuby
     module Internal
       class FileWindow
         def initialize(file, version = 1)
@@ -53,6 +53,6 @@ module Grit
         end
       end
     end
-  end 
+  end
 end
 

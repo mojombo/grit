@@ -4,10 +4,10 @@ require File.dirname(__FILE__) + '/helper'
 #   def test_
 #     r = Repo.new("/Users/tom/dev/god")
 #     t = r.tree("HEAD")
-#     
+#
 #     recurse(t)
 #   end
-#   
+#
 #   def recurse(tree, indent = "")
 #     tree.contents.each do |c|
 #       # puts "#{indent}#{c.name} (#{c.id})"

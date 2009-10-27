@@ -75,7 +75,7 @@ class TestBlob < Test::Unit::TestCase
     @b = Blob.create(@r, :id => 'abc')
     assert_equal %Q{#<Grit::Blob "abc">}, @b.inspect
   end
-  
+
   def test_basename
     @b = Blob.create(@r, :name => 'foo/bar.rb')
     assert_equal "bar.rb", @b.basename

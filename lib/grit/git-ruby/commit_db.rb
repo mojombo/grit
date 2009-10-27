@@ -1,14 +1,14 @@
 begin
   require 'sequel'
-  
+
   module Grit
-  
+
     class CommitDb
-    
+
       SCHEMA_VERSION = 1
 
       attr_accessor :db, :git
-        
+
       def initialize(git_obj, index_location = nil)
         @git = git_obj
         db_file = File.join(index_location || @git.git_dir, 'commit_db')
@@ -19,10 +19,10 @@ begin
           @db = Sequel.open "sqlite:///#{db_file}"
         end
       end
-      
+
       def rev_list(branch, options)
       end
-      
+
       def update_db(branch = nil)
         # find all refs/heads, for each
         # add branch if not there
@@ -35,18 +35,18 @@ begin
       def setup_tables
         @db << "create table meta (meta_key text, meta_value text)"
         @db[:meta] << {:meta_key => 'schema', :meta_value => SCHEMA_VERSION}
-        
+
         @db << "create table commits (id integer, sha text, author_date integer)"
         @db << "create table nodes (id integer, path text, type text)"
         @db << "create table branches (id integer, ref text, commit_id integer)"
-        
+
         @db << "create table commit_branches (commit_id integer, branch_id integer)"
-        @db << "create table commit_nodes (commit_id integer, node_id integer, node_sha string)"        
+        @db << "create table commit_nodes (commit_id integer, node_id integer, node_sha string)"
       end
-    
+
     end
   end
-        
+
 rescue LoadError
   # no commit db
 end

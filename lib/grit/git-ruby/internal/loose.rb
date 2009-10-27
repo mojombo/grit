@@ -1,7 +1,7 @@
 #
 # converted from the gitrb project
 #
-# authors: 
+# authors:
 #    Matthias Lederhofer <matled@gmx.net>
 #    Simon 'corecode' Schubert <corecode@fs.ei.tum.de>
 #    Scott Chacon <schacon@gmail.com>
@@ -14,7 +14,7 @@ require 'digest/sha1'
 require 'grit/git-ruby/internal/raw_object'
 
 module Grit
-  module GitRuby 
+  module GitRuby
     module Internal
       class LooseObjectError < StandardError
       end
@@ -65,16 +65,16 @@ module Grit
         def put_raw_object(content, type)
           size = content.length.to_s
           LooseStorage.verify_header(type, size)
-          
+
           header = "#{type} #{size}\0"
           store = header + content
-                    
+
           sha1 = Digest::SHA1.hexdigest(store)
           path = @directory+'/'+sha1[0...2]+'/'+sha1[2..40]
-          
+
           if !File.exists?(path)
             content = Zlib::Deflate.deflate(store)
-          
+
             FileUtils.mkdir_p(@directory+'/'+sha1[0...2])
             File.open(path, 'wb') do |f|
               f.write content
@@ -82,17 +82,17 @@ module Grit
           end
           return sha1
         end
-        
+
         # simply figure out the sha
         def self.calculate_sha(content, type)
           size = content.length.to_s
           verify_header(type, size)
           header = "#{type} #{size}\0"
           store = header + content
-                    
+
           Digest::SHA1.hexdigest(store)
         end
-        
+
         def self.verify_header(type, size)
           if !%w(blob tree commit tag).include?(type) || size !~ /^\d+$/
             raise LooseObjectError, "invalid object header"
@@ -132,6 +132,6 @@ module Grit
         end
         private :legacy_loose_object?
       end
-    end 
+    end
   end
 end

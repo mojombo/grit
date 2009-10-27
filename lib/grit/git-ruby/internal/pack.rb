@@ -1,7 +1,7 @@
 #
 # converted from the gitrb project
 #
-# authors: 
+# authors:
 #    Matthias Lederhofer <matled@gmx.net>
 #    Simon 'corecode' Schubert <corecode@fs.ei.tum.de>
 #    Scott Chacon <schacon@gmail.com>
@@ -13,11 +13,11 @@ require 'zlib'
 require 'grit/git-ruby/internal/raw_object'
 require 'grit/git-ruby/internal/file_window'
 
-PACK_SIGNATURE = "PACK" 
-PACK_IDX_SIGNATURE = "\377tOc" 
+PACK_SIGNATURE = "PACK"
+PACK_IDX_SIGNATURE = "\377tOc"
 
-module Grit 
-  module GitRuby 
+module Grit
+  module GitRuby
     module Internal
       class PackFormatError < StandardError
       end
@@ -44,7 +44,7 @@ module Grit
           @cache = {}
           init_pack
         end
-        
+
         def with_idx(index_file = nil)
           if !index_file
             index_file = @name
@@ -52,35 +52,35 @@ module Grit
           else
             idxfile = File.open(index_file, 'rb')
           end
-          
+
           # read header
           sig = idxfile.read(4)
           ver = idxfile.read(4).unpack("N")[0]
-          
+
           if sig == PACK_IDX_SIGNATURE
             if(ver != 2)
               raise PackFormatError, "pack #@name has unknown pack file version #{ver}"
-            end            
+            end
             @version = 2
           else
             @version = 1
           end
-                    
+
           idx = FileWindow.new(idxfile, @version)
           yield idx
           idx.unmap
           idxfile.close
         end
-        
+
         def with_packfile
           packfile = File.open(@name, 'rb')
           yield packfile
           packfile.close
         end
-        
+
         def cache_objects
           @cache = {}
-          with_packfile do |packfile|          
+          with_packfile do |packfile|
             each_entry do |sha, offset|
               data, type = unpack_object(packfile, offset, {:caching => true})
               if data
@@ -93,7 +93,7 @@ module Grit
         def name
           @name
         end
-        
+
         def close
           # shouldnt be anything open now
         end
@@ -104,12 +104,12 @@ module Grit
           each_sha1 { |sha| shas << sha.unpack("H*")[0] }
           shas
         end
-        
+
         def [](sha1)
           if obj = @cache[sha1]
-            return obj 
+            return obj
           end
-          
+
           offset = find_object(sha1)
           return nil if !offset
           @cache[sha1] = obj = parse_object(offset)
@@ -129,7 +129,7 @@ module Grit
             @size = @offsets[-1]
           end
         end
-        
+
         def each_entry
           with_idx do |idx|
             if @version == 2
@@ -148,7 +148,7 @@ module Grit
             end
           end
         end
-        
+
         def read_data_v2(idx)
           data = []
           pos = OffsetStart
@@ -169,7 +169,7 @@ module Grit
           data
         end
         private :read_data_v2
-        
+
         def each_sha1
           with_idx do |idx|
             if @version == 2
@@ -191,7 +191,7 @@ module Grit
         def find_object_in_index(idx, sha1)
           slot = sha1.getord(0)
           return nil if !slot
-          first, last = @offsets[slot,2] 
+          first, last = @offsets[slot,2]
           while first < last
             mid = (first + last) / 2
             if @version == 2
@@ -224,16 +224,16 @@ module Grit
           end
           nil
         end
-        
+
         def find_object(sha1)
           obj = nil
           with_idx do |idx|
             obj = find_object_in_index(idx, sha1)
           end
           obj
-        end    
+        end
         private :find_object
-        
+
         def parse_object(offset)
           obj = nil
           with_packfile do |packfile|
@@ -259,9 +259,9 @@ module Grit
             shift += 7
             offset += 1
           end
-        
+
           return [false, false] if !(type == OBJ_COMMIT || type == OBJ_TREE) && options[:caching]
-          
+
           case type
           when OBJ_OFS_DELTA, OBJ_REF_DELTA
             data, type = unpack_deltified(packfile, type, offset, obj_offset, size, options)
@@ -297,9 +297,9 @@ module Grit
           end
 
           base, type = unpack_object(packfile, base_offset)
-          
+
           return [false, false] if !(type == OBJ_COMMIT || type == OBJ_TREE) && options[:caching]
-          
+
           delta = unpack_compressed(offset, size)
           [patch_delta(base, delta), type]
         end
@@ -378,5 +378,5 @@ module Grit
         private :patch_delta_header_size
       end
     end
-  end 
+  end
 end

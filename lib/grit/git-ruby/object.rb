@@ -1,7 +1,7 @@
 #
 # converted from the gitrb project
 #
-# authors: 
+# authors:
 #    Matthias Lederhofer <matled@gmx.net>
 #    Simon 'corecode' Schubert <corecode@fs.ei.tum.de>
 #    Scott Chacon <schacon@gmail.com>
@@ -40,7 +40,7 @@ module Grit
   class Object
     attr_accessor :repository
 
-    def Object.from_raw(rawobject, repository = nil)      
+    def Object.from_raw(rawobject, repository = nil)
       case rawobject.type
       when :blob
         return Blob.from_raw(rawobject, repository)
@@ -154,7 +154,7 @@ module Grit
     def format_mode
       "%06o" % @mode
     end
-    
+
     def raw
       "%o %s\0%s" % [@mode, @name, [@sha1].pack("H*")]
     end
@@ -175,20 +175,20 @@ module Grit
     string
   end
 
-  
+
   class Tree < Object
     attr_accessor :entry
 
     def self.from_raw(rawobject, repository=nil)
       raw = StringIO.new(rawobject.content)
-  
+
       entries = []
       while !raw.eof?
         mode      = Grit::GitRuby.read_bytes_until(raw, ' ')
         file_name = Grit::GitRuby.read_bytes_until(raw, "\0")
         raw_sha   = raw.read(20)
         sha = raw_sha.unpack("H*").first
-        
+
         entries << DirectoryEntry.new(mode, file_name, sha)
       end
       new(entries, repository)
@@ -208,7 +208,7 @@ module Grit
       #@entry.sort { |a,b| a.name <=> b.name }.
       @entry.collect { |e| [[e.format_mode, e.format_type, e.sha1].join(' '), e.name].join("\t") }.join("\n")
     end
-    
+
     def actual_raw
       #@entry.collect { |e| e.raw.join(' '), e.name].join("\t") }.join("\n")
     end
@@ -264,13 +264,13 @@ module Grit
         @parent.collect { |i| "parent %s\n" % i }.join,
         @author, @committer] + @message
     end
-    
+
     def raw_log(sha)
       output = "commit #{sha}\n"
       output += @headers + "\n\n"
       output += @message.split("\n").map { |l| '    ' + l }.join("\n") + "\n\n"
     end
-    
+
   end
 
   class Tag < Object

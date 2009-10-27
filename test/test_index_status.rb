@@ -14,7 +14,7 @@ class TestIndexStatus < Test::Unit::TestCase
     Git.any_instance.expects(:add).with({}, 'file1', 'file2')
     @r.add(['file1', 'file2'])
   end
-  
+
   def test_remove
     Git.any_instance.expects(:rm).with({}, 'file1', 'file2')
     @r.remove('file1', 'file2')
@@ -35,6 +35,6 @@ class TestIndexStatus < Test::Unit::TestCase
     assert_equal stat.mode_repo, "100644"
     assert_equal stat.type, "M"
   end
-  
-  
+
+
 end

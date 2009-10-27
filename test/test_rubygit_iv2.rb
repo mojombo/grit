@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/helper'
 require 'pp'
 
 class TestRubyGitIv2 < Test::Unit::TestCase
-  
+
   def setup
     @git = Grit::Repo.new(File.join(File.dirname(__FILE__), *%w[dot_git_iv2]), :is_bare => true)
     @rgit = @git.git.ruby_git
@@ -15,7 +15,7 @@ class TestRubyGitIv2 < Test::Unit::TestCase
     assert @rgit.object_exists?(@commit_sha)
     assert_equal 10, @git.commits.size
   end
-  
+
   def test_objects
     commit = @rgit.get_object_by_sha1(@commit_sha)
     assert_equal commit.author.email, 'schacon@gmail.com'
@@ -24,5 +24,5 @@ class TestRubyGitIv2 < Test::Unit::TestCase
     blob = @rgit.get_object_by_sha1(@blob_sha)
     assert_match 'First public release', blob.content
   end
-    
+
 end

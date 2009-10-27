@@ -1,7 +1,7 @@
 require File.dirname(__FILE__) + '/helper'
 
 class TestCommitStats < Test::Unit::TestCase
-  
+
   def setup
     File.expects(:exist?).returns(true)
     @r = Repo.new(GRIT_REPO)
@@ -9,7 +9,7 @@ class TestCommitStats < Test::Unit::TestCase
     Git.any_instance.expects(:log).returns(fixture('log'))
     @stats = @r.commit_stats
   end
-  
+
   def test_commit_stats
     assert_equal 3, @stats.size
   end

@@ -1,11 +1,11 @@
 module Grit
-  
+
   class Tree
     lazy_reader :contents
     attr_reader :id
     attr_reader :mode
     attr_reader :name
-    
+
     # Construct the contents of the tree
     #   +repo+ is the Repo
     #   +treeish+ is the reference
@@ -16,12 +16,12 @@ module Grit
       output = repo.git.ls_tree({}, treeish, *paths)
       self.allocate.construct_initialize(repo, treeish, output)
     end
-    
+
     def construct_initialize(repo, id, text)
       @repo = repo
       @id = id
       @contents = []
-      
+
       text.split("\n").each do |line|
         @contents << content_from_string(repo, line)
       end
@@ -29,11 +29,11 @@ module Grit
 
       self
     end
-    
+
     def lazy_source
       Tree.construct(@repo, @id, [])
     end
-    
+
     # Create an unbaked Tree containing just the specified attributes
     #   +repo+ is the Repo
     #   +atts+ is a Hash of instance variable data
@@ -42,7 +42,7 @@ module Grit
     def self.create(repo, atts)
       self.allocate.create_initialize(repo, atts)
     end
-    
+
     # Initializer for Tree.create
     #   +repo+ is the Repo
     #   +atts+ is a Hash of instance variable data
@@ -50,13 +50,13 @@ module Grit
     # Returns Grit::Tree (unbaked)
     def create_initialize(repo, atts)
       @repo = repo
-      
+
       atts.each do |k, v|
         instance_variable_set("@#{k}", v)
       end
       self
     end
-    
+
     # Parse a content item and create the appropriate object
     #   +repo+ is the Repo
     #   +text+ is the single line containing the items data in `git ls-tree` format
@@ -77,7 +77,7 @@ module Grit
           raise "Invalid type: #{type}"
       end
     end
-    
+
     # Find the named object in this tree's contents
     #
     # Examples
@@ -94,11 +94,11 @@ module Grit
         self.contents.find { |c| c.name == file }
       end
     end
-    
+
     def basename
       File.basename(name)
     end
-    
+
     # Pretty object inspection
     def inspect
       %Q{#<Grit::Tree "#{@id}">}

@@ -2,19 +2,19 @@ require File.dirname(__FILE__) + '/helper'
 require 'pp'
 
 class TestBlameTree < Test::Unit::TestCase
-  
+
   def setup
     @git = Git.new(File.join(File.dirname(__FILE__), *%w[dot_git]))
   end
 
-  def test_blame_tree    
+  def test_blame_tree
     commit = '2d3acf90f35989df8f262dc50beadc4ee3ae1560'
     tree = @git.blame_tree(commit)
     last_commit_sha = tree['History.txt']
     assert_equal last_commit_sha, '7bcc0ee821cdd133d8a53e8e7173a334fef448aa'
   end
 
-  def test_blame_tree_path   
+  def test_blame_tree_path
     commit = '2d3acf90f35989df8f262dc50beadc4ee3ae1560'
     tree = @git.blame_tree(commit, 'lib')
     last_commit_sha = tree['lib/grit.rb']
@@ -29,5 +29,5 @@ class TestBlameTree < Test::Unit::TestCase
     last_commit_sha = tree['lib/grit/diff.rb']
     assert_equal last_commit_sha, '22825175e37f22c9418d756ca69b574d75602994'
   end
-  
+
 end

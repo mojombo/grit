@@ -16,5 +16,5 @@ class TestCommitWrite < Test::Unit::TestCase
     results = @r.commit_all('my message')
     assert_match /Created commit/, results
   end
-  
+
 end

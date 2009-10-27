@@ -1,10 +1,10 @@
 module Grit
-  
+
   class Submodule
     attr_reader :id
     attr_reader :mode
     attr_reader :name
-    
+
     # Create a Submodule containing just the specified attributes
     #   +repo+ is the Repo
     #   +atts+ is a Hash of instance variable data
@@ -13,7 +13,7 @@ module Grit
     def self.create(repo, atts)
       self.allocate.create_initialize(repo, atts)
     end
-    
+
     # Initializer for Submodule.create
     #   +repo+ is the Repo
     #   +atts+ is a Hash of instance variable data
@@ -26,23 +26,23 @@ module Grit
       end
       self
     end
-    
+
     # The url of this submodule
     #   +ref+ is the committish that should be used to look up the url
     #
     # Returns String
     def url(ref)
       config = self.class.config(@repo, ref)
-      
+
       lookup = config.keys.inject({}) do |acc, key|
         id = config[key]['id']
         acc[id] = config[key]['url']
         acc
       end
-      
+
       lookup[@id]
     end
-    
+
     # The configuration information for the given +repo+
     #   +repo+ is the Repo
     #   +ref+ is the committish (defaults to 'master')
@@ -53,12 +53,12 @@ module Grit
       commit = repo.commit(ref)
       blob = commit.tree/'.gitmodules'
       return {} unless blob
-      
+
       lines = blob.data.gsub(/\r\n?/, "\n" ).split("\n")
-      
+
       config = {}
       current = nil
-      
+
       lines.each do |line|
         if line =~ /^\[submodule "(.+)"\]$/
           current = $1
@@ -71,18 +71,18 @@ module Grit
           # ignore
         end
       end
-      
+
       config
     end
-    
+
     def basename
       File.basename(name)
-    end    
-    
+    end
+
     # Pretty object inspection
     def inspect
       %Q{#<Grit::Submodule "#{@id}">}
     end
   end # Submodule
-  
+
 end # Grit

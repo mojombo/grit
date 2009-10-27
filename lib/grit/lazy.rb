@@ -1,6 +1,6 @@
 ##
 # Allows attributes to be declared as lazy, meaning that they won't be
-# computed until they are asked for. 
+# computed until they are asked for.
 #
 # Works by delegating each lazy_reader to a cached lazy_source method.
 #
