@@ -307,18 +307,10 @@ module Grit
     #
     # Returns Grit::Repo (the newly created repo)
     def self.init_bare(path, git_options = {}, repo_options = {})
+      git_options = {:bare => true}.merge(git_options)
       git = Git.new(path)
       git.fs_mkdir('..')
       git.init(git_options)
-      self.new(path, repo_options)
-    end
-
-    def self.init_bare_or_open(path, git_options = {}, repo_options = {})
-      git = Git.new(path)
-      if !git.exist?
-        git.fs_mkdir(path)
-        git.init(git_options)
-      end
       self.new(path, repo_options)
     end
     
@@ -333,6 +325,19 @@ module Grit
       Git.new(path).fs_mkdir('..')
       self.git.clone(real_options, self.path, path)
       Repo.new(path)
+    end
+    
+    # Fork a bare git repository from another repo
+    #   +path+ is the full path of the new repo (traditionally ends with /<name>.git)
+    #   +options+ is any additional options to the git clone command (:bare and :shared are true by default)
+    #
+    # Returns Grit::Repo (the newly forked repo)
+    def fork_bare_from(path, options = {})
+      default_options = {:bare => true, :shared => true}
+      real_options = default_options.merge(options)
+      Git.new(self.path).fs_mkdir('..')
+      self.git.clone(real_options, path, self.path)
+      Repo.new(self.path)
     end
     
     # Archive the given treeish

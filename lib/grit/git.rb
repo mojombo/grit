@@ -120,18 +120,6 @@ module Grit
     def fs_chmod(mode, file = '/')
       FileUtils.chmod_R(mode, File.join(self.git_dir, file))
     end
-    
-    # Create a new directory
-    #   +path+ is an absolute path
-    #
-    # Returns nothing
-    def fs_mkdir(path)
-      FileUtils.mkdir_p(path)
-    end
-    
-    def fs_exist(path)
-      File.exist?(path)
-    end
 
     def list_remotes
       remotes = []
