@@ -1,7 +1,8 @@
-==
+== 2.0.0 / 2009-10-27
   * Major Enhancements
     * All filesystem calls have been moved into Grit::Git to allow proxying
-    * Windows support [github.com/mattn]
+  * Non-code changes
+    * Removed all trailing whitespace in code files
   * Bug Fixes
     * Repo.archive_tar_gz now passes -n option to gzip to be idempotent
     * Fix RubyGit's diff to detect additions and deletions [github.com/defunkt]
