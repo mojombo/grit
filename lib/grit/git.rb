@@ -137,6 +137,19 @@ module Grit
       return path
     end
     
+    def commit_from_sha(id)
+      git_ruby_repo = GitRuby::Repository.new(self.git_dir)
+      object = git_ruby_repo.get_object_by_sha1(id)
+
+      if object.type == :commit
+        id
+      elsif object.type == :tag
+        object.object
+      else
+        ''
+      end
+    end
+    
     def check_applies(head_sha, applies_sha)
       git_index = create_tempfile('index', true)
       (o1, exit1) = raw_git("git read-tree #{head_sha} 2>/dev/null", git_index)
