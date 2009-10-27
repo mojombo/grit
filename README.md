@@ -9,12 +9,13 @@ reimplementations of core Git functionality. This choice, however, is
 transparent to end users, and you need not know which method is being used.
 
 This software was developed to power GitHub, and should be considered
-production ready. An extensive test suite is provided to verify its correctness.
+production ready. An extensive test suite is provided to verify its
+correctness.
 
 Grit is maintained by Tom Preston-Werner, Scott Chacon, Chris Wanstrath, and
 PJ Hyett.
 
-This documentation is accurate as of Grit 1.2.
+This documentation is accurate as of Grit 2.0.
 
 
 ## Requirements #############################################################
@@ -26,15 +27,7 @@ This documentation is accurate as of Grit 1.2.
 
 Easiest install is via RubyGems:
 
-    $ gem install grit
-
-or
-
-    $ gem sources -a http://gems.github.com/ (you only need to do this once)
-    $ gem install mojombo-grit
-
-The gem from GitHub will generally be available sooner than the gem from
-Rubyforge. Both sources will eventually contain the same releases.
+    $ gem install grit -s http://gemcutter.org
 
 
 ## Source ###################################################################
@@ -47,25 +40,29 @@ and cloned with:
 
     git clone git://github.com/mojombo/grit.git
 
+
 ### Development
 
 You will need these gems to get tests to pass:
 
-* technicalpickles-jeweler
+* jeweler
 * mocha
+
 
 ### Contributing
 
 If you'd like to contribute to Grit, we ask that you fork mojombo/grit on
 GitHub, and push up a topic branch for each feature you add or bug you fix.
-Then create an issue and link to the topic branch and explain what the
-code does. This allows us to discuss and merge each change separately.
+Then create an issue and link to the topic branch and explain what the code
+does. This allows us to discuss and merge each change separately.
+
 
 ## Usage ####################################################################
 
 Grit gives you object model access to your Git repositories. Once you have
 created a `Repo` object, you can traverse it to find parent commits,
 trees, blobs, etc.
+
 
 ### Initialize a Repo object
 
@@ -81,6 +78,7 @@ directory and contains the `.git` directory. You can also initialize Grit with
 a bare repo.
 
     repo = Repo.new("/var/git/grit.git")
+
 
 ### Getting a list of commits
 
@@ -111,6 +109,7 @@ If you need paging, you can specify a number of commits to skip.
     repo.commits('master', 10, 20)
 
 The above will return commits 21-30 from the commit list.
+
 
 ### The Commit object
 
@@ -147,6 +146,7 @@ You can traverse a commit's ancestry by chaining calls to `#parents`.
     repo.commits.first.parents[0].parents[0].parents[0]
 
 The above corresponds to **master^^^** or **master~3** in Git parlance.
+
 
 ### The Tree object
 
@@ -191,6 +191,7 @@ You can also get a tree directly from the repo if you know its name.
     repo.tree("91169e1f5fa4de2eaea3f176461f5dc784796769")
     # => #<Grit::Tree "91169e1f5fa4de2eaea3f176461f5dc784796769">
 
+
 ### The Blob object
 
 A blob represents a file. Trees often contain blobs.
@@ -221,3 +222,15 @@ You can also get a blob directly from the repo if you know its name.
 
     repo.blob("4ebc8aea50e0a67e000ba29a30809d0a7b9b2666")
     # => #<Grit::Blob "4ebc8aea50e0a67e000ba29a30809d0a7b9b2666">
+
+
+### Other
+
+There are many more API methods available that are not documented here. Please
+reference the code for more functionality.
+
+
+Copyright
+---------
+
+Copyright (c) 2008 Tom Preston-Werner. See LICENSE for details.
