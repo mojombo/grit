@@ -54,7 +54,7 @@ class TestRepo < Test::Unit::TestCase
   # descriptions
 
   def test_description
-    assert_equal "Unnamed repository; edit this file 'description' to name the repository.", @r.description
+    assert_equal "Unnamed repository; edit this file to name it for gitweb.", @r.description
   end
 
   # refs
@@ -160,12 +160,16 @@ class TestRepo < Test::Unit::TestCase
   # init_bare
 
   def test_init_bare
+    FileUtils.stubs(:mkdir_p)
+
     Git.any_instance.expects(:init).returns(true)
     Repo.expects(:new).with("/foo/bar.git", {})
     Repo.init_bare("/foo/bar.git")
   end
 
   def test_init_bare_with_options
+    FileUtils.stubs(:mkdir_p)
+
     Git.any_instance.expects(:init).with(
       :bare => true, :template => "/baz/sweet").returns(true)
     Repo.expects(:new).with("/foo/bar.git", {})
@@ -175,6 +179,8 @@ class TestRepo < Test::Unit::TestCase
   # fork_bare
 
   def test_fork_bare
+    FileUtils.stubs(:mkdir_p)
+
     Git.any_instance.expects(:clone).with(
       {:bare => true, :shared => true},
       "#{absolute_project_path}/.git",
@@ -185,6 +191,8 @@ class TestRepo < Test::Unit::TestCase
   end
 
   def test_fork_bare_with_options
+    FileUtils.stubs(:mkdir_p)
+
     Git.any_instance.expects(:clone).with(
       {:bare => true, :shared => true, :template => '/awesome'},
       "#{absolute_project_path}/.git",
