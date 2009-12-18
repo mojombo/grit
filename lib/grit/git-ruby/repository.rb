@@ -242,6 +242,7 @@ module Grit
               tree
             end
           else
+            raise NoSuchPath if tree.nil?
             next_path = paths.shift
             dir_name = tree.split("\n").select { |p| p.split("\t")[1] == next_path }.first
             raise NoSuchPath if !dir_name
@@ -254,6 +255,7 @@ module Grit
             end
           end
         else
+          raise NoSuchPath if tree.nil?
           tree = tree.split("\n")
           tree = tree.select { |p| p.split("\t")[1] == path }
           if append
