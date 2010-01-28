@@ -100,7 +100,7 @@ module Grit
       ## !! more - partials and such !!
 
       # revert to calling git - grr
-      return method_missing('rev-parse', {}, string).chomp
+      return method_missing('rev-parse', options, string).chomp
     end
 
     def refs(options, prefix)
