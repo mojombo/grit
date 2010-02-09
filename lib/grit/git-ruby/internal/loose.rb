@@ -29,7 +29,7 @@ module Grit
           begin
             return nil unless sha1[0...2] && sha1[2..39]
             path = @directory + '/' + sha1[0...2] + '/' + sha1[2..39]
-            get_raw_object(File.open(path, 'rb').read)
+            get_raw_object(File.read(path))
           rescue Errno::ENOENT
             nil
           end

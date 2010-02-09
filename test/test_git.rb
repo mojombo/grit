@@ -85,8 +85,7 @@ class TestGit < Test::Unit::TestCase
 
   def test_fs_read
     f = stub
-    f.expects(:read).returns('bar')
-    File.expects(:open).with(File.join(@git.git_dir, 'foo')).returns(f)
+    File.expects(:read).with(File.join(@git.git_dir, 'foo')).returns('bar')
     assert_equal 'bar', @git.fs_read('foo')
   end
 

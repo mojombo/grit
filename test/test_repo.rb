@@ -255,7 +255,7 @@ class TestRepo < Test::Unit::TestCase
 
   def test_alternates_with_two_alternates
     File.expects(:exist?).with("#{absolute_project_path}/.git/objects/info/alternates").returns(true)
-    File.any_instance.expects(:read).returns("/path/to/repo1/.git/objects\n/path/to/repo2.git/objects\n")
+    File.expects(:read).with("#{absolute_project_path}/.git/objects/info/alternates").returns("/path/to/repo1/.git/objects\n/path/to/repo2.git/objects\n")
 
     assert_equal ["/path/to/repo1/.git/objects", "/path/to/repo2.git/objects"], @r.alternates
   end

@@ -69,12 +69,14 @@ module Grit
           idx = FileWindow.new(idxfile, @version)
           yield idx
           idx.unmap
+        ensure
           idxfile.close
         end
 
         def with_packfile
           packfile = File.open(@name, 'rb')
           yield packfile
+        ensure
           packfile.close
         end
 

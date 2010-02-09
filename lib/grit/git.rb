@@ -72,7 +72,7 @@ module Grit
     #
     # Returns the String contents of the file
     def fs_read(file)
-      File.open(File.join(self.git_dir, file)).read
+      File.read(File.join(self.git_dir, file))
     end
 
     # Write a normal file to the filesystem.
