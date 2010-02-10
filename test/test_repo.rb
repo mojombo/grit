@@ -54,7 +54,7 @@ class TestRepo < Test::Unit::TestCase
   # descriptions
 
   def test_description
-    assert_equal "Unnamed repository; edit this file to name it for gitweb.", @r.description
+    assert @r.description.include?("Unnamed repository; edit this file")
   end
 
   # refs
