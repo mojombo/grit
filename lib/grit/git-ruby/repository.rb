@@ -186,15 +186,17 @@ module Grit
       def get_raw_tree(sha, recursive = false)
         o = get_raw_object_by_sha1(sha)
         if o.type == :commit
-          cat_file(get_object_by_sha1(sha).tree)
+          tree = get_object_by_sha1(sha).tree
         elsif o.type == :tag
           commit_sha = get_object_by_sha1(sha).object
-          cat_file(get_object_by_sha1(commit_sha).tree)
-        elsif o.type == :tree && recursive
-          get_raw_trees(sha)
+          tree = get_object_by_sha1(commit_sha).tree
         elsif o.type == :tree
-          cat_file(sha)
+          tree = sha
+        else
+          return nil
         end
+
+        recursive ? get_raw_trees(tree) : cat_file(tree)
       end
 
       # Grabs tree contents recursively,

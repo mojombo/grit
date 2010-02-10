@@ -120,7 +120,16 @@ class TestRubyGit < Test::Unit::TestCase
   end
 
   def test_ls_tree_recursive
-    out = @git.ls_tree({:r => true}, @tree_sha)
+    # this is the tree associated with @commit_sha, which we use in
+    # the next test
+    tree_sha = '77fc9894c0904279fde93adc9c0ba231515ce68a'
+
+    out = @git.ls_tree({:r => true}, tree_sha)
+    assert_equal out, fixture('ls_tree_recursive')
+  end
+
+  def test_ls_tree_recursive_with_a_commit
+    out = @git.ls_tree({:r => true}, @commit_sha)
     assert_equal out, fixture('ls_tree_recursive')
   end
 
