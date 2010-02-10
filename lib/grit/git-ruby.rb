@@ -33,7 +33,7 @@ module Grit
     # lib/grit/tree.rb:16:      output = repo.git.ls_tree({}, treeish, *paths)
     def ls_tree(options, treeish, *paths)
       sha = rev_parse({}, treeish)
-      ruby_git.ls_tree(sha, paths.flatten)
+      ruby_git.ls_tree(sha, paths.flatten, options.delete(:r))
     rescue Grit::GitRuby::Repository::NoSuchShaFound
       ''
     end

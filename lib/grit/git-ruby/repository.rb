@@ -169,7 +169,8 @@ module Grit
       # returns the raw (cat-file) output for a tree
       # if given a commit sha, it will print the tree of that commit
       # if given a path limiter array, it will limit the output to those
-      def ls_tree(sha, paths = [])
+      # if asked for recrusive trees, will traverse trees
+      def ls_tree(sha, paths = [], recursive = false)
         if paths.size > 0
           # pathing
           part = []
@@ -178,20 +179,42 @@ module Grit
           end
           return part.join("\n")
         else
-          get_raw_tree(sha)
+          get_raw_tree(sha, recursive)
         end
       end
 
-      def get_raw_tree(sha)
+      def get_raw_tree(sha, recursive = false)
         o = get_raw_object_by_sha1(sha)
         if o.type == :commit
           cat_file(get_object_by_sha1(sha).tree)
         elsif o.type == :tag
           commit_sha = get_object_by_sha1(sha).object
           cat_file(get_object_by_sha1(commit_sha).tree)
+        elsif o.type == :tree && recursive
+          get_raw_trees(sha)
         elsif o.type == :tree
           cat_file(sha)
         end
+      end
+
+      # Grabs tree contents recursively,
+      #   e.g. `git ls-tree -r sha`
+      def get_raw_trees(sha, path = '')
+        out = ''
+        cat_file(sha).split("\n").each do |line|
+          mode, type, sha, name = line.split(/\s/)
+
+          if type == 'tree'
+            full_name = path.empty? ? name : "#{path}/#{name}"
+            out << get_raw_trees(sha, full_name)
+          elsif path.empty?
+            out << line + "\n"
+          else
+            out << line.gsub(name, "#{path}/#{name}") + "\n"
+          end
+        end
+
+        out
       end
 
       # return array of tree entries
