@@ -201,6 +201,10 @@ module Grit
       @committed_date
     end
 
+    def refs
+      @refs ||= @repo.refs.select{ |ref| ref.commit.id == @id }.to_a
+    end
+
     def to_patch
       @repo.git.format_patch({'1' => true, :stdout => true}, to_s)
     end

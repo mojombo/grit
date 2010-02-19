@@ -204,4 +204,14 @@ class TestCommit < Test::Unit::TestCase
   ensure
     ENV["TZ"] = old_tz
   end
+
+  # refs
+
+  def test_refs
+    @c = Commit.create(@r, :id => '80f136f500dfdb8c3e8abf4ae716f875f0a1b57f')
+    @r = @r.tags[1] # tag called "commit_ref", created for this purpose.
+
+    assert_equal @c.refs.first.name, @r.name
+
+  end
 end
