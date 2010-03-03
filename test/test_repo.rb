@@ -354,4 +354,12 @@ class TestRepo < Test::Unit::TestCase
     delta_blobs = @r.commit_deltas_from(other_repo)
     assert_equal 3, delta_blobs.size
   end
+
+  # object_exist
+
+  def test_select_existing_objects
+    before = ['634396b2f541a9f2d58b00be1a07f0c358b999b3', 'deadbeef']
+    after = ['634396b2f541a9f2d58b00be1a07f0c358b999b3']
+    assert_equal after, @r.git.select_existing_objects(before)
+  end
 end

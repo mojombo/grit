@@ -27,6 +27,12 @@ module Grit
       ruby_git.object_exists?(object_id)
     end
 
+    def select_existing_objects(object_ids)
+      object_ids.select do |object_id|
+        object_exists?(object_id)
+      end
+    end
+
     class << self
       attr_accessor :git_binary, :git_timeout, :git_max_size
     end
