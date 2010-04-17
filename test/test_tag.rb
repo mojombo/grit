@@ -56,6 +56,17 @@ class TestTag < Test::Unit::TestCase
     assert_equal '7bcc0ee821cdd133d8a53e8e7173a334fef448aa', tag.commit.id
   end
 
+  # describe_recent_tag
+
+  def test_describe_recent_tag
+    assert_equal 'annotated', @r.recent_tag_name
+  end
+
+  # describe_recent_tag_with_updates
+
+  def test_describe_recent_tag_with_updates
+    assert_equal 'v0.7.0-62-g3fa4e13', @r.recent_tag_name('3fa4e130fa18c92e3030d4accb5d3e0cadd40157')
+  end
 
   # inspect
 
