@@ -132,16 +132,26 @@ module Grit
       Tag.find_all(self)
     end
 
-    # Finds the most recent tag name that is reachable from a commit.
+    # Finds the most recent annotated tag name that is reachable from a commit.
+    #
+    #   @repo.recent_tag_name('master')
+    #   # => "v1.0-0-abcdef"
     #
     # committish - optional commit SHA, branch, or tag name.
+    # options    - optional hash of options to pass to git.
+    #              Default: {:always => true}
+    #              :tags => true      # use lightweight tags too.
+    #              :abbrev => Integer # number of hex digits to form the unique
+    #                name.  Defaults to 7.
+    #              :long => true      # always output tag + commit sha
+    #              # see `git describe` docs for more options.
     #
     # Returns the String tag name, or just the commit if no tag is 
     # found.  If there have been updates since the tag was made, a
     # suffix is added with the number of commits since the tag, and 
     # the abbreviated object name of the most recent commit.
-    def recent_tag_name(committish = nil)
-      git.describe({:always => true}, committish.to_s).strip
+    def recent_tag_name(committish = nil, options = {})
+      git.describe({:always => true}.update(options), committish.to_s).strip
     end
 
     # An array of Remote objects representing the remote branches in
