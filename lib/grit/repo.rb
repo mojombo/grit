@@ -150,8 +150,10 @@ module Grit
     # found.  If there have been updates since the tag was made, a
     # suffix is added with the number of commits since the tag, and 
     # the abbreviated object name of the most recent commit.
+    # Returns nil if the committish value is not found.
     def recent_tag_name(committish = nil, options = {})
-      git.describe({:always => true}.update(options), committish.to_s).strip
+      value = git.describe({:always => true}.update(options), committish.to_s).to_s.strip
+      value.size.zero? ? nil : value
     end
 
     # An array of Remote objects representing the remote branches in

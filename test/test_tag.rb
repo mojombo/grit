@@ -68,6 +68,12 @@ class TestTag < Test::Unit::TestCase
     assert_equal 'v0.7.0-62-g3fa4e13', @r.recent_tag_name('3fa4e130fa18c92e3030d4accb5d3e0cadd40157')
   end
 
+  # describe_missing_tag
+
+  def test_describe_missing_Tag
+    assert_nil @r.recent_tag_name('boom')
+  end
+
   # inspect
 
   def test_inspect
