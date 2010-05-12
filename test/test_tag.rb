@@ -74,6 +74,20 @@ class TestTag < Test::Unit::TestCase
     assert_nil @r.recent_tag_name('boom')
   end
 
+  # read_content
+
+  def test_reads_annotated_tag_content
+    tag = @r.tags.first
+    assert_equal 'annotated',      tag.name
+    assert_equal 'Annotated tag.', tag.message
+  end
+
+  def test_reads_annotated_and_packed_tag_content
+    tag = @r.tags[3]
+    assert_equal 'packed_annotated', tag.name
+    assert_equal 'v0.7.0',           tag.message
+  end
+
   # inspect
 
   def test_inspect

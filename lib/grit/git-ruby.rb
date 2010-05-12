@@ -18,16 +18,21 @@ module Grit
       end
     end
 
-    def cat_file(options, ref)
+    def cat_file(options, sha)
       if options[:t]
-        file_type(ref)
+        file_type(sha)
       elsif options[:s]
-        file_size(ref)
+        file_size(sha)
       elsif options[:p]
-        try_run { ruby_git.cat_file(ref) }
+        try_run { ruby_git.cat_file(sha) }
       end
     rescue Grit::GitRuby::Repository::NoSuchShaFound
       ''
+    end
+
+    def cat_ref(options, ref)
+      sha = rev_parse({}, ref)
+      cat_file(options, sha)
     end
 
     # lib/grit/tree.rb:16:      output = repo.git.ls_tree({}, treeish, *paths)
