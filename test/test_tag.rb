@@ -83,6 +83,11 @@ class TestTag < Test::Unit::TestCase
       tag.message
   end
 
+  def test_attempts_to_read_bad_tag_message
+    tag = Grit::Tag.new('abc', @r.tags[0].commit)
+    assert_equal '', tag.message
+  end
+
   def test_reads_annotated_tag_message
     tag = @r.tags[0]
     assert_equal 'annotated',      tag.name

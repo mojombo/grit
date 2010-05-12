@@ -18,6 +18,8 @@ module Grit
       repo  = @commit.repo
       lines = repo.git.cat_ref({:p => true}, name).split("\n")
       @message = ''
+      return self if lines.empty?
+
       if lines[0] =~ /^object/
         lines.shift # type commit
         lines.shift # tag name
