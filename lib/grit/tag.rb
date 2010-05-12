@@ -18,7 +18,7 @@ module Grit
       repo  = @commit.repo
       lines = repo.git.cat_ref({:p => true}, name).split("\n")
       @message = ''
-      if lines.shift =~ /^object/
+      if lines[0] =~ /^object/
         lines.shift # type commit
         lines.shift # tag name
         lines.shift # tagger
@@ -27,6 +27,10 @@ module Grit
           @message << lines.shift << "\n"
         end
         @message.strip!
+      else # lightweight tag, grab the commit message
+        lines.shift until lines.first.empty?
+        lines.shift # blank line
+        @message = lines * "\n"
       end
       self
     end

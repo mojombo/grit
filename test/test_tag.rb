@@ -76,13 +76,20 @@ class TestTag < Test::Unit::TestCase
 
   # read_content
 
-  def test_reads_annotated_tag_content
-    tag = @r.tags.first
+  def test_reads_light_tag_message
+    tag = @r.tags[1]
+    assert_equal 'not_annotated', tag.name
+    assert_equal 'added a pure-ruby git library and converted the cat_file commands to use it',
+      tag.message
+  end
+
+  def test_reads_annotated_tag_message
+    tag = @r.tags[0]
     assert_equal 'annotated',      tag.name
     assert_equal 'Annotated tag.', tag.message
   end
 
-  def test_reads_annotated_and_packed_tag_content
+  def test_reads_annotated_and_packed_tag_message
     tag = @r.tags[3]
     assert_equal 'packed_annotated', tag.name
     assert_equal 'v0.7.0',           tag.message
