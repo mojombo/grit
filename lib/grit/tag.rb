@@ -9,20 +9,22 @@ module Grit
       refs = repo.git.refs(options, prefix)
       refs.split("\n").map do |ref|
         name, id = *ref.split(' ')
-        cid = repo.git.commit_from_sha(id)
-        raise "Unknown object type." if cid == ''
-        commit = Commit.create(repo, :id => cid)
-        self.new(name, commit)
+        sha = repo.git.commit_from_sha(id)
+        raise "Unknown object type." if sha == ''
+        commit = Commit.create(repo, :id => sha)
+        new(name, commit)
       end
     end
 
     def lazy_source
-      repo = @commit.repo
-      data = repo.git.cat_ref({:p => true}, name)
-      @message = ''
+      data         = commit.repo.git.cat_ref({:p => true}, name)
+      @message     = commit.short_message
+      @tagger      = commit.author
+      @tag_date    = commit.authored_date
       return self if data.empty?
 
       if data =~ /^object/
+        @message = ''
         lines = data.split("\n")
         lines.shift # type commit
         lines.shift # tag name
@@ -33,10 +35,6 @@ module Grit
           @message << lines.shift << "\n"
         end
         @message.strip!
-      else # lightweight tag, grab just the commit message
-        @tagger   = commit.author
-        @tag_date = commit.authored_date
-        @message  = commit.short_message
       end
       self
     end

@@ -90,7 +90,7 @@ class TestTag < Test::Unit::TestCase
 
   def test_attempts_to_read_bad_tag_message
     tag = Grit::Tag.new('abc', @r.tags[0].commit)
-    assert_equal '', tag.message
+    assert_equal tag.commit.message, tag.message
   end
 
   # reads_annotated_tag_contents
