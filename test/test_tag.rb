@@ -74,30 +74,45 @@ class TestTag < Test::Unit::TestCase
     assert_nil @r.recent_tag_name('boom')
   end
 
-  # read_content
+  # reads_light_tag_contents
 
-  def test_reads_light_tag_message
+  def test_reads_light_tag_contents
     tag = @r.tags[1]
     assert_equal 'not_annotated', tag.name
     assert_equal 'added a pure-ruby git library and converted the cat_file commands to use it',
       tag.message
+    assert_equal 'Scott Chacon',      tag.tagger.name
+    assert_equal 'schacon@gmail.com', tag.tagger.email
+    assert_equal Time.utc(2008, 4, 18, 23, 27, 8), tag.tag_date.utc
   end
+
+  # attempts_to_read_bad_tag_message
 
   def test_attempts_to_read_bad_tag_message
     tag = Grit::Tag.new('abc', @r.tags[0].commit)
     assert_equal '', tag.message
   end
 
-  def test_reads_annotated_tag_message
+  # reads_annotated_tag_contents
+
+  def test_reads_annotated_tag_contents
     tag = @r.tags[0]
-    assert_equal 'annotated',      tag.name
-    assert_equal 'Annotated tag.', tag.message
+    assert_equal 'annotated',       tag.name
+    assert_equal 'Annotated tag.',  tag.message
+    assert_equal 'Chris Wanstrath', tag.tagger.name
+    assert_equal 'chris@ozmm.org',  tag.tagger.email
+    assert_equal Time.utc(2009, 2, 13, 22, 22, 16), tag.tag_date.utc
   end
 
-  def test_reads_annotated_and_packed_tag_message
+  # reads_annotated_and_packed_tag_contents
+
+  def test_reads_annotated_and_packed_tag_contents
     tag = @r.tags[3]
-    assert_equal 'packed_annotated', tag.name
-    assert_equal 'v0.7.0',           tag.message
+    assert_equal 'packed_annotated',   tag.name
+    assert_equal 'v0.7.0',             tag.message
+    assert_equal 'Tom Preston-Werner', tag.tagger.name
+    assert_equal 'tom@mojombo.com',    tag.tagger.email
+    assert_equal Time.utc(2008, 1, 8, 5, 32, 29), tag.tag_date.utc
   end
 
   # inspect
