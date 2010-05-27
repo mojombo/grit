@@ -5,7 +5,7 @@ require 'test/unit'
 gem "mocha", ">=0"
 require 'mocha'
 
-GRIT_REPO = File.join(File.dirname(__FILE__), *%w[..])
+GRIT_REPO = ENV["GRIT_REPO"] || File.join(File.dirname(__FILE__), '..')
 
 include Grit
 

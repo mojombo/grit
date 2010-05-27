@@ -245,10 +245,50 @@ module Grit
       # rev-list'ing the whole thing
       repo_refs       = self.git.rev_list({}, ref).strip.split("\n")
       other_repo_refs = other_repo.git.rev_list({}, other_ref).strip.split("\n")
-
+      
       (other_repo_refs - repo_refs).map do |ref|
         Commit.find_all(other_repo, ref, {:max_count => 1}).first
       end
+    end
+
+    def objects(refs)
+      Grit.no_quote = true
+      obj = self.git.rev_list({:objects => true, :timeout => false}, refs).split("\n").map { |a| a[0, 40] }
+      Grit.no_quote = false
+      obj
+    end
+
+    def commit_objects(refs)
+      Grit.no_quote = true
+      obj = self.git.rev_list({:timeout => false}, refs).split("\n").map { |a| a[0, 40] }
+      Grit.no_quote = false
+      obj
+    end
+
+    def objects_between(ref1, ref2 = nil)
+      if ref2
+        refs = "#{ref2}..#{ref1}"
+      else
+        refs = ref1
+      end
+      self.objects(refs)
+    end
+
+    def diff_objects(commit_sha, parents = true)
+      revs = []
+      Grit.no_quote = true
+      if parents
+        # PARENTS:
+        cmd = "-r -t -m #{commit_sha}"
+        revs = self.git.diff_tree({:timeout => false}, cmd).strip.split("\n").map{ |a| r = a.split(' '); r[3] if r[1] != '160000' }
+      else
+        # NO PARENTS:
+        cmd = "-r -t #{commit_sha}"
+        revs = self.git.method_missing('ls-tree', {:timeout => false}, "-r -t #{commit_sha}").split("\n").map{ |a| a.split("\t").first.split(' ')[2] }
+      end
+      revs << self.commit(commit_sha).tree.id
+      Grit.no_quote = false
+      return revs.uniq.compact
     end
 
     # The Tree object for the given treeish reference
@@ -311,6 +351,15 @@ module Grit
       git = Git.new(path)
       git.fs_mkdir('..')
       git.init(git_options)
+      self.new(path, repo_options)
+    end
+
+    def self.init_bare_or_open(path, git_options = {}, repo_options = {})
+      git = Git.new(path)
+      if !git.exist?
+        git.fs_mkdir(path)
+        git.init(git_options)
+      end
       self.new(path, repo_options)
     end
 
