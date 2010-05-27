@@ -4,4 +4,7 @@ module Grit
 
   class NoSuchPathError < StandardError
   end
+
+  class InvalidObjectType < StandardError
+  end
 end

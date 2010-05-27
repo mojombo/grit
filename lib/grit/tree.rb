@@ -74,7 +74,7 @@ module Grit
         when "commit"
           Submodule.create(repo, :id => id, :mode => mode, :name => name)
         else
-          raise "Invalid type: #{type}"
+          raise Grit::InvalidObjectType, type
       end
     end
 
