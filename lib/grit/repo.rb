@@ -53,7 +53,7 @@ module Grit
         raise NoSuchPathError.new(epath)
       end
 
-      self.git = Git.new(self.path)
+      self.git = @bare ? Git.new(self.path) : Git.new(self.path, self.working_dir)
     end
 
     # Public: Initialize a git repository (create it on the filesystem). By
