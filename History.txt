@@ -1,3 +1,8 @@
+== Git
+  * Bug Fixes
+    * Add no_quote option for fixing tag listings.
+    * Raise custom exceptions on invalid tree objects.
+
 == 2.0.0 / 2009-10-27
   * Major Enhancements
     * All filesystem calls have been moved into Grit::Git to allow proxying
