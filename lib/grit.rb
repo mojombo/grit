@@ -9,13 +9,12 @@ require 'timeout'
 require 'logger'
 require 'digest/sha1'
 
-
 if defined? RUBY_ENGINE && RUBY_ENGINE == 'jruby'
   require 'open3'
 elsif RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/
   require 'win32/open3'
 else
-  require 'open3_detach'
+  require 'grit/open3_detach'
 end
 
 # third party
@@ -51,8 +50,9 @@ require 'grit/submodule'
 require 'grit/blame'
 require 'grit/merge'
 
-
 module Grit
+  VERSION = '2.0.0'
+
   class << self
     # Set +debug+ to true to log all git calls and responses
     attr_accessor :debug
@@ -72,7 +72,6 @@ module Grit
   @logger ||= ::Logger.new(STDOUT)
 
   def self.version
-    yml = YAML.load(File.read(File.join(File.dirname(__FILE__), *%w[.. VERSION.yml])))
-    "#{yml[:major]}.#{yml[:minor]}.#{yml[:patch]}"
+    VERSION
   end
 end

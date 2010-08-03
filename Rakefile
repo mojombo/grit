@@ -1,82 +1,149 @@
+require 'rubygems'
 require 'rake'
+require 'date'
+
+#############################################################################
+#
+# Helper functions
+#
+#############################################################################
+
+def name
+  @name ||= Dir['*.gemspec'].first.split('.').first
+end
+
+def version
+  line = File.read("lib/#{name}.rb")[/^\s*VERSION\s*=\s*.*/]
+  line.match(/.*VERSION\s*=\s*['"](.*)['"]/)[1]
+end
+
+def date
+  Date.today.to_s
+end
+
+def rubyforge_project
+  name
+end
+
+def gemspec_file
+  "#{name}.gemspec"
+end
+
+def gem_file
+  "#{name}-#{version}.gem"
+end
+
+def replace_header(head, header_name)
+  head.sub!(/(\.#{header_name}\s*= ').*'/) { "#{$1}#{send(header_name)}'"}
+end
+
+#############################################################################
+#
+# Standard tasks
+#
+#############################################################################
+
+task :default => :test
+
 require 'rake/testtask'
+Rake::TestTask.new(:test) do |test|
+  test.libs << 'lib' << 'test'
+  test.pattern = 'test/**/test_*.rb'
+  test.verbose = true
+end
+
+desc "Generate RCov test coverage and open in your browser"
+task :coverage do
+  require 'rcov'
+  sh "rm -fr coverage"
+  sh "rcov test/test_*.rb"
+  sh "open coverage/index.html"
+end
+
 require 'rake/rdoctask'
-
-begin
-  require 'rubygems'
-  require 'jeweler'
-  Jeweler::Tasks.new do |s|
-    s.name = "grit"
-    s.rubyforge_project = "grit"
-    s.summary = "Grit is a Ruby library for extracting information from a git repository in an object oriented manner."
-    s.email = "tom@mojombo.com"
-    s.homepage = "http://github.com/mojombo/grit"
-    s.description = "Grit is a Ruby library for extracting information from a git repository in an object oriented manner."
-    s.authors = ["Tom Preston-Werner", "Scott Chacon"]
-    s.files = FileList["[A-Z]*.*", "lib/**/*"]
-    s.add_dependency('mime-types', '>= 1.15')
-    s.add_dependency('diff-lcs', '>= 1.1.2')
-  end
-rescue LoadError
-  puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
-end
-
-Rake::TestTask.new do |t|
-  t.libs << 'lib'
-  t.pattern = 'test/**/test_*.rb'
-  t.verbose = false
-end
-
 Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title    = 'grit'
-  rdoc.options << '--line-numbers' << '--inline-source'
+  rdoc.title = "#{name} #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
 
-begin
-  require 'rake/contrib/sshpublisher'
-  namespace :rubyforge do
-
-    desc "Release gem and RDoc documentation to RubyForge"
-    task :release => ["rubyforge:release:gem", "rubyforge:release:docs"]
-
-    namespace :release do
-      desc "Publish RDoc to RubyForge."
-      task :docs => [:rdoc] do
-        config = YAML.load(
-            File.read(File.expand_path('~/.rubyforge/user-config.yml'))
-        )
-
-        host = "#{config['username']}@rubyforge.org"
-        remote_dir = "/var/www/gforge-projects/grit/"
-        local_dir = 'rdoc'
-
-        Rake::SshDirPublisher.new(host, remote_dir, local_dir).upload
-      end
-    end
-  end
-rescue LoadError
-  puts "Rake SshDirPublisher is unavailable or your rubyforge environment is not configured."
-end
-
-task :default => :test
-
-# custom
-
 desc "Open an irb session preloaded with this library"
 task :console do
-  sh "irb -rubygems -r ./lib/grit.rb"
+  sh "irb -rubygems -r ./lib/#{name}.rb"
 end
 
-task :coverage do
-  system("rm -fr coverage")
-  system("rcov test/test_*.rb")
-  system("open coverage/index.html")
-end
+#############################################################################
+#
+# Custom tasks (add your own tasks here)
+#
+#############################################################################
 
 desc "Upload site to Rubyforge"
 task :site do
   sh "scp -r doc/* mojombo@grit.rubyforge.org:/var/www/gforge-projects/grit"
+end
+
+#############################################################################
+#
+# Packaging tasks
+#
+#############################################################################
+
+task :release => :build do
+  unless `git branch` =~ /^\* master$/
+    puts "You must be on the master branch to release!"
+    exit!
+  end
+  sh "git commit --allow-empty -a -m 'Release #{version}'"
+  sh "git tag v#{version}"
+  sh "git push origin master"
+  sh "git push v#{version}"
+  sh "gem push pkg/#{name}-#{version}.gem"
+end
+
+task :build => :gemspec do
+  sh "mkdir -p pkg"
+  sh "gem build #{gemspec_file}"
+  sh "mv #{gem_file} pkg"
+end
+
+task :gemspec => :validate do
+  # read spec file and split out manifest section
+  spec = File.read(gemspec_file)
+  head, manifest, tail = spec.split("  # = MANIFEST =\n")
+
+  # replace name version and date
+  replace_header(head, :name)
+  replace_header(head, :version)
+  replace_header(head, :date)
+  #comment this out if your rubyforge_project has a different name
+  replace_header(head, :rubyforge_project)
+
+  # determine file list from git ls-files
+  files = `git ls-files`.
+    split("\n").
+    sort.
+    reject { |file| file =~ /^\./ }.
+    reject { |file| file =~ /^(rdoc|pkg)/ }.
+    map { |file| "    #{file}" }.
+    join("\n")
+
+  # piece file back together and write
+  manifest = "  s.files = %w[\n#{files}\n  ]\n"
+  spec = [head, manifest, tail].join("  # = MANIFEST =\n")
+  File.open(gemspec_file, 'w') { |io| io.write(spec) }
+  puts "Updated #{gemspec_file}"
+end
+
+task :validate do
+  libfiles = Dir['lib/*'] - ["lib/#{name}.rb", "lib/#{name}"]
+  unless libfiles.empty?
+    puts "Directory `lib` should only contain a `#{name}.rb` file and `#{name}` dir."
+    exit!
+  end
+  unless Dir['VERSION*'].empty?
+    puts "A `VERSION` file at root level violates Gem best practices."
+    exit!
+  end
 end
