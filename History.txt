@@ -3,6 +3,14 @@
     * Add support for parsing annotated tag objects.
     * Add Grit::Repo#recent_tag_name for getting the latest tag name that is
       reachable in a commit.
+  * Minor Enhancements
+    * Allow diff to only take one sha
+    * Add merge commit diff support
+    * Pass along the options to Real Git on a rev-parse miss
+    * Raise NoSuchPath with no tree in ls_tree_path
+    * Make pure-ruby `ls-tree -r` work with commits
+    * Implement select_existing_objects
+    * Switch to RakeGem for build management
   * Bug Fixes
     * Add no_quote option for fixing tag listings.
     * Raise custom exceptions on invalid tree objects.
