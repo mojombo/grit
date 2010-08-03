@@ -16,14 +16,14 @@ class TestGit < Test::Unit::TestCase
   def test_logs_stderr
     Grit.debug = true
     Grit.stubs(:log)
-    Grit.expects(:log).with(includes("git: 'bad' is not a git-command"))
+    Grit.expects(:log).with(includes("git: 'bad' is not a git command"))
     @git.bad
   end
 
   def testl_logs_stderr_when_skipping_timeout
     Grit.debug = true
     Grit.stubs(:log)
-    Grit.expects(:log).with(includes("git: 'bad' is not a git-command"))
+    Grit.expects(:log).with(includes("git: 'bad' is not a git command"))
     @git.bad :timeout => false
   end
 

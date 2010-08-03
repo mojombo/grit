@@ -173,7 +173,7 @@ class TestCommit < Test::Unit::TestCase
     assert patch.include?('test/test_reality.rb |   30 +++++++++++++++---------------')
     assert patch.include?('@@ -1,17 +1,17 @@')
     assert patch.include?('+#     recurse(t)')
-    assert patch.include?("1.6.")
+    assert patch.include?("1.7.")
   end
 
   # inspect
