@@ -86,13 +86,6 @@ class TestTag < Test::Unit::TestCase
     assert_equal Time.utc(2008, 4, 18, 23, 27, 8), tag.tag_date.utc
   end
 
-  # attempts_to_read_bad_tag_message
-
-  def test_attempts_to_read_bad_tag_message
-    tag = Grit::Tag.new('abc', @r.tags[0].commit)
-    assert_equal tag.commit.message, tag.message
-  end
-
   # reads_annotated_tag_contents
 
   def test_reads_annotated_tag_contents
@@ -102,6 +95,19 @@ class TestTag < Test::Unit::TestCase
     assert_equal 'Chris Wanstrath', tag.tagger.name
     assert_equal 'chris@ozmm.org',  tag.tagger.email
     assert_equal Time.utc(2009, 2, 13, 22, 22, 16), tag.tag_date.utc
+  end
+
+  def test_parses_tag_object_without_message
+    parsed = Grit::Tag.parse_tag_data(<<-TAG)
+object 2695effb5807a22ff3d138d593fd856244e155e7
+type commit
+tag rel-0-1-0
+tagger bob <bob>
+Thu Jan 1 00:00:00 1970 +0000
+TAG
+    assert_equal 'bob',          parsed[:tagger].name
+    assert_equal Time.utc(1970), parsed[:tag_date]
+    assert_equal '',             parsed[:message]
   end
 
   # reads_annotated_and_packed_tag_contents

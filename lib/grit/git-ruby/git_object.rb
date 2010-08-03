@@ -337,8 +337,8 @@ module Grit
     end
 
     def raw_content
-      "object %s\ntype %s\ntag %s\ntagger %s\n\n" % \
-        [@object, @type, @tag, @tagger] + @message
+      ("object %s\ntype %s\ntag %s\ntagger %s\n\n" % \
+        [@object, @type, @tag, @tagger]) + @message.to_s
     end
 
     def type
