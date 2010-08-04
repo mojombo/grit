@@ -17,6 +17,12 @@ class TestHead < Test::Unit::TestCase
     assert_equal 'ca8a30f5a7f0f163bbe3b6f0abf18a6c83b0687a', head.id
   end
 
+  def test_head_commit
+    head = @r.head
+    assert_equal 'master', head.name
+    assert_equal 'ca8a30f5a7f0f163bbe3b6f0abf18a6c83b0687a', head.commit
+  end
+
   def test_submaster
     head = @r.commit('test/master')
     assert_equal '2d3acf90f35989df8f262dc50beadc4ee3ae1560', head.id
