@@ -3,6 +3,7 @@
     * Add support for parsing annotated tag objects.
     * Add Grit::Repo#recent_tag_name for getting the latest tag name that is
       reachable in a commit.
+    * Grit::Diff tracks renames properly if given the :M option.
     * Grit::Commit#diffs and Grit::Commit.diffs both take a git options hash
       that is passed to `git diff`.
   * Minor Enhancements
