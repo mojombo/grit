@@ -146,9 +146,9 @@ module Grit
     #              :long => true      # always output tag + commit sha
     #              # see `git describe` docs for more options.
     #
-    # Returns the String tag name, or just the commit if no tag is 
+    # Returns the String tag name, or just the commit if no tag is
     # found.  If there have been updates since the tag was made, a
-    # suffix is added with the number of commits since the tag, and 
+    # suffix is added with the number of commits since the tag, and
     # the abbreviated object name of the most recent commit.
     # Returns nil if the committish value is not found.
     def recent_tag_name(committish = nil, options = {})
@@ -269,7 +269,7 @@ module Grit
       # rev-list'ing the whole thing
       repo_refs       = self.git.rev_list({}, ref).strip.split("\n")
       other_repo_refs = other_repo.git.rev_list({}, other_ref).strip.split("\n")
-      
+
       (other_repo_refs - repo_refs).map do |ref|
         Commit.find_all(other_repo, ref, {:max_count => 1}).first
       end
@@ -351,7 +351,14 @@ module Grit
     #   +b+ is the other commit
     #   +paths+ is an optional list of file paths on which to restrict the diff
     def diff(a, b, *paths)
-      self.git.diff({}, a, b, '--', *paths)
+      diff = self.git.native('diff', {}, a, b, '--', *paths)
+
+      if diff =~ /diff --git a/
+        diff = diff.sub(/.+?(diff --git a)/m, '\1')
+      else
+        diff = ''
+      end
+      Diff.list_from_string(self, diff)
     end
 
     # The commit diff for the given commit

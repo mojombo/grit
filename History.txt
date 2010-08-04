@@ -17,6 +17,7 @@
   * Bug Fixes
     * Add no_quote option for fixing tag listings.
     * Raise custom exceptions on invalid tree objects.
+    * Fix Repo#diff (was throwing an error).
 
 == 2.0.0 / 2009-10-27
   * Major Enhancements
