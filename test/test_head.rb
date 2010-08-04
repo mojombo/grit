@@ -20,7 +20,7 @@ class TestHead < Test::Unit::TestCase
   def test_head_commit
     head = @r.head
     assert_equal 'master', head.name
-    assert_equal 'ca8a30f5a7f0f163bbe3b6f0abf18a6c83b0687a', head.commit
+    assert_equal 'ca8a30f5a7f0f163bbe3b6f0abf18a6c83b0687a', head.commit.sha
   end
 
   def test_submaster
