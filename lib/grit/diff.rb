@@ -4,20 +4,23 @@ module Grit
     attr_reader :a_path, :b_path
     attr_reader :a_blob, :b_blob
     attr_reader :a_mode, :b_mode
-    attr_reader :new_file, :deleted_file
-    attr_reader :diff
+    attr_reader :new_file, :deleted_file, :renamed_file
+    attr_reader :similarity_index
+    attr_accessor :diff
 
-    def initialize(repo, a_path, b_path, a_blob, b_blob, a_mode, b_mode, new_file, deleted_file, diff)
-      @repo = repo
+    def initialize(repo, a_path, b_path, a_blob, b_blob, a_mode, b_mode, new_file, deleted_file, diff, renamed_file = false, similarity_index = 0)
+      @repo   = repo
       @a_path = a_path
       @b_path = b_path
       @a_blob = a_blob =~ /^0{40}$/ ? nil : Blob.create(repo, :id => a_blob)
       @b_blob = b_blob =~ /^0{40}$/ ? nil : Blob.create(repo, :id => b_blob)
       @a_mode = a_mode
       @b_mode = b_mode
-      @new_file = new_file || @a_blob.nil?
-      @deleted_file = deleted_file || @b_blob.nil?
-      @diff = diff
+      @new_file         = new_file     || @a_blob.nil?
+      @deleted_file     = deleted_file || @b_blob.nil?
+      @renamed_file     = renamed_file
+      @similarity_index = similarity_index.to_i
+      @diff             = diff
     end
 
     def self.list_from_string(repo, text)
@@ -38,17 +41,23 @@ module Grit
           next
         end
 
-        new_file = false
+        sim_index    = 0
+        new_file     = false
         deleted_file = false
+        renamed_file = false
 
         if lines.first =~ /^new file/
           m, b_mode = lines.shift.match(/^new file mode (.+)$/)
-          a_mode = nil
-          new_file = true
+          a_mode    = nil
+          new_file  = true
         elsif lines.first =~ /^deleted file/
-          m, a_mode = lines.shift.match(/^deleted file mode (.+)$/)
-          b_mode = nil
+          m, a_mode    = lines.shift.match(/^deleted file mode (.+)$/)
+          b_mode       = nil
           deleted_file = true
+        elsif lines.first =~ /^similarity index (\d+)\%/
+          sim_index    = $1.to_i
+          renamed_file = true
+          2.times { lines.shift } # shift away the 2 `rename from/to ...` lines
         end
 
         m, a_blob, b_blob, b_mode = *lines.shift.match(%r{^index ([0-9A-Fa-f]+)\.\.([0-9A-Fa-f]+) ?(.+)?$})
@@ -60,7 +69,7 @@ module Grit
         end
         diff = diff_lines.join("\n")
 
-        diffs << Diff.new(repo, a_path, b_path, a_blob, b_blob, a_mode, b_mode, new_file, deleted_file, diff)
+        diffs << Diff.new(repo, a_path, b_path, a_blob, b_blob, a_mode, b_mode, new_file, deleted_file, diff, renamed_file, sim_index)
       end
 
       diffs
