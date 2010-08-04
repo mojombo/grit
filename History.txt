@@ -3,6 +3,8 @@
     * Add support for parsing annotated tag objects.
     * Add Grit::Repo#recent_tag_name for getting the latest tag name that is
       reachable in a commit.
+    * Grit::Commit#diffs and Grit::Commit.diffs both take a git options hash
+      that is passed to `git diff`.
   * Bug Fixes
     * Add no_quote option for fixing tag listings.
     * Raise custom exceptions on invalid tree objects.

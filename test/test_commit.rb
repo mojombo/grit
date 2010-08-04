@@ -80,6 +80,13 @@ class TestCommit < Test::Unit::TestCase
     assert_equal 'lib/grit/commit.rb', diffs.first.a_path
   end
 
+  def test_diff_with_options
+    Git.any_instance.expects(:diff).
+      with({:full_index => true, :M => true}, 'master').
+      returns(fixture('diff_mode_only'))
+    Commit.diff(@r, 'master', nil, [], :M => true)
+  end
+
   # diffs
   def test_diffs
     # git diff --full-index 91169e1f5fa4de2eaea3f176461f5dc784796769 > test/fixtures/diff_p
@@ -150,6 +157,16 @@ class TestCommit < Test::Unit::TestCase
     assert_equal 23, diffs.size
     assert_equal '100644', diffs[0].a_mode
     assert_equal '100755', diffs[0].b_mode
+  end
+
+  def test_diffs_with_options
+    Git.any_instance.expects(:diff).
+      with({:full_index => true, :M => true}, 
+        '038af8c329ef7c1bae4568b98bd5c58510465493', 
+        '91169e1f5fa4de2eaea3f176461f5dc784796769').
+      returns(fixture('diff_mode_only'))
+    @c = Commit.create(@r, :id => '91169e1f5fa4de2eaea3f176461f5dc784796769')
+    @c.diffs :M => true
   end
 
   # to_s
