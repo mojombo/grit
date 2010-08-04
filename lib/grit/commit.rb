@@ -141,16 +141,18 @@ module Grit
       commits
     end
 
-    # Show diffs between two trees:
-    #   +repo+ is the Repo
-    #   +a+ is a named commit
-    #   +b+ is an optional named commit.  Passing an array assumes you
-    #     wish to omit the second named commit and limit the diff to the
-    #     given paths.
-    #   +paths* is an array of paths to limit the diff.
+    # Show diffs between two trees.
+    #
+    # repo    - The current Grit::Repo instance.
+    # a       - A String named commit.
+    # b       - An optional String named commit.  Passing an array assumes you
+    #           wish to omit the second named commit and limit the diff to the
+    #           given paths.
+    # paths   - An optional Array of paths to limit the diff.
+    # options - An optional Hash of options.  Merged into {:full_index => true}.
     #
     # Returns Grit::Diff[] (baked)
-    def self.diff(repo, a, b = nil, paths = [])
+    def self.diff(repo, a, b = nil, paths = [], options = {})
       if b.is_a?(Array)
         paths = b
         b     = nil
@@ -158,7 +160,8 @@ module Grit
       paths.unshift("--") unless paths.empty?
       paths.unshift(b)    unless b.nil?
       paths.unshift(a)
-      text = repo.git.diff({:full_index => true}, *paths)
+      options = {:full_index => true}.update(options)
+      text    = repo.git.diff(options, *paths)
       Diff.list_from_string(repo, text)
     end
 
@@ -177,11 +180,16 @@ module Grit
       Diff.list_from_string(@repo, diff)
     end
 
-    def diffs
+    # Shows diffs between the commit's parent and the commit.
+    #
+    # options - An optional Hash of options, passed to Grit::Commit.diff.
+    #
+    # Returns Grit::Diff[] (baked)
+    def diffs(options = {})
       if parents.empty?
         show
       else
-        self.class.diff(@repo, parents.first.id, @id)
+        self.class.diff(@repo, parents.first.id, @id, [], options)
       end
     end
 
