@@ -1,4 +1,4 @@
-== Git
+== 2.1.0 / 2010-08-04
   * Major Enhancements
     * Add support for parsing annotated tag objects.
     * Add Grit::Repo#recent_tag_name for getting the latest tag name that is
