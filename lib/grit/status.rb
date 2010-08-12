@@ -3,6 +3,8 @@ module Grit
   class Status
     include Enumerable
 
+    attr_reader :files
+
     @base = nil
     @files = nil
 
