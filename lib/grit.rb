@@ -51,7 +51,7 @@ require 'grit/blame'
 require 'grit/merge'
 
 module Grit
-  VERSION = '2.1.0'
+  VERSION = '2.2.0'
 
   class << self
     # Set +debug+ to true to log all git calls and responses
