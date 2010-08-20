@@ -1,4 +1,4 @@
-== HEAD
+== 2.2.0 / 2010-08-19
   * Minor Enhancements
     * Add Grit::Index#delete to allow deletions of files from the index.
 
