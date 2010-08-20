@@ -1,21 +1,36 @@
 module Grit
 
   class Index
-    attr_accessor :repo, :tree, :current_tree
+    # Public: Gets/Sets the Grit::Repo to which this index belongs.
+    attr_accessor :repo
 
+    # Public: Gets/Sets the Hash tree map that holds the changes to be made
+    # in the next commit.
+    attr_accessor :tree
+
+    # Public: Gets/Sets the Grit::Tree object representing the tree upon
+    # which the next commit will be based.
+    attr_accessor :current_tree
+
+    # Initialize a new Index object.
+    #
+    # repo - The Grit::Repo to which the index belongs.
+    #
+    # Returns the newly initialized Grit::Index.
     def initialize(repo)
       self.repo = repo
       self.tree = {}
       self.current_tree = nil
     end
 
-    # Add a file to the index
-    #   +path+ is the path (including filename)
-    #   +data+ is the binary contents of the file
+    # Public: Add a file to the index.
     #
-    # Returns nothing
-    def add(file_path, data)
-      path = file_path.split('/')
+    # path - The String file path including filename (no slash prefix).
+    # data - The String binary contents of the file.
+    #
+    # Returns nothing.
+    def add(path, data)
+      path = path.split('/')
       filename = path.pop
 
       current = self.tree
@@ -29,31 +44,49 @@ module Grit
       current[filename] = data
     end
 
-    # Sets the current tree
-    #   +tree+ the branch/tag/sha... to use - a string
+    # Public: Delete the given file from the index.
     #
-    # Returns index (self)
+    # path - The String file path including filename (no slash prefix).
+    #
+    # Returns nothing.
+    def delete(path)
+      add(path, false)
+    end
+
+    # Public: Read the contents of the given Tree into the index to use as a
+    # starting point for the index.
+    #
+    # tree - The String branch/tag/sha of the Git tree object.
+    #
+    # Returns nothing.
     def read_tree(tree)
       self.current_tree = self.repo.tree(tree)
     end
 
-    # Commit the contents of the index
-    #   +message+ is the commit message [nil]
-    #   +parents+ is one or more commits to attach this commit to to form a new head [nil]
-    #   +actor+ is the details of the user making the commit [nil]
-    #   +last_tree+ is a tree to compare with - to avoid making empty commits [nil]
-    #   +head+ is the branch to write this head to [master]
+    # Public: Commit the contents of the index
     #
-    # Returns a String of the SHA1 of the commit
-    def commit(message, parents = nil, actor = nil, last_tree = nil, head = 'master')
+    # message   - The String commit message.
+    # parents   - Array of String commit SHA1s or Grit::Commit objects to
+    #             attach this commit to to form a new head (default: []).
+    # actor     - The Grit::Actor details of the user making the commit
+    #             (default: nil).
+    # last_tree - The String SHA1 of a tree to compare with in order to avoid
+    #             making empty commits (default: nil).
+    # head      - The String branch name to write this head to
+    #             (default: "master").
+    #
+    # Returns a String of the SHA1 of the new commit.
+    def commit(message, parents = [], actor = nil, last_tree = nil, head = 'master')
       tree_sha1 = write_tree(self.tree, self.current_tree)
-      return false if tree_sha1 == last_tree # don't write identical commits
+
+      # don't write identical commits
+      return false if tree_sha1 == last_tree
 
       contents = []
       contents << ['tree', tree_sha1].join(' ')
       parents.each do |p|
-        contents << ['parent', p].join(' ') if p
-      end if parents
+        contents << ['parent', p].join(' ')
+      end
 
       if actor
         name = actor.name
@@ -75,10 +108,15 @@ module Grit
       self.repo.update_ref(head, commit_sha1)
     end
 
-    # Recursively write a tree to the index
-    #   +tree+ is the tree
+    # Recursively write a tree to the index.
     #
-    # Returns the SHA1 String of the tree
+    # tree -     The Hash tree map:
+    #            key - The String directory or filename.
+    #            val - The Hash submap or the String contents of the file.
+    # now_tree - The Grit::Tree representing the a previous tree upon which
+    #            this tree will be based (default: nil).
+    #
+    # Returns the String SHA1 String of the tree.
     def write_tree(tree, now_tree = nil)
       tree_contents = {}
 
@@ -104,16 +142,20 @@ module Grit
             sha = [sha].pack("H*")
             str = "%s %s\0%s" % ['40000', k, sha]
             tree_contents[k + '/'] = str
+          when false
+            tree_contents.delete(k)
         end
       end
+
       tr = tree_contents.sort.map { |k, v| v }.join('')
       self.repo.git.put_raw_object(tr, 'tree')
     end
 
-    # Write the blob to the index
-    #   +data+ is the data to write
+    # Write a blob to the index.
     #
-    # Returns the SHA1 String of the blob
+    # data - The String data to write.
+    #
+    # Returns the String SHA1 of the new blob.
     def write_blob(data)
       self.repo.git.put_raw_object(data, 'blob')
     end
