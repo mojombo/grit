@@ -67,7 +67,7 @@ module Grit
     #
     # message   - The String commit message.
     # parents   - Array of String commit SHA1s or Grit::Commit objects to
-    #             attach this commit to to form a new head (default: []).
+    #             attach this commit to to form a new head (default: nil).
     # actor     - The Grit::Actor details of the user making the commit
     #             (default: nil).
     # last_tree - The String SHA1 of a tree to compare with in order to avoid
@@ -76,7 +76,7 @@ module Grit
     #             (default: "master").
     #
     # Returns a String of the SHA1 of the new commit.
-    def commit(message, parents = [], actor = nil, last_tree = nil, head = 'master')
+    def commit(message, parents = nil, actor = nil, last_tree = nil, head = 'master')
       tree_sha1 = write_tree(self.tree, self.current_tree)
 
       # don't write identical commits
@@ -86,15 +86,15 @@ module Grit
       contents << ['tree', tree_sha1].join(' ')
       parents.each do |p|
         contents << ['parent', p].join(' ')
-      end
+      end if parents
 
       if actor
-        name = actor.name
+        name  = actor.name
         email = actor.email
       else
         config = Config.new(self.repo)
-        name = config['user.name']
-        email = config['user.email']
+        name   = config['user.name']
+        email  = config['user.email']
       end
 
       author_string = "#{name} <#{email}> #{Time.now.to_i} -0700" # !! TODO : gotta fix this
