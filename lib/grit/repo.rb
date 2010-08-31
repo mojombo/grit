@@ -3,23 +3,34 @@ module Grit
   class Repo
     DAEMON_EXPORT_FILE = 'git-daemon-export-ok'
 
-    # The path of the git repo as a String
+    # Public: The String path of the Git repo.
     attr_accessor :path
+
+    # Public: The String path to the working directory of the repo, or nil if
+    # there is no working directory.
     attr_accessor :working_dir
+
+    # Public: The Boolean of whether or not the repo is bare.
     attr_reader :bare
 
-    # The git command line interface object
+    # Public: The Grit::Git command line interface object.
     attr_accessor :git
 
-    # Create a new Repo instance
-    #   +path+ is the path to either the root git directory or the bare git repo
-    #   +options+ :is_bare force to load a bare repo
+    # Public: Create a new Repo instance.
+    #
+    # path    - The String path to either the root git directory or the bare
+    #           git repo.
+    # options - :is_bare force to load a bare repo
     #
     # Examples
+    #
     #   g = Repo.new("/Users/tom/dev/grit")
     #   g = Repo.new("/Users/tom/public/grit.git")
     #
-    # Returns Grit::Repo
+    # Returns a newly initialized Grit::Repo.
+    # Raises Grit::InvalidGitRepositoryError if the path exists but is not
+    #   a Git repository.
+    # Raises Grit::NoSuchPathError if the path does not exist.
     def initialize(path, options = {})
       epath = File.expand_path(path)
 
@@ -39,12 +50,106 @@ module Grit
       self.git = Git.new(self.path)
     end
 
-    # Does nothing yet...
-    def self.init(path)
-      # !! TODO !!
-      # create directory
-      # generate initial git directory
-      # create new Grit::Repo on that dir, return it
+    # Public: Initialize a git repository (create it on the filesystem). By
+    # default, the newly created repository will contain a working directory.
+    # If you would like to create a bare repo, use Gollum::Repo.init_bare.
+    #
+    # path         - The String full path to the repo. Traditionally ends with
+    #                "/<name>.git".
+    # git_options  - A Hash of additional options to the git init command
+    #                (default: {}).
+    # repo_options - A Hash of additional options to the Grit::Repo.new call
+    #                (default: {}).
+    #
+    # Examples
+    #
+    #   Grit::Repo.init('/var/git/myrepo.git')
+    #
+    # Returns the newly created Grit::Repo.
+    def self.init(path, git_options = {}, repo_options = {})
+      git_options = {:base => false}.merge(git_options)
+      git = Git.new(path)
+      git.fs_mkdir('..')
+      git.init(git_options, path)
+      self.new(path, repo_options)
+    end
+
+    # Public: Initialize a bare git repository (create it on the filesystem).
+    #
+    # path         - The String full path to the repo. Traditionally ends with
+    #                "/<name>.git".
+    # git_options  - A Hash of additional options to the git init command
+    #                (default: {}).
+    # repo_options - A Hash of additional options to the Grit::Repo.new call
+    #                (default: {}).
+    #
+    # Examples
+    #
+    #   Grit::Repo.init_bare('/var/git/myrepo.git')
+    #
+    # Returns the newly created Grit::Repo.
+    def self.init_bare(path, git_options = {}, repo_options = {})
+      git_options = {:bare => true}.merge(git_options)
+      git = Git.new(path)
+      git.fs_mkdir('..')
+      git.init(git_options)
+      self.new(path, repo_options)
+    end
+
+    # Public: Initialize a bare Git repository (create it on the filesystem)
+    # or, if the repo already exists, simply return it.
+    #
+    # path         - The String full path to the repo. Traditionally ends with
+    #                "/<name>.git".
+    # git_options  - A Hash of additional options to the git init command
+    #                (default: {}).
+    # repo_options - A Hash of additional options to the Grit::Repo.new call
+    #                (default: {}).
+    #
+    # Returns the new or existing Grit::Repo.
+    def self.init_bare_or_open(path, git_options = {}, repo_options = {})
+      git = Git.new(path)
+
+      unless git.exist?
+        git.fs_mkdir(path)
+        git.init(git_options)
+      end
+
+      self.new(path, repo_options)
+    end
+
+    # Public: Create a bare fork of this repository.
+    #
+    # path    - The String full path of where to create the new fork.
+    #           Traditionally ends with "/<name>.git".
+    # options - The Hash of additional options to the git clone command.
+    #           These options will be merged on top of the default Hash:
+    #           {:bare => true, :shared => true}.
+    #
+    # Returns the newly forked Grit::Repo.
+    def fork_bare(path, options = {})
+      default_options = {:bare => true, :shared => true}
+      real_options = default_options.merge(options)
+      Git.new(path).fs_mkdir('..')
+      self.git.clone(real_options, self.path, path)
+      Repo.new(path)
+    end
+
+    # Public: Fork a bare git repository from another repo.
+    #
+    # path    - The String full path of the repo from which to fork..
+    #           Traditionally ends with "/<name>.git".
+    # options - The Hash of additional options to the git clone command.
+    #           These options will be merged on top of the default Hash:
+    #           {:bare => true, :shared => true}.
+    #
+    # Returns the newly forked Grit::Repo.
+    def fork_bare_from(path, options = {})
+      default_options = {:bare => true, :shared => true}
+      real_options = default_options.merge(options)
+      Git.new(self.path).fs_mkdir('..')
+      self.git.clone(real_options, path, self.path)
+      Repo.new(self.path)
     end
 
     # The project's description. Taken verbatim from GIT_REPO/description
@@ -57,7 +162,6 @@ module Grit
     def blame(file, commit = nil)
       Blame.new(self, file, commit)
     end
-
 
     # An array of Head objects representing the branch heads in
     # this repo
@@ -367,57 +471,6 @@ module Grit
     # Returns Grit::Diff[]
     def commit_diff(commit)
       Commit.diff(self, commit)
-    end
-
-    # Initialize a bare git repository at the given path
-    #   +path+ is the full path to the repo (traditionally ends with /<name>.git)
-    #   +options+ is any additional options to the git init command
-    #
-    # Examples
-    #   Grit::Repo.init_bare('/var/git/myrepo.git')
-    #
-    # Returns Grit::Repo (the newly created repo)
-    def self.init_bare(path, git_options = {}, repo_options = {})
-      git_options = {:bare => true}.merge(git_options)
-      git = Git.new(path)
-      git.fs_mkdir('..')
-      git.init(git_options)
-      self.new(path, repo_options)
-    end
-
-    def self.init_bare_or_open(path, git_options = {}, repo_options = {})
-      git = Git.new(path)
-      if !git.exist?
-        git.fs_mkdir(path)
-        git.init(git_options)
-      end
-      self.new(path, repo_options)
-    end
-
-    # Fork a bare git repository from this repo
-    #   +path+ is the full path of the new repo (traditionally ends with /<name>.git)
-    #   +options+ is any additional options to the git clone command (:bare and :shared are true by default)
-    #
-    # Returns Grit::Repo (the newly forked repo)
-    def fork_bare(path, options = {})
-      default_options = {:bare => true, :shared => true}
-      real_options = default_options.merge(options)
-      Git.new(path).fs_mkdir('..')
-      self.git.clone(real_options, self.path, path)
-      Repo.new(path)
-    end
-
-    # Fork a bare git repository from another repo
-    #   +path+ is the full path of the new repo (traditionally ends with /<name>.git)
-    #   +options+ is any additional options to the git clone command (:bare and :shared are true by default)
-    #
-    # Returns Grit::Repo (the newly forked repo)
-    def fork_bare_from(path, options = {})
-      default_options = {:bare => true, :shared => true}
-      real_options = default_options.merge(options)
-      Git.new(self.path).fs_mkdir('..')
-      self.git.clone(real_options, path, self.path)
-      Repo.new(self.path)
     end
 
     # Archive the given treeish

@@ -232,14 +232,19 @@ module Grit
       timeout  = options.delete(:timeout) rescue nil
       timeout  = true if timeout.nil?
 
+      base     = options.delete(:base) rescue nil
+      base     = true if base.nil?
+
       opt_args = transform_options(options)
 
       if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/
         ext_args = args.reject { |a| a.empty? }.map { |a| (a == '--' || a[0].chr == '|' || Grit.no_quote) ? a : "\"#{e(a)}\"" }
-        call = "#{prefix}#{Git.git_binary} --git-dir=\"#{self.git_dir}\" #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
+        gitdir = base ? "--git-dir=\"#{self.git_dir}\"" : ""
+        call = "#{prefix}#{Git.git_binary} #{gitdir} #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
       else
         ext_args = args.reject { |a| a.empty? }.map { |a| (a == '--' || a[0].chr == '|' || Grit.no_quote) ? a : "'#{e(a)}'" }
-        call = "#{prefix}#{Git.git_binary} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
+        gitdir = base ? "--git-dir='#{self.git_dir}'" : ""
+        call = "#{prefix}#{Git.git_binary} #{gitdir} #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
       end
       Grit.log(call) if Grit.debug
       response, err = timeout ? sh(call) : wild_sh(call)

@@ -1,3 +1,7 @@
+== HEAD
+  * Minor Enhancements
+    * Add Grit::Repo.init.
+
 == 2.2.1 / 2010-08-23
   * Bug Fixes
     * Fix minor regression due to the changed default values in Grit::Index#commit.

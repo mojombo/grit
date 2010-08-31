@@ -157,6 +157,16 @@ class TestRepo < Test::Unit::TestCase
     assert_equal "Hello world", blob.data
   end
 
+  # init
+
+  def test_init
+    FileUtils.stubs(:mkdir_p)
+
+    Git.any_instance.expects(:init).with({:base => false}, "/foo/bar").returns(true)
+    Repo.expects(:new).with("/foo/bar", {})
+    Repo.init("/foo/bar")
+  end
+
   # init_bare
 
   def test_init_bare
