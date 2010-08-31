@@ -19,13 +19,16 @@ module Grit
     # Public: Create a new Repo instance.
     #
     # path    - The String path to either the root git directory or the bare
-    #           git repo.
-    # options - :is_bare force to load a bare repo
+    #           git repo. Bare repos are expected to end with ".git".
+    # options - A Hash of options (default: {}):
+    #           :is_bare - Boolean whether to consider the repo as bare even
+    #                      if the repo name does not end with ".git".
     #
     # Examples
     #
-    #   g = Repo.new("/Users/tom/dev/grit")
-    #   g = Repo.new("/Users/tom/public/grit.git")
+    #   r = Repo.new("/Users/tom/dev/normal")
+    #   r = Repo.new("/Users/tom/public/bare.git")
+    #   r = Repo.new("/Users/tom/public/bare", {:is_bare => true})
     #
     # Returns a newly initialized Grit::Repo.
     # Raises Grit::InvalidGitRepositoryError if the path exists but is not
