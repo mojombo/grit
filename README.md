@@ -15,22 +15,22 @@ correctness.
 Grit is maintained by Tom Preston-Werner, Scott Chacon, Chris Wanstrath, and
 PJ Hyett.
 
-This documentation is accurate as of Grit 2.0.
+This documentation is accurate as of Grit 2.3.
 
 
-## Requirements #############################################################
+## Requirements
 
-* git (http://git-scm.com) tested with 1.6.0.2
+* git (http://git-scm.com) tested with 1.7.2.1
 
 
-## Install ##################################################################
+## Install
 
 Easiest install is via RubyGems:
 
-    $ gem install grit -s http://gemcutter.org
+    $ gem install grit
 
 
-## Source ###################################################################
+## Source
 
 Grit's Git repo is available on GitHub, which can be browsed at:
 
@@ -45,19 +45,26 @@ and cloned with:
 
 You will need these gems to get tests to pass:
 
-* jeweler
 * mocha
 
 
 ### Contributing
 
-If you'd like to contribute to Grit, we ask that you fork mojombo/grit on
-GitHub, and push up a topic branch for each feature you add or bug you fix.
-Then create an issue and link to the topic branch and explain what the code
-does. This allows us to discuss and merge each change separately.
+If you'd like to hack on Grit, follow these instructions. To get all of the dependencies, install the gem first.
+
+1. Fork the project to your own account
+1. Clone down your fork
+1. Create a thoughtfully named topic branch to contain your change
+1. Hack away
+1. Add tests and make sure everything still passes by running `rake`
+1. If you are adding new functionality, document it in README.md
+1. Do not change the version number, I will do that on my end
+1. If necessary, rebase your commits into logical chunks, without errors
+1. Push the branch up to GitHub
+1. Send a pull request for your branch
 
 
-## Usage ####################################################################
+## Usage
 
 Grit gives you object model access to your Git repositories. Once you have
 created a `Repo` object, you can traverse it to find parent commits,
@@ -70,8 +77,7 @@ The first step is to create a `Grit::Repo` object to represent your repo. In
 this documentation I include the `Grit` module to reduce typing.
 
     require 'grit'
-    include Grit
-    repo = Repo.new("/Users/tom/dev/grit")
+    repo = Grit::Repo.new("/Users/tom/dev/grit")
 
 In the above example, the directory `/Users/tom/dev/grit` is my working
 directory and contains the `.git` directory. You can also initialize Grit with
@@ -233,4 +239,4 @@ reference the code for more functionality.
 Copyright
 ---------
 
-Copyright (c) 2008 Tom Preston-Werner. See LICENSE for details.
+Copyright (c) 2010 Tom Preston-Werner. See LICENSE for details.
