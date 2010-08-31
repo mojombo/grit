@@ -1,6 +1,8 @@
 == HEAD
   * Minor Enhancements
     * Add Grit::Repo.init.
+  * Bug Fixes
+    * Fix Ruby 1.9 compatibility (#24).
 
 == 2.2.1 / 2010-08-23
   * Bug Fixes
