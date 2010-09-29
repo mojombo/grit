@@ -1,4 +1,4 @@
-== HEAD
+== 2.3.0 / 2010-09-29
   * Minor Enhancements
     * Add Grit::Repo.init.
   * Bug Fixes
@@ -6,7 +6,8 @@
 
 == 2.2.1 / 2010-08-23
   * Bug Fixes
-    * Fix minor regression due to the changed default values in Grit::Index#commit.
+    * Fix minor regression due to the changed default values in
+      Grit::Index#commit.
 
 == 2.2.0 / 2010-08-19
   * Minor Enhancements
@@ -40,7 +41,8 @@
     * Removed all trailing whitespace in code files
   * Bug Fixes
     * Repo.archive_tar_gz now passes -n option to gzip to be idempotent
-    * Fix RubyGit's diff to detect additions and deletions [github.com/defunkt]
+    * Fix RubyGit's diff to detect additions and deletions
+      [github.com/defunkt]
 
 == 1.1.1 / 2009-03-31
   * Changes
@@ -54,17 +56,25 @@
   * Minor Enhancements
     * Convert readme to markdown
     * Added a shortcut for commit_stats as Commit#stats [github.com/js]
-    * Add a #basename method to Submodule, Blob and Tree for retrieving the name [github.com/js]
-    * Make Grit::Submodule grasp the concept of non-unix lineendings [github.com/js]
+    * Add a #basename method to Submodule, Blob and Tree for retrieving the
+      name [github.com/js]
+    * Make Grit::Submodule grasp the concept of non-unix lineendings
+      [github.com/js]
     * Added Repo#commit_deltas_from [github.com/js]
     * do some mild shell escaping when running commands [github.com/js]
-    * Added two shortcut methods to Tree, for picking trees/blobs only [github.com/Voker57]
+    * Added two shortcut methods to Tree, for picking trees/blobs only
+      [github.com/Voker57]
     * Added <=> method to Blob, needed for sorting tree [github.com/Voker57]
-    * Make the number of bytes to be read from git's stdout configurable [github.com/josb]
-    * Repo.archive_to_file accepts extra parameters making plain zipping possible [github.com/darwin]
-    * Handle commit stats that summarize commits with binary changes [github.com/therealadam]
-    * Add a DiffStat class for easy access to diff stats [github.com/therealadam]
-    * Don't split git logs that contain blank lines into two CommitStats [github.com/therealadam]
+    * Make the number of bytes to be read from git's stdout configurable
+      [github.com/josb]
+    * Repo.archive_to_file accepts extra parameters making plain zipping
+      possible [github.com/darwin]
+    * Handle commit stats that summarize commits with binary changes
+      [github.com/therealadam]
+    * Add a DiffStat class for easy access to diff stats
+      [github.com/therealadam]
+    * Don't split git logs that contain blank lines into two CommitStats
+      [github.com/therealadam]
     * Add DiffStat#net for total change count [github.com/therealadam]
 
 == 1.0.3 / 2009-02-13
@@ -86,10 +96,10 @@
 
 == 0.8.3 / 2008-07-07
   * Capture stderr and log if debug is true (rsanheim)
-  
+
 == 0.8.2 / 2008-06-27
   * Allow user provided logger (rsanheim)
-  
+
 == 0.8.0 / 2008-04-24
   * Lots of fixes and additions
 
