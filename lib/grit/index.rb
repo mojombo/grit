@@ -125,7 +125,8 @@ module Grit
         sha = [obj.id].pack("H*")
         k = obj.name
         k += '/' if (obj.class == Grit::Tree)
-        tree_contents[k] = "%s %s\0%s" % [obj.mode.to_s, obj.name, sha]
+        tmode = obj.mode.to_i.to_s  ## remove zero-padding
+        tree_contents[k] = "%s %s\0%s" % [tmode, obj.name, sha]
       end if now_tree
 
       # overwrite with new tree contents
