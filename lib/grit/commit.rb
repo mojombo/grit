@@ -1,6 +1,8 @@
 module Grit
 
   class Commit
+    extend Lazy
+
     attr_reader :id
     attr_reader :repo
     lazy_reader :parents

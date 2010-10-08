@@ -1,6 +1,8 @@
 module Grit
 
   class Tree
+    extend Lazy
+
     lazy_reader :contents
     attr_reader :id
     attr_reader :mode

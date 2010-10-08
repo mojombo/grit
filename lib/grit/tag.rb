@@ -1,6 +1,8 @@
 module Grit
 
   class Tag < Ref
+    extend Lazy
+
     lazy_reader :message
     lazy_reader :tagger
     lazy_reader :tag_date

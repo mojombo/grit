@@ -16,6 +16,10 @@
 # => 2
 #
 module Lazy
+  def self.extended(klass)
+    klass.send(:attr_writer, :lazy_source)
+  end
+
   def lazy_reader(*args)
     args.each do |arg|
       ivar = "@#{arg}"
@@ -29,5 +33,3 @@ module Lazy
     end
   end
 end
-
-Object.extend Lazy unless Object.ancestors.include? Lazy
