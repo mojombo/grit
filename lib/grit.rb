@@ -18,12 +18,18 @@ else
 end
 
 # third party
-require 'rubygems'
+
 begin
-  gem "mime-types", ">=0"
   require 'mime/types'
-rescue Gem::LoadError => e
-  puts "WARNING: Gem LoadError: #{e.message}"
+  require 'rubygems'
+rescue LoadError
+  require 'rubygems'
+  begin
+    gem "mime-types", ">=0"
+    require 'mime/types'
+  rescue Gem::LoadError => e
+    puts "WARNING: Gem LoadError: #{e.message}"
+  end
 end
 
 # ruby 1.9 compatibility
