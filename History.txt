@@ -1,3 +1,9 @@
+== git
+  * Major Enhancements
+    * Add support for parsing git notes.
+  * Bug Fixes
+    * Zero-Padding issue in Grit::Index was fixed.
+
 == 2.3.0 / 2010-09-29
   * Minor Enhancements
     * Add Grit::Repo.init.
