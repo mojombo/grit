@@ -216,6 +216,17 @@ module Grit
       @repo.git.format_patch({'1' => true, :stdout => true}, to_s)
     end
 
+    def notes
+      ret = {}
+      notes = Note.find_all(@repo)
+      notes.each do |note|
+        if n = note.commit.tree/(self.id)
+          ret[note.name] = n.data
+        end
+      end
+      ret
+    end
+
     # Pretty object inspection
     def inspect
       %Q{#<Grit::Commit "#{@id}">}

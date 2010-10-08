@@ -73,4 +73,6 @@ module Grit
 
   class Remote < Ref; end
 
+  class Note < Ref; end
+
 end # Grit
