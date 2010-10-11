@@ -1,6 +1,7 @@
 == git
   * Major Enhancements
     * Add support for parsing git notes.
+    * Add `git cat-file --batch` support with Grit::Repo#batch.
   * Bug Fixes
     * Zero-Padding issue in Grit::Index was fixed.
 
