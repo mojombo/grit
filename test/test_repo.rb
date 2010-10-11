@@ -123,6 +123,15 @@ class TestRepo < Test::Unit::TestCase
     assert_equal "Merge branch 'site'", c.short_message
   end
 
+  def test_commit_batch
+    commits = @r.batch('4c8124ffcf4039d292442eeccabdeca5af5c5017', 
+      '634396b2f541a9f2d58b00be1a07f0c358b999b3')
+    assert_equal "4c8124ffcf4039d292442eeccabdeca5af5c5017", commits[0].id
+    assert_equal "634396b2f541a9f2d58b00be1a07f0c358b999b3", commits[1].id
+    assert_equal "tom@mojombo.com", commits[0].author.email
+    assert_equal "tom@mojombo.com", commits[1].author.email
+  end
+
   # commit_count
 
   def test_commit_count

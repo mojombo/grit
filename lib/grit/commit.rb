@@ -15,6 +15,31 @@ module Grit
     lazy_reader :short_message
     lazy_reader :author_string
 
+    # Parses output from the `git-cat-file --batch'.
+    #
+    # repo   - Grit::Repo instance.
+    # sha    - String SHA of the Commit.
+    # size   - Fixnum size of the object.
+    # object - Parsed String output from `git cat-file --batch`.
+    #
+    # Returns an Array of Grit::Commit objects.
+    def self.parse_batch(repo, sha, size, object)
+      info, message = object.split("\n\n", 2)
+
+      lines = info.split("\n")
+      tree = lines.shift.split(' ', 2).last
+      parents = []
+      parents << lines.shift[7..-1] while lines.first[0, 6] == 'parent'
+      author,    authored_date  = Grit::Commit.actor(lines.shift)
+      committer, committed_date = Grit::Commit.actor(lines.shift)
+
+      Grit::Commit.new(
+        repo, sha, parents, tree,
+        author, authored_date,
+        committer, committed_date,
+        message.to_s.split("\n"))
+    end
+
     # Instantiate a new Commit
     #   +id+ is the id of the commit
     #   +parents+ is an array of commit ids (will be converted into Commit instances)

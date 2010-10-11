@@ -217,18 +217,18 @@ module Grit
     #   git.rev_list({:max_count => 10, :header => true}, "master")
     #
     # Returns String
-    def method_missing(cmd, options = {}, *args)
-      run('', cmd, '', options, args)
+    def method_missing(cmd, options = {}, *args, &block)
+      run('', cmd, '', options, args, &block)
     end
 
     # Bypass any pure Ruby implementations and go straight to the native Git command
     #
     # Returns String
-    def native(cmd, options = {}, *args)
-      method_missing(cmd, options, *args)
+    def native(cmd, options = {}, *args, &block)
+      method_missing(cmd, options, *args, &block)
     end
 
-    def run(prefix, cmd, postfix, options, args)
+    def run(prefix, cmd, postfix, options, args, &block)
       timeout  = options.delete(:timeout) rescue nil
       timeout  = true if timeout.nil?
 
@@ -247,15 +247,16 @@ module Grit
         call = "#{prefix}#{Git.git_binary} #{gitdir} #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
       end
       Grit.log(call) if Grit.debug
-      response, err = timeout ? sh(call) : wild_sh(call)
+      response, err = timeout ? sh(call, &block) : wild_sh(call, &block)
       Grit.log(response) if Grit.debug
       Grit.log(err) if Grit.debug
       response
     end
 
-    def sh(command)
+    def sh(command, &block)
       ret, err = '', ''
-      Open3.popen3(command) do |_, stdout, stderr|
+      Open3.popen3(command) do |stdin, stdout, stderr|
+        block.call(stdin) if block
         Timeout.timeout(self.class.git_timeout) do
           while tmp = stdout.read(1024)
             ret += tmp
@@ -278,9 +279,10 @@ module Grit
       raise GitTimeout.new(command, bytes)
     end
 
-    def wild_sh(command)
+    def wild_sh(command, &block)
       ret, err = '', ''
-      Open3.popen3(command) do |_, stdout, stderr|
+      Open3.popen3(command) do |stdin, stdout, stderr|
+        block.call(stdin) if block
         while tmp = stdout.read(1024)
           ret += tmp
         end

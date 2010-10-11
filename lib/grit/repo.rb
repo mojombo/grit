@@ -2,6 +2,9 @@ module Grit
 
   class Repo
     DAEMON_EXPORT_FILE = 'git-daemon-export-ok'
+    BATCH_PARSERS      = {
+      'commit' => ::Grit::Commit
+    }
 
     # Public: The String path of the Git repo.
     attr_accessor :path
@@ -153,6 +156,35 @@ module Grit
       Git.new(self.path).fs_mkdir('..')
       self.git.clone(real_options, path, self.path)
       Repo.new(self.path)
+    end
+
+    # Public: Return the full Git objects from the given SHAs.  Only Commit
+    # objects are parsed for now.
+    #
+    # *shas - Array of String SHAs.
+    #
+    # Returns an Array of Grit objects (Grit::Commit).
+    def batch(*shas)
+      shas.flatten!
+      objects = []
+      data = git.native(:cat_file, {:batch => true}) do |stdin|
+        stdin.write(shas * "\n")
+        stdin.close
+      end
+
+      io = StringIO.new(data)
+      while line = io.gets
+        sha, type, size = line.split(" ", 3)
+        parser = BATCH_PARSERS[type]
+        if type == 'missing' || !parser
+          objects << nil
+          next
+        end
+
+        object   = io.read(size.to_i + 1)
+        objects << parser.parse_batch(self, sha, size, object)
+      end
+      objects
     end
 
     # The project's description. Taken verbatim from GIT_REPO/description
