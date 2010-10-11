@@ -166,13 +166,22 @@ module Grit
     # Returns an Array of Grit objects (Grit::Commit).
     def batch(*shas)
       shas.flatten!
-      objects = []
-      data = git.native(:cat_file, {:batch => true}) do |stdin|
+      text = git.native(:cat_file, {:batch => true}) do |stdin|
         stdin.write(shas * "\n")
         stdin.close
       end
 
-      io = StringIO.new(data)
+      parse_batch(text)
+    end
+
+    # Parses `git cat-file --batch` output, returning an array of Grit objects.
+    #
+    # text - Raw String output.
+    #
+    # Returns an Array of Grit objects (Grit::Commit).
+    def parse_batch(text)
+      io = StringIO.new(text)
+      objects = []
       while line = io.gets
         sha, type, size = line.split(" ", 3)
         parser = BATCH_PARSERS[type]
