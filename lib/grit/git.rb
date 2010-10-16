@@ -259,13 +259,13 @@ module Grit
       Open3.popen3(command) do |stdin, stdout, stderr|
         block.call(stdin) if block
         Timeout.timeout(self.class.git_timeout) do
-          while tmp = stdout.read(1024)
+          while tmp = stdout.read(8192)
             ret << tmp
             raise GitTimeout.new(command, ret.size) if ret.size > max
           end
         end
 
-        while tmp = stderr.read(1024)
+        while tmp = stderr.read(8192)
           err << tmp
         end
       end
@@ -278,11 +278,11 @@ module Grit
       ret, err = '', ''
       Open3.popen3(command) do |stdin, stdout, stderr|
         block.call(stdin) if block
-        while tmp = stdout.read(1024)
+        while tmp = stdout.read(8192)
           ret << tmp
         end
 
-        while tmp = stderr.read(1024)
+        while tmp = stderr.read(8192)
           err << tmp
         end
       end
