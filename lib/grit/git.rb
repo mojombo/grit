@@ -255,28 +255,23 @@ module Grit
 
     def sh(command, &block)
       ret, err = '', ''
+      max = self.class.git_max_size
       Open3.popen3(command) do |stdin, stdout, stderr|
         block.call(stdin) if block
         Timeout.timeout(self.class.git_timeout) do
           while tmp = stdout.read(1024)
-            ret += tmp
-            if (@bytes_read += tmp.size) > self.class.git_max_size
-              bytes = @bytes_read
-              @bytes_read = 0
-              raise GitTimeout.new(command, bytes)
-            end
+            ret << tmp
+            raise GitTimeout.new(command, ret.size) if ret.size > max
           end
         end
 
         while tmp = stderr.read(1024)
-          err += tmp
+          err << tmp
         end
       end
       [ret, err]
     rescue Timeout::Error, Grit::Git::GitTimeout
-      bytes = @bytes_read
-      @bytes_read = 0
-      raise GitTimeout.new(command, bytes)
+      raise GitTimeout.new(command, ret.size)
     end
 
     def wild_sh(command, &block)
@@ -284,11 +279,11 @@ module Grit
       Open3.popen3(command) do |stdin, stdout, stderr|
         block.call(stdin) if block
         while tmp = stdout.read(1024)
-          ret += tmp
+          ret << tmp
         end
 
         while tmp = stderr.read(1024)
-          err += tmp
+          err << tmp
         end
       end
       [ret, err]
