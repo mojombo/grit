@@ -22,6 +22,28 @@ class TestRubyGitIndex < Test::Unit::TestCase
     File.join(tmp_path, 'dot_git_iv2')
   end
 
+  def test_set_default_committed_date
+    parents = [@git.commits.first]
+    sha     = @git.index.commit('message', parents, @user, nil, 'master')
+    commit  = @git.commit(sha)
+    now     = Time.now
+    assert_equal now.year,  commit.committed_date.year
+    assert_equal now.month, commit.committed_date.month
+    assert_equal now.day,   commit.committed_date.day
+  end
+
+  def test_allow_custom_committed_and_authored_dates
+    parents = [@git.commits.first]
+    sha     = @git.index.commit 'message', :date => Time.utc(2000),
+                :parents        => parents, 
+                :actor          => @user, 
+                :head           => 'master'
+
+    commit  = @git.commit(sha)
+    now     = Time.now
+    assert_equal 2000,  commit.committed_date.year
+  end
+
   def test_add_files
     sha = @git.commits.first.tree.id
 

@@ -63,7 +63,25 @@ module Grit
       self.current_tree = self.repo.tree(tree)
     end
 
-    # Public: Commit the contents of the index
+    # Public: Commit the contents of the index.  This method supports two
+    # formats for arguments:
+    #
+    # message - The String commit message.
+    # options - An optional Hash of index options.
+    #           :parents   - Array of String commit SHA1s or Grit::Commit
+    #                        objects to attach this commit to to form a 
+    #                        new head (default: nil).
+    #           :actor     - The Grit::Actor details of the user making 
+    #                        the commit (default: nil).
+    #           :last_tree - The String SHA1 of a tree to compare with
+    #                        in order to avoid making empty commits 
+    #                        (default: nil).
+    #           :head      - The String branch name to write this head to
+    #                        (default: "master").
+    #           :date      - The Time that the commit was made.  
+    #                        (Default: Time.now)
+    #
+    # The legacy argument style looks like:
     #
     # message   - The String commit message.
     # parents   - Array of String commit SHA1s or Grit::Commit objects to
@@ -77,6 +95,13 @@ module Grit
     #
     # Returns a String of the SHA1 of the new commit.
     def commit(message, parents = nil, actor = nil, last_tree = nil, head = 'master')
+      if parents.is_a?(Hash)
+        actor     = parents[:actor]
+        last_tree = parents[:last_tree]
+        head      = parents[:head]
+        date      = parents[:date]
+      end
+
       tree_sha1 = write_tree(self.tree, self.current_tree)
 
       # don't write identical commits
@@ -97,8 +122,9 @@ module Grit
         email  = config['user.email']
       end
 
-      author_string = "#{name} <#{email}> #{Time.now.to_i} -0700" # !! TODO : gotta fix this
-      contents << ['author', author_string].join(' ')
+      date ||= Time.now
+      author_string = "#{name} <#{email}> #{date.to_i} -0700" # !! TODO : gotta fix this
+      contents << ['author',    author_string].join(' ')
       contents << ['committer', author_string].join(' ')
       contents << ''
       contents << message
