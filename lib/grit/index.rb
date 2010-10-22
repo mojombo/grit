@@ -104,6 +104,7 @@ module Grit
         head           = parents[:head]
         committed_date = parents[:committed_date]
         authored_date  = parents[:authored_date]
+        parents        = parents[:parents] || []
       end
 
       tree_sha1 = write_tree(self.tree, self.current_tree)

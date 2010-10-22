@@ -56,6 +56,7 @@ class TestRubyGitIndex < Test::Unit::TestCase
                 :head           => 'master'
 
     commit  = @git.commit(sha)
+    assert_equal parents.map { |c| c.sha }, commit.parents.map { |c| c.sha }
     assert_equal 'abc', commit.committer.name
     assert_equal 'def', commit.author.name
   end
