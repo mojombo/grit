@@ -34,7 +34,9 @@ class TestRubyGitIndex < Test::Unit::TestCase
 
   def test_allow_custom_committed_and_authored_dates
     parents = [@git.commits.first]
-    sha     = @git.index.commit 'message', :date => Time.utc(2000),
+    sha     = @git.index.commit 'message', 
+                :committed_date => Time.utc(2000),
+                :authored_date  => Time.utc(2001),
                 :parents        => parents, 
                 :actor          => @user, 
                 :head           => 'master'
@@ -42,6 +44,20 @@ class TestRubyGitIndex < Test::Unit::TestCase
     commit  = @git.commit(sha)
     now     = Time.now
     assert_equal 2000,  commit.committed_date.year
+    assert_equal 2001,  commit.authored_date.year
+  end
+
+  def test_allow_custom_committers_and_authors
+    parents = [@git.commits.first]
+    sha     = @git.index.commit 'message', 
+                :committer => Grit::Actor.new('abc', nil),
+                :author    => Grit::Actor.new('def', nil),
+                :parents        => parents, 
+                :head           => 'master'
+
+    commit  = @git.commit(sha)
+    assert_equal 'abc', commit.committer.name
+    assert_equal 'def', commit.author.name
   end
 
   def test_add_files

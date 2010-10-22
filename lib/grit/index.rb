@@ -68,18 +68,20 @@ module Grit
     #
     # message - The String commit message.
     # options - An optional Hash of index options.
-    #           :parents   - Array of String commit SHA1s or Grit::Commit
-    #                        objects to attach this commit to to form a 
-    #                        new head (default: nil).
-    #           :actor     - The Grit::Actor details of the user making 
-    #                        the commit (default: nil).
-    #           :last_tree - The String SHA1 of a tree to compare with
-    #                        in order to avoid making empty commits 
-    #                        (default: nil).
-    #           :head      - The String branch name to write this head to
-    #                        (default: "master").
-    #           :date      - The Time that the commit was made.  
-    #                        (Default: Time.now)
+    #           :parents        - Array of String commit SHA1s or Grit::Commit
+    #                             objects to attach this commit to to form a 
+    #                             new head (default: nil).
+    #           :actor          - The Grit::Actor details of the user making 
+    #                             the commit (default: nil).
+    #           :last_tree      - The String SHA1 of a tree to compare with
+    #                             in order to avoid making empty commits 
+    #                             (default: nil).
+    #           :head           - The String branch name to write this head to
+    #                             (default: "master").
+    #           :committed_date - The Time that the commit was made.  
+    #                             (Default: Time.now)
+    #           :authored_date  - The Time that the commit was authored.  
+    #                             (Default: committed_date)
     #
     # The legacy argument style looks like:
     #
@@ -96,10 +98,12 @@ module Grit
     # Returns a String of the SHA1 of the new commit.
     def commit(message, parents = nil, actor = nil, last_tree = nil, head = 'master')
       if parents.is_a?(Hash)
-        actor     = parents[:actor]
-        last_tree = parents[:last_tree]
-        head      = parents[:head]
-        date      = parents[:date]
+        committer      = parents[:committer] || parents[:actor]
+        author         = parents[:author]
+        last_tree      = parents[:last_tree]
+        head           = parents[:head]
+        committed_date = parents[:committed_date]
+        authored_date  = parents[:authored_date]
       end
 
       tree_sha1 = write_tree(self.tree, self.current_tree)
@@ -113,19 +117,16 @@ module Grit
         contents << ['parent', p].join(' ')
       end if parents
 
-      if actor
-        name  = actor.name
-        email = actor.email
-      else
+      committer      ||= begin
         config = Config.new(self.repo)
-        name   = config['user.name']
-        email  = config['user.email']
+        Actor.new(config['user.name'], config['user.email'])
       end
+      author         ||= committer
+      committed_date ||= Time.now
+      authored_date  ||= committed_date
 
-      date ||= Time.now
-      author_string = "#{name} <#{email}> #{date.to_i} -0700" # !! TODO : gotta fix this
-      contents << ['author',    author_string].join(' ')
-      contents << ['committer', author_string].join(' ')
+      contents << ['author',    author.output(authored_date)].join(' ')
+      contents << ['committer', committer.output(committed_date)].join(' ')
       contents << ''
       contents << message
 
