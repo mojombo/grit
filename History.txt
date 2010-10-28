@@ -4,6 +4,7 @@
     * Add `git cat-file --batch` support with Grit::Repo#batch.
   * Minor Enhancements
     * Grit::Index#commit supports custom committer/author names and dates.
+    * Performance enhancements with internal command output buffering.
   * Bug Fixes
     * Zero-Padding issue in Grit::Index was fixed.
 
