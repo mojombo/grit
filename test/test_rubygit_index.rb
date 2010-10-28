@@ -32,11 +32,20 @@ class TestRubyGitIndex < Test::Unit::TestCase
     assert_equal now.day,   commit.committed_date.day
   end
 
+  def test_set_actor
+    parents = [@git.commits.first]
+    sha     = @git.index.commit('message', parents, @user)
+
+    commit  = @git.commit(sha)
+    assert_equal @user.name, commit.committer.name
+    assert_equal @user.name, commit.author.name
+  end
+
   def test_allow_custom_committed_and_authored_dates
     parents = [@git.commits.first]
     sha     = @git.index.commit 'message', 
-                :committed_date => Time.utc(2000),
-                :authored_date  => Time.utc(2001),
+                :committed_date => Time.local(2000),
+                :authored_date  => Time.local(2001),
                 :parents        => parents, 
                 :actor          => @user, 
                 :head           => 'master'
@@ -52,8 +61,8 @@ class TestRubyGitIndex < Test::Unit::TestCase
     sha     = @git.index.commit 'message', 
                 :committer => Grit::Actor.new('abc', nil),
                 :author    => Grit::Actor.new('def', nil),
-                :parents        => parents, 
-                :head           => 'master'
+                :parents   => parents, 
+                :head      => 'master'
 
     commit  = @git.commit(sha)
     assert_equal parents.map { |c| c.sha }, commit.parents.map { |c| c.sha }

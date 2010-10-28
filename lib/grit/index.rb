@@ -98,14 +98,18 @@ module Grit
     # Returns a String of the SHA1 of the new commit.
     def commit(message, parents = nil, actor = nil, last_tree = nil, head = 'master')
       if parents.is_a?(Hash)
-        committer      = parents[:committer] || parents[:actor]
+        actor          = parents[:actor]
+        committer      = parents[:committer]
         author         = parents[:author]
         last_tree      = parents[:last_tree]
         head           = parents[:head]
         committed_date = parents[:committed_date]
         authored_date  = parents[:authored_date]
-        parents        = parents[:parents] || []
+        parents        = parents[:parents]
       end
+
+      committer ||= actor
+      author    ||= committer
 
       tree_sha1 = write_tree(self.tree, self.current_tree)
 
