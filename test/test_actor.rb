@@ -5,6 +5,14 @@ class TestActor < Test::Unit::TestCase
 
   end
 
+  # output
+  def test_output_adds_tz_offset
+    t = Time.now
+    a = Actor.new("Tom Werner", "tom@example.com")
+    assert_equal "Tom Werner <tom@example.com> #{t.to_i} -0700", 
+      a.output(t)
+  end
+
   # from_string
 
   def test_from_string_should_separate_name_and_email

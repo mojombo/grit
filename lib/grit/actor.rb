@@ -40,7 +40,7 @@ module Grit
       end
       hours = (time.utc_offset.to_f / 3600).to_i # 60 * 60, seconds to hours
       rem   = time.utc_offset.abs % 3600
-      out << " #{time.to_i} #{hours >= 0 ? :+ : :-}#{hours.to_s.rjust(2, '0')}#{rem.to_s.rjust(2, '0')}"
+      out << " #{time.to_i} #{hours >= 0 ? :+ : :-}#{hours.abs.to_s.rjust(2, '0')}#{rem.to_s.rjust(2, '0')}"
     end
 
     # Pretty object inspection
