@@ -181,9 +181,12 @@ class TestRepo < Test::Unit::TestCase
   def test_init_bare
     FileUtils.stubs(:mkdir_p)
 
-    Git.any_instance.expects(:init).returns(true)
-    Repo.expects(:new).with("/foo/bar.git", {})
+    Git.any_instance.expects(:init).with(:bare => true).returns(true).twice
+    Repo.expects(:new).with("/foo/bar.git", {:is_bare => true})
     Repo.init_bare("/foo/bar.git")
+
+    Repo.expects(:new).with("/foo/bar", {:is_bare => true})
+    Repo.init_bare("/foo/bar")
   end
 
   def test_init_bare_with_options
@@ -191,7 +194,7 @@ class TestRepo < Test::Unit::TestCase
 
     Git.any_instance.expects(:init).with(
       :bare => true, :template => "/baz/sweet").returns(true)
-    Repo.expects(:new).with("/foo/bar.git", {})
+    Repo.expects(:new).with("/foo/bar.git", {:is_bare => true})
     Repo.init_bare("/foo/bar.git", :template => "/baz/sweet")
   end
 
