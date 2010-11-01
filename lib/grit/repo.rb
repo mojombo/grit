@@ -99,6 +99,7 @@ module Grit
       git = Git.new(path)
       git.fs_mkdir('..')
       git.init(git_options)
+      repo_options = {:is_bare => true}.merge(repo_options)
       self.new(path, repo_options)
     end
 
