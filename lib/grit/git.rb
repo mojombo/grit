@@ -52,12 +52,11 @@ module Grit
       Grit::Git.git_timeout = old_timeout
     end
 
-    attr_accessor :git_dir, :bytes_read, :work_tree
+    attr_accessor :git_dir, :work_tree
 
     def initialize(git_dir, work_tree = nil)
       self.git_dir    = git_dir
       self.work_tree  = work_tree
-      self.bytes_read = 0
     end
 
     def shell_escape(str)
