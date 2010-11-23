@@ -599,11 +599,9 @@ module Grit
     # Returns Array[String] (pathnames of alternates)
     def alternates
       alternates_path = "objects/info/alternates"
-      if self.git.fs_exist?(alternates_path)
-        self.git.fs_read(alternates_path).strip.split("\n")
-      else
-        []
-      end
+      self.git.fs_read(alternates_path).strip.split("\n")
+    rescue Errno::ENOENT
+      []
     end
 
     # Sets the alternates
