@@ -58,7 +58,7 @@ module Grit
 
     # Public: Initialize a git repository (create it on the filesystem). By
     # default, the newly created repository will contain a working directory.
-    # If you would like to create a bare repo, use Gollum::Repo.init_bare.
+    # If you would like to create a bare repo, use Grit::Repo.init_bare.
     #
     # path         - The String full path to the repo. Traditionally ends with
     #                "/<name>.git".
