@@ -701,18 +701,32 @@ module Grit
           @loose
         end
 
+        def each_alternate_path(path)
+          alt = File.join(path, 'info/alternates')
+          return if !File.exists?(alt)
+
+          File.readlines(alt).each do |line|
+            path = line.chomp
+            if path[0, 2] == '..'
+              yield File.expand_path(File.join(@git_dir, 'objects', path))
+
+              # XXX this is here for backward compatibility with grit < 2.3.0
+              # relative alternate objects paths are expanded relative to the
+              # objects directory, not the git repository directory.
+              yield File.expand_path(File.join(@git_dir, path))
+            else
+              yield path
+            end
+          end
+        end
+
         def load_alternate_loose(path)
           # load alternate loose, too
-          alt = File.join(path, 'info/alternates')
-          if File.exists?(alt)
-            File.readlines(alt).each do |line|
-              next if @loaded.include?(line.chomp)
-              if line[0, 2] == '..'
-                line = File.expand_path(File.join(@git_dir, line))
-              end
-              load_loose(line.chomp)
-              load_alternate_loose(line.chomp)
-            end
+          each_alternate_path path do |path|
+            next if @loaded.include?(path)
+            next if !File.exist?(path)
+            load_loose(path)
+            load_alternate_loose(path)
           end
         end
 
@@ -732,17 +746,11 @@ module Grit
         end
 
         def load_alternate_packs(path)
-          alt = File.join(path, 'info/alternates')
-          if File.exists?(alt)
-            File.readlines(alt).each do |line|
-              if line[0, 2] == '..'
-                line = File.expand_path(File.join(@git_dir, line))
-              end
-              full_pack = File.join(line.chomp, 'pack')
-              next if @loaded_packs.include?(full_pack)
-              load_packs(full_pack)
-              load_alternate_packs(File.join(line.chomp))
-            end
+          each_alternate_path path do |path|
+            full_pack = File.join(path, 'pack')
+            next if @loaded_packs.include?(full_pack)
+            load_packs(full_pack)
+            load_alternate_packs(path)
           end
         end
 
