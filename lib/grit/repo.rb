@@ -457,7 +457,8 @@ module Grit
       else
         # NO PARENTS:
         cmd = "-r -t #{commit_sha}"
-        revs = self.git.method_missing('ls-tree', {:timeout => false}, "-r -t #{commit_sha}").split("\n").map{ |a| a.split("\t").first.split(' ')[2] }
+        revs = self.git.native(:ls_tree, {:timeout => false, :r => true, :t => true}, commit_sha).
+          split("\n").map{ |a| a.split("\t").first.split(' ')[2] }
       end
       revs << self.commit(commit_sha).tree.id
       Grit.no_quote = false
