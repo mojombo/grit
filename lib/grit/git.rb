@@ -160,11 +160,18 @@ module Grit
     # Returns the exit status of the commands.  Anything above 0 means there
     # was an error.
     def check_applies(head_sha, applies_sha)
-      git_index = create_tempfile('index', true)
-      (o1, exit1) = raw_git("git read-tree #{head_sha} 2>/dev/null", git_index)
-      return exit1 if exit1 != 0
-      (o2, exit2) = raw_git("git diff #{applies_sha}^ #{applies_sha} | git apply --check --cached >/dev/null 2>/dev/null", git_index)
-      return (exit1 + exit2)
+      check_patch_applies(head_sha, get_patch(applies_sha))
+    end
+
+    # Checks if a diff applies against the HEAD of the current repository.
+    #
+    # head_sha - String HEAD SHA of the repository.
+    # patch    - String patch to apply (see #get_patch)
+    #
+    # Returns the exit status of the commands.  Anything above 0 means there
+    # was an error.
+    def check_patch_applies(head_sha, patch)
+      apply_patch(head_sha, patch, :check => true) ? 0 : 1
     end
 
     # Gets the patch for a given commit.
@@ -192,18 +199,26 @@ module Grit
     #
     # Returns a String SHA of the written tree, or false if the patch did not
     # apply cleanly.
-    def apply_patch(head_sha, patch)
-      git_index = create_tempfile('index', true)
-
-      git_patch = create_tempfile('patch')
-      File.open(git_patch, 'w+') { |f| f.print patch }
-
-      raw_git("git read-tree #{head_sha} 2>/dev/null", git_index)
-      (op, exit) = raw_git("git apply --cached < #{git_patch}", git_index)
-      if exit == 0
-        return raw_git("git write-tree", git_index).first.chomp
+    def apply_patch(head_sha, patch, options = {})
+      options[:cached] = true
+      tree_sha = nil
+      with_custom_index do
+        native(:read_tree, {}, head_sha)
+        cmd = sh_command('', :apply, '', options, [])
+        (ret, err) = sh(cmd) do |stdin|
+          stdin << patch
+          stdin.close
+        end
+        if err =~ /error/
+          tree_sha = false
+        elsif options[:check]
+          tree_sha = true
+        else
+          tree_sha = native(:write_tree)
+          tree_sha.strip!
+        end
       end
-      false
+      tree_sha
     end
 
     # Run the given git command with the specified arguments and return
@@ -230,7 +245,17 @@ module Grit
     def run(prefix, cmd, postfix, options, args, &block)
       timeout  = options.delete(:timeout) rescue nil
       timeout  = true if timeout.nil?
+      call     = sh_command(prefix, cmd, postfix, options, args)
+      Grit.log(call) if Grit.debug
+      response, err = timeout ? sh(call, &block) : wild_sh(call, &block)
+      if Grit.debug
+        Grit.log(response)
+        Grit.log(err)
+      end
+      response
+    end
 
+    def sh_command(prefix, cmd, postfix, options, args)
       base     = options.delete(:base) rescue nil
       base     = true if base.nil?
 
@@ -239,17 +264,12 @@ module Grit
       if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/
         ext_args = args.reject { |a| a.empty? }.map { |a| (a == '--' || a[0].chr == '|' || Grit.no_quote) ? a : "\"#{e(a)}\"" }
         gitdir = base ? "--git-dir=\"#{self.git_dir}\"" : ""
-        call = "#{prefix}#{Git.git_binary} #{gitdir} #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
+        "#{prefix}#{Git.git_binary} #{gitdir} #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
       else
         ext_args = args.reject { |a| a.empty? }.map { |a| (a == '--' || a[0].chr == '|' || Grit.no_quote) ? a : "'#{e(a)}'" }
         gitdir = base ? "--git-dir='#{self.git_dir}'" : ""
-        call = "#{prefix}#{Git.git_binary} #{gitdir} #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
+        "#{prefix}#{Git.git_binary} #{gitdir} #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
       end
-      Grit.log(call) if Grit.debug
-      response, err = timeout ? sh(call, &block) : wild_sh(call, &block)
-      Grit.log(response) if Grit.debug
-      Grit.log(err) if Grit.debug
-      response
     end
 
     def sh(command, &block)
@@ -343,16 +363,6 @@ module Grit
       return_value
     ensure
       ENV['GIT_INDEX_FILE'] = tmp
-    end
-
-    def raw_git(command, index)
-      out = nil
-      Dir.chdir(self.git_dir) do
-        with_custom_index(index) do
-          out = `#{command}`
-        end
-      end
-      [out, $?.exitstatus]
     end
   end # Git
 end # Grit
