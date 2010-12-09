@@ -9,8 +9,11 @@ class TestActor < Test::Unit::TestCase
   def test_output_adds_tz_offset
     t = Time.now
     a = Actor.new("Tom Werner", "tom@example.com")
-    assert_equal "Tom Werner <tom@example.com> #{t.to_i} -0700", 
-      a.output(t)
+    pieces = a.output(t).split(" ")
+    offset = pieces.pop
+    output = pieces * ' '
+    assert_equal "Tom Werner <tom@example.com> #{t.to_i}", output
+    assert_match /-?\d{4}/, offset
   end
 
   # from_string
