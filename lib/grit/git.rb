@@ -169,13 +169,20 @@ module Grit
 
     # Gets the patch for a given commit.
     #
-    # applies_sha - String SHA of the commit.
+    # sha1    - String base SHA of the diff.
+    # sha2    - Optional head SHA of the diff.  If not provided, use 
+    #           sha1^...sha1
+    # options - Optional Hash to be passed to the `git diff` command.
     #
     # Returns a String of the patch of the commit's parent to the parent.
-    def get_patch(applies_sha)
-      git_index = create_tempfile('index', true)
-      (patch, exit2) = raw_git("git diff #{applies_sha}^ #{applies_sha}", git_index)
-      patch
+    def get_patch(sha1, sha2 = nil, options = {})
+      if sha2.is_a?(Hash)
+        options = sha2
+        sha2    = nil
+      end
+
+      sha1, sha2 = "#{sha1}^", sha1 if sha2.nil?
+      native(:diff, options, sha1, sha2)
     end
 
     # Applies a patch against the current repository's INDEX.

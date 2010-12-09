@@ -17,6 +17,11 @@ class TestPatch < Test::Unit::TestCase
     assert_match /\+INITIAL\!/, patch
   end
 
+  def test_get_reverse_patch
+    patch = @r.git.get_patch(@cherry, :R => true)
+    assert_match /\-INITIAL\!/, patch
+  end
+
   def test_check_applies
     assert_equal 0, @r.git.check_applies(@master, @cherry)
   end
