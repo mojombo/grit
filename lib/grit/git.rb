@@ -331,24 +331,28 @@ module Grit
       return path
     end
 
-    def raw_git_call(command, index)
-      tmp = ENV['GIT_INDEX_FILE']
+    def with_custom_index(index = nil)
+      index ||= create_tempfile('index', true)
+      tmp     = ENV['GIT_INDEX_FILE']
       ENV['GIT_INDEX_FILE'] = index
-      out = `#{command}`
+      return_value = yield
       after = ENV['GIT_INDEX_FILE'] # someone fucking with us ??
-      ENV['GIT_INDEX_FILE'] = tmp
       if after != index
         raise 'environment was changed for the git call'
       end
-      [out, $?.exitstatus]
+      return_value
+    ensure
+      ENV['GIT_INDEX_FILE'] = tmp
     end
 
     def raw_git(command, index)
-      output = nil
+      out = nil
       Dir.chdir(self.git_dir) do
-        output = raw_git_call(command, index)
+        with_custom_index(index) do
+          out = `#{command}`
+        end
       end
-      output
+      [out, $?.exitstatus]
     end
   end # Git
 end # Grit
