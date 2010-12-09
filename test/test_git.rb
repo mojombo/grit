@@ -38,13 +38,13 @@ class TestGit < Test::Unit::TestCase
     assert_equal ["-s", "-t"], @git.transform_options({:s => true, :t => true}).sort
   end
 
-  def test_uses_custom_sh_method
-    @git.expects(:sh)
+  def test_uses_native_command_execution
+    @git.expects(:native)
     @git.something
   end
 
   def test_can_skip_timeout
-    @git.expects(:wild_sh)
+    Timeout.expects(:timeout).never
     @git.something(:timeout => false)
   end
 
@@ -59,22 +59,23 @@ class TestGit < Test::Unit::TestCase
     assert_raises Grit::Git::GitTimeout do
       @git.version
     end
+  ensure
     Grit::Git.git_timeout = 5.0
   end
 
   def test_it_really_shell_escapes_arguments_to_the_git_shell
     @git.expects(:sh).with("#{Git.git_binary} --git-dir='#{@git.git_dir}' foo --bar='bazz\\'er'")
-    @git.foo(:bar => "bazz'er")
+    @git.run('', :foo, '', {:bar => "bazz'er"}, [])
     @git.expects(:sh).with("#{Git.git_binary} --git-dir='#{@git.git_dir}' bar -x 'quu\\'x'")
-    @git.bar(:x => "quu'x")
+    @git.run('', :bar, '', {:x => "quu'x"}, [])
   end
 
   def test_it_shell_escapes_the_standalone_argument
     @git.expects(:sh).with("#{Git.git_binary} --git-dir='#{@git.git_dir}' foo 'bar\\'s'")
-    @git.foo({}, "bar's")
+    @git.run('', :foo, '', {}, ["bar's"])
 
     @git.expects(:sh).with("#{Git.git_binary} --git-dir='#{@git.git_dir}' foo 'bar' '\\; echo \\'noooo\\''")
-    @git.foo({}, "bar", "; echo 'noooo'")
+    @git.run('', :foo, '', {}, ["bar", "; echo 'noooo'"])
   end
 
   def test_piping_should_work_on_1_9

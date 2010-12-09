@@ -3,7 +3,8 @@ module Grit
 
   class Git
     class GitTimeout < RuntimeError
-      attr_reader :command, :bytes_read
+      attr_accessor :command
+      attr_accessor :bytes_read
 
       def initialize(command = nil, bytes_read = nil)
         @command = command
@@ -204,27 +205,199 @@ module Grit
     # RAW CALLS WITH ENV SETTINGS END
 
 
-
-    # Run the given git command with the specified arguments and return
-    # the result as a String
-    #   +cmd+ is the command
-    #   +options+ is a hash of Ruby style options
-    #   +args+ is the list of arguments (to be joined by spaces)
+    # Execute a git command, bypassing any library implementation.
+    #
+    # cmd - The name of the git command as a Symbol. Underscores are
+    #   converted to dashes as in :rev_parse => 'rev-parse'.
+    # options - Command line option arguments passed to the git command.
+    #   Single char keys are converted to short options (:a => -a).
+    #   Multi-char keys are converted to long options (:arg => '--arg').
+    #   Underscores in keys are converted to dashes. These special options
+    #   are used to control command execution and are not passed in command
+    #   invocation:
+    #     :timeout - Maximum amount of time the command can run for before
+    #       being aborted. When true, use Grit::Git.git_timeout; when numeric,
+    #       use that number of seconds; when false or 0, disable timeout.
+    #     :base - Set false to avoid passing the --git-dir argument when
+    #       invoking the git command.
+    # args - Non-option arguments passed on the command line.
+    #
+    # Optionally yields to the block an IO object attached to the child
+    # process's STDIN.
     #
     # Examples
-    #   git.rev_list({:max_count => 10, :header => true}, "master")
+    #   git.native(:rev_list, {:max_count => 10, :header => true}, "master")
     #
-    # Returns String
-    def method_missing(cmd, options = {}, *args, &block)
-      run('', cmd, '', options, args, &block)
+    # Returns a String with all output written to the child process's stdout.
+    # Raises Grit::Git::GitTimeout when the timeout is exceeded or when more
+    #   than Grit::Git.git_max_size bytes are output.
+    def native(cmd, options = {}, *args, &block)
+      args     = args.first if args.size == 1 && args[0].is_a?(Array)
+      args.map!    { |a| a.to_s.strip }
+      args.reject! { |a| a.empty? }
+
+      # fall back on Open3 and sh runner when fork(2) is not available on this
+      # platform or when the last argument starts a pipeline.
+      if !can_fork? || args[-1].to_s[0] == ?|
+        out = run('', cmd, '', options, args, &block)
+        return out
+      end
+
+      timeout  = options.delete(:timeout)
+      timeout  = true if timeout.nil?
+
+      base     = options.delete(:base)
+      base     = true if base.nil?
+
+      argv = []
+      argv << Git.git_binary
+      argv << "--git-dir=#{git_dir}" if base
+      argv << cmd.to_s.tr('_', '-')
+
+      argv.concat(options_to_argv(options))
+      argv.concat(args)
+
+      Grit.log(argv.join(' ')) if Grit.debug
+      out, err = timeout_after(timeout) { execute(argv, &block) }
+      Grit.log(out) if Grit.debug
+      Grit.log(err) if Grit.debug
+      out
+    rescue Timeout::Error
+      raise GitTimeout, argv.join(' ')
+    rescue GitTimeout => boom
+      boom.command = argv.join(' ')
+      raise boom
     end
 
-    # Bypass any pure Ruby implementations and go straight to the native Git command
+    # Methods not defined by a library implementation execute the git command
+    # using #native, passing the method name as the git command name.
     #
-    # Returns String
-    def native(cmd, options = {}, *args, &block)
-      method_missing(cmd, options, *args, &block)
+    # Examples:
+    #   git.rev_list({:max_count => 10, :header => true}, "master")
+    def method_missing(cmd, options={}, *args, &block)
+      native(cmd, options, *args, &block)
     end
+
+    # Determine if fork(2) available. When false, native command invocation
+    # uses Open3 instead of the POSIX optimized fork/exec native implementation.
+    def can_fork?
+      @@can_fork ||= fork { exit! } && true
+    rescue NotImplemented
+      @@can_fork = false
+    end
+
+    # Execute a command in a child process and read all output into a string
+    # buffer. Requires platform support for Kernel::fork, IO::pipe, and
+    # Kernel::exec.
+    #
+    # argv - Array passed to Kernel::exec. The first element is the full path
+    #   to the command to execute and additional arguments fill out the new
+    #   process's argv. When a String is given, /bin/sh is used to interpret the
+    #   command.
+    # env - Hash of environment variables set in the child process.
+    # cwd - String directory the command should be executed within.
+    #
+    # Returns an [out, err] tuple, where both elements are Strings with the
+    #   entire output of the command.
+    def execute(argv, env={}, cwd=nil)
+      argv = ['/bin/sh', '-c', argv.to_str] if argv.respond_to?(:to_str)
+      stdout = IO.pipe
+      stderr = IO.pipe
+      stdin  = IO.pipe
+
+      pid =
+        fork do
+          [stdout, stderr].each { |fd| fd[0].close }
+          stdin[1].close
+          STDIN.reopen(stdin[0])
+          STDOUT.reopen(stdout[1])
+          STDERR.reopen(stderr[1])
+          env.each { |k, v| ENV[k] = v }
+          ::Dir.chdir(cwd) if cwd
+          ::Kernel.exec(*argv)
+          exit!
+        end
+
+      [stdout, stderr].each { |fd| fd[1].close }
+      stdin[0].close
+
+      yield stdin[1] if block_given?
+      stdin[1].close if !stdin[1].closed?
+
+      out = read_buf(stdout[0])
+      err = read_buf(stderr[0])
+      [stdout, stderr].each { |fd| fd[0].close if !fd[0].closed? }
+      res = ::Process.waitpid(pid)
+
+      [out, err]
+    rescue Object => boom
+      [stdout, stderr].each { |fd| fd[0].close rescue nil }
+      stdin[1].close rescue nil
+      if res.nil?
+        ::Process.kill(pid) rescue nil
+        ::Process.waitpid(pid) rescue nil
+      end
+      raise
+    end
+
+    # Read from IO object until EOF and return as a String.
+    def read_buf(fd, max_size=nil)
+      buf = ''
+      while chunk = fd.read(8192)
+        buf << chunk
+        if max_size && max_size > 0 && buf.size > max_size
+          raise GitTimeout.new('', buf.size)
+        end
+      end
+      buf
+    end
+
+    # Transform a ruby-style options hash to command-line arguments sutiable for
+    # use with Kernel::exec. No shell escaping is performed.
+    #
+    # Returns an Array of String option arguments.
+    def options_to_argv(options)
+      argv = []
+      options.each do |key, val|
+        if key.to_s.size == 1
+          if val == true
+            argv << "-#{key}"
+          elsif val == false
+            # ignore
+          else
+            argv << "-#{key}"
+            argv << val.to_s
+          end
+        else
+          if val == true
+            argv << "--#{key.to_s.tr('_', '-')}"
+          elsif val == false
+            # ignore
+          else
+            argv << "--#{key.to_s.tr('_', '-')}=#{val}"
+          end
+        end
+      end
+      argv
+    end
+
+    # Simple wrapper around Timeout::timeout.
+    #
+    # seconds - Float number of seconds before a Timeout::Error is raised. When
+    #   true, the Grit::Git.git_timeout value is used. When the timeout is less
+    #   than or equal to 0, no timeout is established.
+    #
+    # Raises Timeout::Error when the timeout has elapsed.
+    def timeout_after(seconds)
+      seconds = self.class.git_timeout if seconds == true
+      if seconds && seconds > 0
+        Timeout.timeout(seconds) { yield }
+      else
+        yield
+      end
+    end
+
+    # DEPRECATED OPEN3-BASED COMMAND EXECUTION
 
     def run(prefix, cmd, postfix, options, args, &block)
       timeout  = options.delete(:timeout) rescue nil
@@ -256,15 +429,9 @@ module Grit
       max = self.class.git_max_size
       Open3.popen3(command) do |stdin, stdout, stderr|
         block.call(stdin) if block
-        Timeout.timeout(self.class.git_timeout) do
-          while tmp = stdout.read(8192)
-            ret << tmp
-            raise GitTimeout.new(command, ret.size) if ret.size > max
-          end
-        end
-
-        while tmp = stderr.read(8192)
-          err << tmp
+        timeout_after self.class.git_timeout do
+          ret = read_buf(stdout, max)
+          err = read_buf(stderr, max)
         end
       end
       [ret, err]
@@ -276,13 +443,8 @@ module Grit
       ret, err = '', ''
       Open3.popen3(command) do |stdin, stdout, stderr|
         block.call(stdin) if block
-        while tmp = stdout.read(8192)
-          ret << tmp
-        end
-
-        while tmp = stderr.read(8192)
-          err << tmp
-        end
+        ret = read_buf(stdout)
+        err = read_buf(stderr)
       end
       [ret, err]
     end
