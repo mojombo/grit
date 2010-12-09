@@ -137,12 +137,6 @@ module Grit
       []
     end
 
-    def create_tempfile(seed, unlink = false)
-      path = Tempfile.new(seed).path
-      File.unlink(path) if unlink
-      return path
-    end
-
     def commit_from_sha(id)
       git_ruby_repo = GitRuby::Repository.new(self.git_dir)
       object = git_ruby_repo.get_object_by_sha1(id)
@@ -156,19 +150,41 @@ module Grit
       end
     end
 
+    # Checks if a SHA's diff applies against the HEAD of the current 
+    # repository.  This determines if a cherry-pick from a commit in the same
+    # repository would be successful.
+    #
+    # head_sha    - String HEAD SHA of the repository.
+    # applies_sha - String SHA of the commit to cherry-pick.
+    #
+    # Returns the exit status of the commands.  Anything above 0 means there
+    # was an error.
     def check_applies(head_sha, applies_sha)
       git_index = create_tempfile('index', true)
       (o1, exit1) = raw_git("git read-tree #{head_sha} 2>/dev/null", git_index)
+      return exit1 if exit1 != 0
       (o2, exit2) = raw_git("git diff #{applies_sha}^ #{applies_sha} | git apply --check --cached >/dev/null 2>/dev/null", git_index)
       return (exit1 + exit2)
     end
 
+    # Gets the patch for a given commit.
+    #
+    # applies_sha - String SHA of the commit.
+    #
+    # Returns a String of the patch of the commit's parent to the parent.
     def get_patch(applies_sha)
       git_index = create_tempfile('index', true)
       (patch, exit2) = raw_git("git diff #{applies_sha}^ #{applies_sha}", git_index)
       patch
     end
 
+    # Applies a patch against the current repository's INDEX.
+    #
+    # head_sha - String HEAD SHA of the repository to start from.
+    # patch    - The String patch data.
+    #
+    # Returns a String SHA of the written tree, or false if the patch did not
+    # apply cleanly.
     def apply_patch(head_sha, patch)
       git_index = create_tempfile('index', true)
 
@@ -182,30 +198,6 @@ module Grit
       end
       false
     end
-
-    # RAW CALLS WITH ENV SETTINGS
-    def raw_git_call(command, index)
-      tmp = ENV['GIT_INDEX_FILE']
-      ENV['GIT_INDEX_FILE'] = index
-      out = `#{command}`
-      after = ENV['GIT_INDEX_FILE'] # someone fucking with us ??
-      ENV['GIT_INDEX_FILE'] = tmp
-      if after != index
-        raise 'environment was changed for the git call'
-      end
-      [out, $?.exitstatus]
-    end
-
-    def raw_git(command, index)
-      output = nil
-      Dir.chdir(self.git_dir) do
-        output = raw_git_call(command, index)
-      end
-      output
-    end
-    # RAW CALLS WITH ENV SETTINGS END
-
-
 
     # Run the given git command with the specified arguments and return
     # the result as a String
@@ -319,6 +311,37 @@ module Grit
       end
       args
     end
-  end # Git
 
+    # Creates a temporary file in the filesystem.
+    #
+    # seed   - A string used in the name of the file.
+    # unlink - Determines whether to delete the temp file.  Default: false
+    #
+    # Returns the String path to the Tempfile
+    def create_tempfile(seed, unlink = false)
+      path = Tempfile.new(seed).path
+      File.unlink(path) if unlink
+      return path
+    end
+
+    def raw_git_call(command, index)
+      tmp = ENV['GIT_INDEX_FILE']
+      ENV['GIT_INDEX_FILE'] = index
+      out = `#{command}`
+      after = ENV['GIT_INDEX_FILE'] # someone fucking with us ??
+      ENV['GIT_INDEX_FILE'] = tmp
+      if after != index
+        raise 'environment was changed for the git call'
+      end
+      [out, $?.exitstatus]
+    end
+
+    def raw_git(command, index)
+      output = nil
+      Dir.chdir(self.git_dir) do
+        output = raw_git_call(command, index)
+      end
+      output
+    end
+  end # Git
 end # Grit
