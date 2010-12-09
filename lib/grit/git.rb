@@ -37,11 +37,9 @@ module Grit
       attr_accessor :git_binary, :git_timeout, :git_max_size
     end
 
-    if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/
-      self.git_binary   = "git" # using search path
-    else
-      self.git_binary   = "/usr/bin/env git"
-    end
+    self.git_binary   = ENV['PATH'].split(':').
+      map  { |p| File.join(p, 'git') }.
+      find { |p| File.exist?(p) }
     self.git_timeout  = 10
     self.git_max_size = 5242880 # 5.megabytes
 
