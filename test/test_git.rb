@@ -101,4 +101,13 @@ class TestGit < Test::Unit::TestCase
     FileUtils.expects(:rm_rf).with(File.join(@git.git_dir, 'foo'))
     @git.fs_delete('foo')
   end
+
+  def test_passing_env_to_native
+    @git.expects(:execute).with([
+      Grit::Git.git_binary,
+      "--git-dir=#{@git.git_dir}",
+      "help", "-a"
+    ], { 'A' => 'B' })
+    @git.native(:help, {:a => true, :env => { 'A' => 'B' }})
+  end
 end

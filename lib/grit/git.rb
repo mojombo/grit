@@ -220,6 +220,8 @@ module Grit
     #       use that number of seconds; when false or 0, disable timeout.
     #     :base - Set false to avoid passing the --git-dir argument when
     #       invoking the git command.
+    #     :env - Hash of environment variable key/values that are set on the
+    #       child process.
     # args - Non-option arguments passed on the command line.
     #
     # Optionally yields to the block an IO object attached to the child
@@ -249,6 +251,8 @@ module Grit
       base     = options.delete(:base)
       base     = true if base.nil?
 
+      env      = options.delete(:env) || {}
+
       argv = []
       argv << Git.git_binary
       argv << "--git-dir=#{git_dir}" if base
@@ -258,7 +262,7 @@ module Grit
       argv.concat(args)
 
       Grit.log(argv.join(' ')) if Grit.debug
-      out, err = timeout_after(timeout) { execute(argv, &block) }
+      out, err = timeout_after(timeout) { execute(argv, env, &block) }
       Grit.log(out) if Grit.debug
       Grit.log(err) if Grit.debug
       out
