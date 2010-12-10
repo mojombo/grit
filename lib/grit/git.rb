@@ -12,6 +12,25 @@ module Grit
       end
     end
 
+    # Raised when a native git command exits with non-zero.
+    class CommandFailed < StandardError
+      # The full git command that failed as a String.
+      attr_reader :command
+
+      # The integer exit status.
+      attr_reader :exitstatus
+
+      # Everything output on the command's stderr as a String.
+      attr_reader :err
+
+      def initialize(command, exitstatus, err='')
+        @command = command
+        @exitstatus = exitstatus
+        @err = err
+        super "Command exited with #{exitstatus}: #{command}"
+      end
+    end
+
     undef_method :clone
 
     include GitRuby
@@ -222,6 +241,8 @@ module Grit
     #       invoking the git command.
     #     :env - Hash of environment variable key/values that are set on the
     #       child process.
+    #     :raise - When set true, commands that exit with a non-zero status
+    #       raise a CommandFailed exception.
     # args - Non-option arguments passed on the command line.
     #
     # Optionally yields to the block an IO object attached to the child
@@ -233,6 +254,10 @@ module Grit
     # Returns a String with all output written to the child process's stdout.
     # Raises Grit::Git::GitTimeout when the timeout is exceeded or when more
     #   than Grit::Git.git_max_size bytes are output.
+    # Raises Grit::Git::CommandFailed when the :raise option is set true and the
+    #   git command exits with a non-zero exit status. The CommandFailed's #command,
+    #   #exitstatus, and #err attributes can be used to retrieve additional
+    #   detail about the error.
     def native(cmd, options = {}, *args, &block)
       args     = args.first if args.size == 1 && args[0].is_a?(Array)
       args.map!    { |a| a.to_s.strip }
@@ -253,6 +278,8 @@ module Grit
 
       env      = options.delete(:env) || {}
 
+      raise_errors = options.delete(:raise)
+
       argv = []
       argv << Git.git_binary
       argv << "--git-dir=#{git_dir}" if base
@@ -265,7 +292,11 @@ module Grit
       out, err = timeout_after(timeout) { execute(argv, env, &block) }
       Grit.log(out) if Grit.debug
       Grit.log(err) if Grit.debug
-      out
+      if raise_errors && !$?.success?
+        raise CommandFailed.new(argv.join(' '), $?.exitstatus, err)
+      else
+        out
+      end
     rescue Timeout::Error
       raise GitTimeout, argv.join(' ')
     rescue GitTimeout => boom

@@ -110,4 +110,10 @@ class TestGit < Test::Unit::TestCase
     ], { 'A' => 'B' })
     @git.native(:help, {:a => true, :env => { 'A' => 'B' }})
   end
+
+  def test_raising_exceptions_when_native_git_commands_fail
+    assert_raise Grit::Git::CommandFailed do
+      @git.native(:bad, {:raise => true})
+    end
+  end
 end
