@@ -54,12 +54,16 @@ module Grit
     end
 
     class << self
-      attr_accessor :git_binary, :git_timeout, :git_max_size
+      attr_accessor :git_timeout, :git_max_size
+      def git_binary
+        @git_binary ||=
+          ENV['PATH'].split(':').
+            map  { |p| File.join(p, 'git') }.
+            find { |p| File.exist?(p) }
+      end
+      attr_writer :git_binary
     end
 
-    self.git_binary   = ENV['PATH'].split(':').
-      map  { |p| File.join(p, 'git') }.
-      find { |p| File.exist?(p) }
     self.git_timeout  = 10
     self.git_max_size = 5242880 # 5.megabytes
 
