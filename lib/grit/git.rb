@@ -246,7 +246,8 @@ module Grit
     #     :env - Hash of environment variable key/values that are set on the
     #       child process.
     #     :raise - When set true, commands that exit with a non-zero status
-    #       raise a CommandFailed exception.
+    #       raise a CommandFailed exception. This option is available only on
+    #       platforms that support fork(2).
     # args - Non-option arguments passed on the command line.
     #
     # Optionally yields to the block an IO object attached to the child
@@ -267,10 +268,20 @@ module Grit
       args.map!    { |a| a.to_s.strip }
       args.reject! { |a| a.empty? }
 
+      # special option arguments
+      env = options.delete(:env) || {}
+      raise_errors = options.delete(:raise)
+
       # fall back on Open3 and sh runner when fork(2) is not available on this
       # platform or when the last argument starts a pipeline.
       if !can_fork? || args[-1].to_s[0] == ?|
-        out = run('', cmd, '', options, args, &block)
+        prefix =
+          if env.any?
+            env.map { |k, v| "#{k}='#{v}'" }.join(' ') + ' '
+          else
+            ''
+          end
+        out = run(prefix, cmd, '', options, args, &block)
         return out
       end
 
@@ -279,10 +290,6 @@ module Grit
 
       base     = options.delete(:base)
       base     = true if base.nil?
-
-      env      = options.delete(:env) || {}
-
-      raise_errors = options.delete(:raise)
 
       argv = []
       argv << Git.git_binary
