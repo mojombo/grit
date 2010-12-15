@@ -327,7 +327,12 @@ module Grit
     # Determine if fork(2) available. When false, native command invocation
     # uses Open3 instead of the POSIX optimized fork/exec native implementation.
     def can_fork?
-      @@can_fork ||= fork { exit! } && true
+      return @@can_fork if defined?(@@can_fork)
+      @@can_fork =
+        if pid = fork { exit! }
+          Process.wait(pid)
+          true
+        end
     rescue NotImplemented
       @@can_fork = false
     end
