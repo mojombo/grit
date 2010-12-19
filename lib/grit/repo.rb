@@ -167,11 +167,7 @@ module Grit
     # Returns an Array of Grit objects (Grit::Commit).
     def batch(*shas)
       shas.flatten!
-      text = git.native(:cat_file, {:batch => true}) do |stdin|
-        stdin.write(shas * "\n")
-        stdin.close
-      end
-
+      text = git.native(:cat_file, {:batch => true, :input => (shas * "\n")})
       parse_batch(text)
     end
 
