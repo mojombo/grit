@@ -47,6 +47,9 @@ module Grit
     #           the current environment as if by ENV.merge(env).
     # options - Additional options:
     #           :input => str to write str to the process's stdin.
+    #           :timeout => int number of seconds before we given up.
+    #           A subset of Process:spawn options are also supported on all
+    #           platforms:
     #           :chdir => str to start the process in different working dir.
     #
     # Returns a new Process instance that has already executed to completion.
@@ -57,6 +60,7 @@ module Grit
       @options = options.dup
       @options.delete(:chdir) if @options[:chdir].nil?
       @input = @options.delete(:input)
+      @timeout = @options.delete(:timeout)
       exec!
     end
 
@@ -68,6 +72,9 @@ module Grit
 
     # A Process::Status object with information on how the child exited.
     attr_reader :status
+
+    # Total command execution time (wall-clock time)
+    attr_reader :runtime
 
     # Determine if the process did exit with a zero exit status.
     def success?
@@ -100,7 +107,7 @@ module Grit
       # we're in the parent, close child-side fds
       [ird, owr, ewr].each { |fd| fd.close }
 
-      @out, @err = read_and_write(@input, iwr, ord, erd)
+      @out, @err = read_and_write(@input, iwr, ord, erd, @timeout)
 
       ::Process.waitpid(pid)
       @status = $?
@@ -113,22 +120,47 @@ module Grit
       raise
     end
 
-    # maximum size
+    # Exception raised when timeout is exceeded.
+    class TimeoutExceeded < StandardError
+    end
+
+    # Maximum buffer size for reading
     BUFSIZE = (32 * 1024)
 
     # Start a select loop writing any input on the child's stdin and reading
-    # any output from the child's stdout or stderr
-    def read_and_write(input, stdin, stdout, stderr)
+    # any output from the child's stdout or stderr.
+    #
+    # input   - String input to write on stdin. May be nil.
+    # stdin   - The write side IO object for the child's stdin stream.
+    # stdout  - The read side IO object for the child's stdout stream.
+    # stderr  - The read side IO object for the child's stderr stream.
+    # timeout - An optional Numeric specifying the total number of seconds
+    #           the read/write operations should occur for.
+    #
+    # Returns an [out, err] tuple where both elements are strings with all
+    #   data written to the stdout and stderr streams, respectively.
+    # Raises TimeoutExceeded when all data has not been read / written within
+    #   the duration specified in the timeout argument.
+    def read_and_write(input, stdin, stdout, stderr, timeout=nil)
       input ||= ''
       out, err = '', ''
       offset = 0
+
+      timeout = nil if timeout && timeout <= 0.0
+      @runtime = 0.0
+      start = Time.now
+
       writers = [stdin]
       readers = [stdout, stderr]
-      while ready = IO.select(readers, writers, readers + writers)
-        boom = nil
+      t = timeout
+      while readers.any? || writers.any?
+        ready = IO.select(readers, writers, readers + writers, t)
+        raise TimeoutExceeded if ready.nil?
+
         # write to stdin stream
         ready[1].each do |fd|
           begin
+            boom = nil
             size = fd.write_nonblock(input)
             input = input[size, input.size]
           rescue Errno::EPIPE => boom
@@ -139,6 +171,7 @@ module Grit
             writers.delete(stdin)
           end
         end
+
         # read from stdout and stderr streams
         ready[0].each do |fd|
           buf = (fd == stdout) ? out : err
@@ -150,8 +183,15 @@ module Grit
             fd.close
           end
         end
-        break if readers.empty? && writers.empty?
+
+        # keep tabs on the total amount of time we've spent here
+        @runtime = Time.now - start
+        if timeout
+          t = timeout - @runtime
+          t = 0.000001 if t < 0.0
+        end
       end
+
       [out, err]
     end
 

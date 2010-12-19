@@ -292,7 +292,13 @@ module Grit
 
       # run it and deal with fallout
       Grit.log(argv.join(' ')) if Grit.debug
-      process = Grit::Process.new(argv, env, :input => input, :chdir => chdir)
+
+      process =
+        Grit::Process.new(argv, env,
+          :input   => input,
+          :chdir   => chdir,
+          :timeout => (Grit::Git.git_timeout if timeout == true)
+        )
       status = process.status
       Grit.log(process.out) if Grit.debug
       Grit.log(process.err) if Grit.debug
@@ -301,11 +307,8 @@ module Grit
       else
         process.out
       end
-    rescue Timeout::Error
+    rescue Grit::Process::TimeoutExceeded
       raise GitTimeout, argv.join(' ')
-    rescue GitTimeout => boom
-      boom.command = argv.join(' ')
-      raise boom
     end
 
     # Methods not defined by a library implementation execute the git command
@@ -386,6 +389,7 @@ module Grit
         gitdir = base ? "--git-dir='#{self.git_dir}'" : ""
         call = "#{prefix}#{Git.git_binary} #{gitdir} #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
       end
+
       Grit.log(call) if Grit.debug
       response, err = timeout ? sh(call, &block) : wild_sh(call, &block)
       Grit.log(response) if Grit.debug
@@ -394,8 +398,10 @@ module Grit
     end
 
     def sh(command, &block)
-      process = Grit::Process.new(command)
+      process = Grit::Process.new(command, {}, :timeout => Git.git_timeout)
       [process.out, process.err]
+    rescue Grit::Process::TimeoutExceeded
+      raise GitTimeout, command
     end
 
     def wild_sh(command, &block)

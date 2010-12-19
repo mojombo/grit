@@ -106,7 +106,7 @@ class TestGit < Test::Unit::TestCase
     args = [
       [Grit::Git.git_binary, "--git-dir=#{@git.git_dir}", "help", "-a"],
       { 'A' => 'B' },
-      {:input => nil, :chdir => nil}
+      {:input => nil, :chdir => nil, :timeout => Grit::Git.git_timeout}
     ]
     p = Grit::Process.new(*args)
     Grit::Process.expects(:new).with(*args).returns(p)
