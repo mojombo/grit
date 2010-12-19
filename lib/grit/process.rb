@@ -46,21 +46,25 @@ module Grit
     # env     - The new process's environment variables. This is merged with
     #           the current environment as if by ENV.merge(env).
     # options - Additional options:
-    #           :input => str to write str to the process's stdin.
-    #           :timeout => int number of seconds before we given up.
+    #             :input   => str to write str to the process's stdin.
+    #             :timeout => int number of seconds before we given up.
+    #             :max     => total number of output bytes
     #           A subset of Process:spawn options are also supported on all
     #           platforms:
-    #           :chdir => str to start the process in different working dir.
+    #             :chdir => str to start the process in different working dir.
     #
     # Returns a new Process instance that has already executed to completion.
     # The out, err, and status attributes are immediately available.
     def initialize(argv, env={}, options={})
       @argv = argv
       @env = env
+
       @options = options.dup
-      @options.delete(:chdir) if @options[:chdir].nil?
       @input = @options.delete(:input)
       @timeout = @options.delete(:timeout)
+      @max = @options.delete(:max)
+      @options.delete(:chdir) if @options[:chdir].nil?
+
       exec!
     end
 
@@ -107,7 +111,7 @@ module Grit
       # we're in the parent, close child-side fds
       [ird, owr, ewr].each { |fd| fd.close }
 
-      @out, @err = read_and_write(@input, iwr, ord, erd, @timeout)
+      @out, @err = read_and_write(@input, iwr, ord, erd, @timeout, @max)
 
       ::Process.waitpid(pid)
       @status = $?
@@ -118,6 +122,11 @@ module Grit
         (@status = ::Process.waitpid(pid)) rescue nil
       end
       raise
+    end
+
+    # Exception raised when the total number of bytes output on the command's
+    # stderr and stdout streams exceeds the maximum output size (:max option).
+    class MaximumOutputExceeded < StandardError
     end
 
     # Exception raised when timeout is exceeded.
@@ -141,8 +150,11 @@ module Grit
     #   data written to the stdout and stderr streams, respectively.
     # Raises TimeoutExceeded when all data has not been read / written within
     #   the duration specified in the timeout argument.
-    def read_and_write(input, stdin, stdout, stderr, timeout=nil)
+    # Raises MaximumOutputExceeded when the total number of bytes output
+    #   exceeds the amount specified by the max argument.
+    def read_and_write(input, stdin, stdout, stderr, timeout=nil, max=nil)
       input ||= ''
+      max = nil if max && max <= 0
       out, err = '', ''
       offset = 0
 
@@ -189,6 +201,11 @@ module Grit
         if timeout
           t = timeout - @runtime
           t = 0.000001 if t < 0.0
+        end
+
+        # maybe we've hit our max output
+        if max && ready[0].any? && (out.size + err.size) > max
+          raise MaximumOutputExceeded
         end
       end
 

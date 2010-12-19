@@ -297,7 +297,8 @@ module Grit
         Grit::Process.new(argv, env,
           :input   => input,
           :chdir   => chdir,
-          :timeout => (Grit::Git.git_timeout if timeout == true)
+          :timeout => (Grit::Git.git_timeout if timeout == true),
+          :max     => (Grit::Git.git_max_size if timeout == true)
         )
       status = process.status
       Grit.log(process.out) if Grit.debug
@@ -307,7 +308,7 @@ module Grit
       else
         process.out
       end
-    rescue Grit::Process::TimeoutExceeded
+    rescue Grit::Process::TimeoutExceeded, Grit::Process::MaximumOutputExceeded
       raise GitTimeout, argv.join(' ')
     end
 
@@ -398,9 +399,14 @@ module Grit
     end
 
     def sh(command, &block)
-      process = Grit::Process.new(command, {}, :timeout => Git.git_timeout)
+      process =
+        Grit::Process.new(
+          command, {},
+          :timeout => Git.git_timeout,
+          :max     => Git.git_max_size
+        )
       [process.out, process.err]
-    rescue Grit::Process::TimeoutExceeded
+    rescue Grit::Process::TimeoutExceeded, Grit::Process::MaximumOutputExceeded
       raise GitTimeout, command
     end
 
