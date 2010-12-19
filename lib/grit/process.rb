@@ -254,5 +254,12 @@ module Grit
         exit! 1
       end
     end
+
+    # Use native Process::spawn implementation on Ruby 1.9.
+    if ::Process.respond_to?(:spawn)
+      def spawn(env, *argv)
+        ::Process.spawn(env, *argv)
+      end
+    end
   end
 end
