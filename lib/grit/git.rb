@@ -272,43 +272,34 @@ module Grit
       env = options.delete(:env) || {}
       raise_errors = options.delete(:raise)
 
-      # fall back on Open3 and sh runner when fork(2) is not available on this
-      # platform or when the last argument starts a pipeline.
-      if !can_fork? || args[-1].to_s[0] == ?|
-        prefix =
-          if env.any?
-            env.map { |k, v| "#{k}='#{v}'" }.join(' ') + ' '
-          else
-            ''
-          end
-        out = run(prefix, cmd, '', options, args, &block)
-        return out
-      end
+      # fall back to using a shell when the last argument looks like it wants to
+      # start a pipeline for compatibility with previous versions of grit.
+      return run(prefix, cmd, '', options, args) if args[-1].to_s[0] == ?|
 
+      # more options
       input    = options.delete(:input)
+      timeout  = options.delete(:timeout); timeout = true if timeout.nil?
+      base     = options.delete(:base);    base    = true if base.nil?
+      chdir    = options.delete(:chdir)
 
-      timeout  = options.delete(:timeout)
-      timeout  = true if timeout.nil?
-
-      base     = options.delete(:base)
-      base     = true if base.nil?
-
+      # build up the git process argv
       argv = []
       argv << Git.git_binary
       argv << "--git-dir=#{git_dir}" if base
       argv << cmd.to_s.tr('_', '-')
-
       argv.concat(options_to_argv(options))
       argv.concat(args)
 
+      # run it and deal with fallout
       Grit.log(argv.join(' ')) if Grit.debug
-      out, err = timeout_after(timeout) { execute(argv, env, nil, input, &block) }
-      Grit.log(out) if Grit.debug
-      Grit.log(err) if Grit.debug
-      if raise_errors && !$?.success?
-        raise CommandFailed.new(argv.join(' '), $?.exitstatus, err)
+      process = Grit::Process.new(argv, env, :input => input, :chdir => chdir)
+      status = process.status
+      Grit.log(process.out) if Grit.debug
+      Grit.log(process.err) if Grit.debug
+      if raise_errors && !status.success?
+        raise CommandFailed.new(argv.join(' '), status.exitstatus, process.err)
       else
-        out
+        process.out
       end
     rescue Timeout::Error
       raise GitTimeout, argv.join(' ')
@@ -324,136 +315,6 @@ module Grit
     #   git.rev_list({:max_count => 10, :header => true}, "master")
     def method_missing(cmd, options={}, *args, &block)
       native(cmd, options, *args, &block)
-    end
-
-    # Determine if fork(2) available. When false, native command invocation
-    # uses Open3 instead of the POSIX optimized fork/exec native implementation.
-    def can_fork?
-      return @@can_fork if defined?(@@can_fork)
-      @@can_fork =
-        if pid = fork { exit! }
-          Process.wait(pid)
-          true
-        end
-    rescue NotImplemented
-      @@can_fork = false
-    end
-
-    # Execute a command in a child process and read all output into a string
-    # buffer. Requires platform support for Kernel::fork, IO::pipe, and
-    # Kernel::exec.
-    #
-    # argv - Array passed to Kernel::exec. The first element is the full path
-    #   to the command to execute and additional arguments fill out the new
-    #   process's argv. When a String is given, /bin/sh is used to interpret the
-    #   command.
-    # env - Hash of environment variables set in the child process.
-    # cwd - String directory the command should be executed within.
-    # input - String input to write to the new process's stdin.
-    #
-    # Returns an [out, err] tuple, where both elements are Strings with the
-    #   entire output of the command.
-    def execute(argv, env={}, cwd=nil, input=nil, &block)
-      argv = ['/bin/sh', '-c', argv.to_str] if argv.respond_to?(:to_str)
-      stdout = IO.pipe
-      stderr = IO.pipe
-      stdin  = IO.pipe
-
-      # fork/exec git child process
-      pid =
-        fork do
-          [stdout, stderr].each { |fd| fd[0].close }
-          stdin[1].close
-          STDIN.reopen(stdin[0])
-          STDOUT.reopen(stdout[1])
-          STDERR.reopen(stderr[1])
-          env.each { |k, v| ENV[k] = v }
-          ::Dir.chdir(cwd) if cwd
-          ::Kernel.exec(*argv)
-          exit!
-        end
-
-      # we're in the parent. close child-side fds.
-      [stdout, stderr].each { |fd| fd[1].close }
-      stdin[0].close
-
-      # write data to the git process's stdin if a block was given
-      pipe_writer(stdin[1], input, &block)
-
-      # read stdout and stderr
-      out = read_buf(stdout[0])
-      err = read_buf(stderr[0])
-      [stdout, stderr].each { |fd| fd[0].close if !fd[0].closed? }
-      res = ::Process.waitpid(pid)
-
-      [out, err]
-    rescue Object => boom
-      [stdout, stderr].each { |fd| fd[0].close rescue nil }
-      stdin[1].close rescue nil
-      if res.nil?
-        ::Process.kill(pid) rescue nil
-        ::Process.waitpid(pid) rescue nil
-      end
-      raise
-    end
-
-    # Read from IO object until EOF and return as a String.
-    def read_buf(fd, max_size=nil)
-      buf = ''
-      while chunk = fd.read(8192)
-        buf << chunk
-        if max_size && max_size > 0 && buf.size > max_size
-          raise GitTimeout.new('', buf.size)
-        end
-      end
-      buf
-    end
-
-    # Write a String or buffer accumulated by yielding to the block to a child
-    # process's stdin. This has special logic that will fork off a child process
-    # if the maximum pipe buffer is likely to fill up and block the writing
-    # process.
-    #
-    # stdin - An IO object that should be written to.
-    # data  - String data to write to the stdin IO object. May be nil when a
-    #         block is given.
-    # block - When given, this method yields an IO object so that the block may
-    #         write input. The accumulated buffer is then written to the child
-    #         process.
-    #
-    # Returns nothing.
-    def pipe_writer(stdin, data=nil)
-      if block_given?
-        buf = StringIO.new
-        buf.write(data) if data
-        yield buf
-        data = buf.string
-      end
-
-      # bail out if there's no data to write
-      return if data.nil? || data.empty?
-
-      # if the input is likely to exceed the pipe buffer, we need to fork off a
-      # child process to perform the writing. The pipe buffer is 32K on Mac, 64K on
-      # Linux 2.6 but we fork on anything over 16K just to be safe.
-      if data.size > 16_384
-        pid =
-          fork do
-            begin
-              [STDIN, STDOUT, STDERR].each { |fd| fd.reopen('/dev/null') }
-              stdin.write(data)
-              stdin.close
-            ensure
-              exit!
-            end
-          end
-        stdin.close
-        Process.waitpid(pid)
-      else
-        stdin.write(data)
-      end
-    ensure
-      stdin.close if !stdin.closed?
     end
 
     # Transform a ruby-style options hash to command-line arguments sutiable for
@@ -533,28 +394,13 @@ module Grit
     end
 
     def sh(command, &block)
-      ret, err = '', ''
-      max = self.class.git_max_size
-      Open3.popen3(command) do |stdin, stdout, stderr|
-        block.call(stdin) if block
-        timeout_after self.class.git_timeout do
-          ret = read_buf(stdout, max)
-          err = read_buf(stderr, max)
-        end
-      end
-      [ret, err]
-    rescue Timeout::Error, Grit::Git::GitTimeout
-      raise GitTimeout.new(command, ret.size)
+      process = Grit::Process.new(command)
+      [process.out, process.err]
     end
 
     def wild_sh(command, &block)
-      ret, err = '', ''
-      Open3.popen3(command) do |stdin, stdout, stderr|
-        block.call(stdin) if block
-        ret = read_buf(stdout)
-        err = read_buf(stderr)
-      end
-      [ret, err]
+      process = Grit::Process.new(command)
+      [process.out, process.err]
     end
 
     # Transform Ruby style options into git command line options
