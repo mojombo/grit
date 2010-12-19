@@ -107,7 +107,7 @@ class TestGit < Test::Unit::TestCase
       Grit::Git.git_binary,
       "--git-dir=#{@git.git_dir}",
       "help", "-a"
-    ], { 'A' => 'B' })
+    ], { 'A' => 'B' }, nil, nil)
     @git.native(:help, {:a => true, :env => { 'A' => 'B' }})
   end
 

@@ -285,6 +285,8 @@ module Grit
         return out
       end
 
+      input    = options.delete(:input)
+
       timeout  = options.delete(:timeout)
       timeout  = true if timeout.nil?
 
@@ -300,7 +302,7 @@ module Grit
       argv.concat(args)
 
       Grit.log(argv.join(' ')) if Grit.debug
-      out, err = timeout_after(timeout) { execute(argv, env, &block) }
+      out, err = timeout_after(timeout) { execute(argv, env, nil, input, &block) }
       Grit.log(out) if Grit.debug
       Grit.log(err) if Grit.debug
       if raise_errors && !$?.success?
@@ -347,15 +349,17 @@ module Grit
     #   command.
     # env - Hash of environment variables set in the child process.
     # cwd - String directory the command should be executed within.
+    # input - String input to write to the new process's stdin.
     #
     # Returns an [out, err] tuple, where both elements are Strings with the
     #   entire output of the command.
-    def execute(argv, env={}, cwd=nil)
+    def execute(argv, env={}, cwd=nil, input=nil, &block)
       argv = ['/bin/sh', '-c', argv.to_str] if argv.respond_to?(:to_str)
       stdout = IO.pipe
       stderr = IO.pipe
       stdin  = IO.pipe
 
+      # fork/exec git child process
       pid =
         fork do
           [stdout, stderr].each { |fd| fd[0].close }
@@ -369,12 +373,14 @@ module Grit
           exit!
         end
 
+      # we're in the parent. close child-side fds.
       [stdout, stderr].each { |fd| fd[1].close }
       stdin[0].close
 
-      yield stdin[1] if block_given?
-      stdin[1].close if !stdin[1].closed?
+      # write data to the git process's stdin if a block was given
+      pipe_writer(stdin[1], input, &block)
 
+      # read stdout and stderr
       out = read_buf(stdout[0])
       err = read_buf(stderr[0])
       [stdout, stderr].each { |fd| fd[0].close if !fd[0].closed? }
@@ -401,6 +407,53 @@ module Grit
         end
       end
       buf
+    end
+
+    # Write a String or buffer accumulated by yielding to the block to a child
+    # process's stdin. This has special logic that will fork off a child process
+    # if the maximum pipe buffer is likely to fill up and block the writing
+    # process.
+    #
+    # stdin - An IO object that should be written to.
+    # data  - String data to write to the stdin IO object. May be nil when a
+    #         block is given.
+    # block - When given, this method yields an IO object so that the block may
+    #         write input. The accumulated buffer is then written to the child
+    #         process.
+    #
+    # Returns nothing.
+    def pipe_writer(stdin, data=nil)
+      if block_given?
+        buf = StringIO.new
+        buf.write(data) if data
+        yield buf
+        data = buf.string
+      end
+
+      # bail out if there's no data to write
+      return if data.nil? || data.empty?
+
+      # if the input is likely to exceed the pipe buffer, we need to fork off a
+      # child process to perform the writing. The pipe buffer is 32K on Mac, 64K on
+      # Linux 2.6 but we fork on anything over 16K just to be safe.
+      if data.size > 16_384
+        pid =
+          fork do
+            begin
+              [STDIN, STDOUT, STDERR].each { |fd| fd.reopen('/dev/null') }
+              stdin.write(data)
+              stdin.close
+            ensure
+              exit!
+            end
+          end
+        stdin.close
+        Process.waitpid(pid)
+      else
+        stdin.write(data)
+      end
+    ensure
+      stdin.close if !stdin.closed?
     end
 
     # Transform a ruby-style options hash to command-line arguments sutiable for
