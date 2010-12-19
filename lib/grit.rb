@@ -9,14 +9,6 @@ require 'timeout'
 require 'logger'
 require 'digest/sha1'
 
-if defined? RUBY_ENGINE && RUBY_ENGINE == 'jruby'
-  require 'open3'
-elsif RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/
-  require 'win32/open3'
-else
-  require 'grit/open3_detach'
-end
-
 # third party
 
 begin
@@ -36,6 +28,7 @@ end
 require 'grit/ruby1.9'
 
 # internal requires
+require 'grit/process'
 require 'grit/lazy'
 require 'grit/errors'
 require 'grit/git-ruby'
@@ -55,7 +48,6 @@ require 'grit/status'
 require 'grit/submodule'
 require 'grit/blame'
 require 'grit/merge'
-require 'grit/process'
 
 module Grit
   VERSION = '2.3.0'
