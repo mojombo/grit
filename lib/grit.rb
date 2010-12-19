@@ -55,6 +55,7 @@ require 'grit/status'
 require 'grit/submodule'
 require 'grit/blame'
 require 'grit/merge'
+require 'grit/process'
 
 module Grit
   VERSION = '2.3.0'
