@@ -510,6 +510,10 @@ module Grit
       base     = options.delete(:base) rescue nil
       base     = true if base.nil?
 
+      if input = options.delete(:input)
+        block = lambda { |stdin| stdin.write(input) }
+      end
+
       opt_args = transform_options(options)
 
       if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/
