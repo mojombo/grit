@@ -47,6 +47,36 @@ class TestProcess < Test::Unit::TestCase
     assert_equal 100_000, p.out.strip.to_i
   end
 
+  def test_max
+    assert_raise Grit::Process::MaximumOutputExceeded do
+      Grit::Process.new(['yes'], {}, :max => 100_000)
+    end
+  end
+
+  def test_max_with_child_hierarchy
+    assert_raise Grit::Process::MaximumOutputExceeded do
+      Grit::Process.new(['/bin/sh', '-c', 'yes'], {}, :max => 100_000)
+    end
+  end
+
+  def test_max_with_stubborn_child
+    assert_raise Grit::Process::MaximumOutputExceeded do
+      Grit::Process.new("trap '' TERM; yes", {}, :max => 100_000)
+    end
+  end
+
+  def test_timeout
+    assert_raise Grit::Process::TimeoutExceeded do
+      Grit::Process.new(['sleep 1'], {}, :timeout => 0.05)
+    end
+  end
+
+  def test_timeout_with_child_hierarchy
+    assert_raise Grit::Process::TimeoutExceeded do
+      Grit::Process.new(['/bin/sh', '-c', 'yes'], {}, :timeout => 0.05)
+    end
+  end
+
   def test_lots_of_input_and_lots_of_output_at_the_same_time
     input = "stuff on stdin \n" * 1_000
     command = "
@@ -62,7 +92,7 @@ class TestProcess < Test::Unit::TestCase
     assert p.success?
   end
 
-  def test_when_input_cannot_be_written_due_to_broken_pipe
+  def test_input_cannot_be_written_due_to_broken_pipe
     input = "1" * 100_000
     p = Grit::Process.new(['false'], {}, :input => input)
     assert !p.success?
