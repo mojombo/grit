@@ -113,13 +113,12 @@ module Grit
 
       @out, @err = read_and_write(@input, iwr, ord, erd, @timeout, @max)
 
-      ::Process.waitpid(pid)
-      @status = $?
+      @status = (::Process.waitpid(pid); $?)
     rescue Object => boom
       [ird, iwr, ord, owr, erd, ewr].each { |fd| fd.close rescue nil }
       if @status.nil?
-        ::Process.kill(pid) rescue nil
-        (@status = ::Process.waitpid(pid)) rescue nil
+        ::Process.kill('TERM', pid) rescue nil
+        @status = (::Process.waitpid(pid); $?) rescue nil
       end
       raise
     end
