@@ -93,29 +93,16 @@ module Grit
       argv = @argv
       argv = ['/bin/sh', '-c', argv.to_str] if argv.respond_to?(:to_str)
 
-      # create some pipes (see pipe(2) manual -- the ruby docs suck)
-      ird, iwr = IO.pipe
-      ord, owr = IO.pipe
-      erd, ewr = IO.pipe
+      # spawn the process and hook up the pipes
+      pid, stdin, stdout, stderr = popen4(@env, *(argv + [@options]))
 
-      # spawn the child process with either end of pipes hooked together
-      opts =
-        @options.merge(
-          # redirect fds        # close other sides
-          :in  => ird,          iwr  => :close,
-          :out => owr,          ord  => :close,
-          :err => ewr,          erd  => :close
-        )
-      pid = spawn(@env, *(argv + [opts]))
+      # async read from all streams into buffers
+      @out, @err = read_and_write(@input, stdin, stdout, stderr, @timeout, @max)
 
-      # we're in the parent, close child-side fds
-      [ird, owr, ewr].each { |fd| fd.close }
-
-      @out, @err = read_and_write(@input, iwr, ord, erd, @timeout, @max)
-
+      # grab exit status
       @status = (::Process.waitpid(pid); $?)
     rescue Object => boom
-      [ird, iwr, ord, owr, erd, ewr].each { |fd| fd.close rescue nil }
+      [stdin, stdout, stderr].each { |fd| fd.close rescue nil }
       if @status.nil?
         ::Process.kill('TERM', pid) rescue nil
         @status = (::Process.waitpid(pid); $?) rescue nil
@@ -254,10 +241,45 @@ module Grit
       end
     end
 
+    # Start a process with spawn options and return
+    # popen4([env], command, arg1, arg2, [opt])
+    #
+    #   env     - The child process's environment as a Hash.
+    #   command - The command and zero or more arguments.
+    #   options - An options hash.
+    #
+    # See Ruby 1.9 IO.popen and Process::spawn docs for more info:
+    # http://www.ruby-doc.org/core-1.9/classes/IO.html#M001640
+    #
+    # Returns a [pid, stdin, stderr, stdout] tuple where pid is the child
+    # process's pid, stdin is a writeable IO object, and stdout + stderr are
+    # readable IO objects.
+    def popen4(*argv)
+      # create some pipes (see pipe(2) manual -- the ruby docs suck)
+      ird, iwr = IO.pipe
+      ord, owr = IO.pipe
+      erd, ewr = IO.pipe
+
+      # spawn the child process with either end of pipes hooked together
+      opts =
+        ((argv.pop if argv[-1].is_a?(Hash)) || {}).merge(
+          # redirect fds        # close other sides
+          :in  => ird,          iwr  => :close,
+          :out => owr,          ord  => :close,
+          :err => ewr,          erd  => :close
+        )
+      pid = spawn(*(argv + [opts]))
+
+      [pid, iwr, ord, erd]
+    ensure
+      # we're in the parent, close child-side fds
+      [ird, owr, ewr].each { |fd| fd.close }
+    end
+
     # Use native Process::spawn implementation on Ruby 1.9.
     if ::Process.respond_to?(:spawn)
-      def spawn(env, *argv)
-        ::Process.spawn(env, *argv)
+      def spawn(*argv)
+        ::Process.spawn(*argv)
       end
     end
   end
