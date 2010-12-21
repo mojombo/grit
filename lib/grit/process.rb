@@ -100,12 +100,12 @@ module Grit
       @out, @err = read_and_write(@input, stdin, stdout, stderr, @timeout, @max)
 
       # grab exit status
-      @status = (::Process.waitpid(pid); $?)
+      @status = waitpid(pid)
     rescue Object => boom
       [stdin, stdout, stderr].each { |fd| fd.close rescue nil }
       if @status.nil?
         ::Process.kill('TERM', pid) rescue nil
-        @status = (::Process.waitpid(pid); $?) rescue nil
+        @status = waitpid(pid)      rescue nil
       end
       raise
     end
@@ -186,7 +186,7 @@ module Grit
         @runtime = Time.now - start
         if timeout
           t = timeout - @runtime
-          t = 0.000001 if t < 0.0
+          raise TimeoutExceeded if t < 0.0
         end
 
         # maybe we've hit our max output
@@ -274,6 +274,14 @@ module Grit
     ensure
       # we're in the parent, close child-side fds
       [ird, owr, ewr].each { |fd| fd.close }
+    end
+
+    # Wait for the child process to exit
+    #
+    # Returns the Process::Status object obtained by reaping the process.
+    def waitpid(pid)
+      ::Process::waitpid(pid)
+      $?
     end
 
     # Use native Process::spawn implementation on Ruby 1.9.

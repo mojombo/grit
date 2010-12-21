@@ -48,18 +48,21 @@ class TestProcess < Test::Unit::TestCase
   end
 
   def test_max
+    fail if jruby?
     assert_raise Grit::Process::MaximumOutputExceeded do
       Grit::Process.new(['yes'], {}, :max => 100_000)
     end
   end
 
   def test_max_with_child_hierarchy
+    fail if jruby?
     assert_raise Grit::Process::MaximumOutputExceeded do
       Grit::Process.new(['/bin/sh', '-c', 'yes'], {}, :max => 100_000)
     end
   end
 
   def test_max_with_stubborn_child
+    fail if jruby?
     assert_raise Grit::Process::MaximumOutputExceeded do
       Grit::Process.new("trap '' TERM; yes", {}, :max => 100_000)
     end
@@ -72,6 +75,7 @@ class TestProcess < Test::Unit::TestCase
   end
 
   def test_timeout_with_child_hierarchy
+    fail if jruby?
     assert_raise Grit::Process::TimeoutExceeded do
       Grit::Process.new(['/bin/sh', '-c', 'yes'], {}, :timeout => 0.05)
     end

@@ -138,6 +138,7 @@ class TestRepo < Test::Unit::TestCase
   #
   # The pipe buffer is 32K on Mac, 64K on Linux 2.6.
   def test_large_commit_batch
+    fail if jruby?
     n = 1000 # 41K of input
     commits = @r.batch(['4c8124ffcf4039d292442eeccabdeca5af5c5017'] * n)
     assert_equal n, commits.size

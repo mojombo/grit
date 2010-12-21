@@ -16,3 +16,7 @@ end
 def absolute_project_path
   File.expand_path(File.join(File.dirname(__FILE__), '..'))
 end
+
+def jruby?
+  defined?(RUBY_ENGINE) && RUBY_ENGINE =~ /jruby/
+end
