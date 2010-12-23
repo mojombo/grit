@@ -2,13 +2,27 @@
   * Major Enhancements
     * Add support for parsing git notes.
     * Add `git cat-file --batch` support with Grit::Repo#batch.
+    * Grit::Process is a custom written external command invocation heavily
+      optimized for running git commands quickly and efficiently.
+    * Grit::Git#native takes an :input option for piping data into git commands
+    * Grit::Git#native takes an :env option for setting the git child process's
+      environment without futsing with the parent's environment.
+    * Grit::Git#native takes an :chdir option for setting the current working
+      directory (PWD) of the git child process.
+    * Grit::Git#native takes an :raise => true option that causes an exception
+      to be raised when the git child process exits non-zero.
   * Minor Enhancements
     * Grit::Index#commit supports custom committer/author names and dates.
     * Performance enhancements with internal command output buffering.
+    * Reduce fork/execs needed to execute a smoke command from between 3-4 to 1.
+    * Git child processes are now properly parented under the grit Ruby
+      process instead of being dropped under init.
   * Bug Fixes
     * Zero-Padding issue in Grit::Index was fixed.
     * Fix issue where Repo#diff skips the first diff (#42)
     * Fix Repo.init_bare for repo names not ending in .git (#40)
+    * Fix a variety of process hangs when git stderr output or data written
+      to stdin exceeded PIPE_BUF bytes.
 
 == 2.3.0 / 2010-09-29
   * Minor Enhancements
