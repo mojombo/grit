@@ -124,12 +124,24 @@ class TestRepo < Test::Unit::TestCase
   end
 
   def test_commit_batch
-    commits = @r.batch('4c8124ffcf4039d292442eeccabdeca5af5c5017', 
+    commits = @r.batch('4c8124ffcf4039d292442eeccabdeca5af5c5017',
       '634396b2f541a9f2d58b00be1a07f0c358b999b3')
     assert_equal "4c8124ffcf4039d292442eeccabdeca5af5c5017", commits[0].id
     assert_equal "634396b2f541a9f2d58b00be1a07f0c358b999b3", commits[1].id
     assert_equal "tom@mojombo.com", commits[0].author.email
     assert_equal "tom@mojombo.com", commits[1].author.email
+  end
+
+  # generate enough input to overflow the max pipe input buffer. this will cause
+  # the git child process hang if stdin is not written at the same time as stdout
+  # is being read.
+  #
+  # The pipe buffer is 32K on Mac, 64K on Linux 2.6.
+  def test_large_commit_batch
+    fail if jruby?
+    n = 1000 # 41K of input
+    commits = @r.batch(['4c8124ffcf4039d292442eeccabdeca5af5c5017'] * n)
+    assert_equal n, commits.size
   end
 
   # commit_count

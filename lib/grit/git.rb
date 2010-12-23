@@ -3,11 +3,31 @@ module Grit
 
   class Git
     class GitTimeout < RuntimeError
-      attr_reader :command, :bytes_read
+      attr_accessor :command
+      attr_accessor :bytes_read
 
       def initialize(command = nil, bytes_read = nil)
         @command = command
         @bytes_read = bytes_read
+      end
+    end
+
+    # Raised when a native git command exits with non-zero.
+    class CommandFailed < StandardError
+      # The full git command that failed as a String.
+      attr_reader :command
+
+      # The integer exit status.
+      attr_reader :exitstatus
+
+      # Everything output on the command's stderr as a String.
+      attr_reader :err
+
+      def initialize(command, exitstatus, err='')
+        @command = command
+        @exitstatus = exitstatus
+        @err = err
+        super "Command exited with #{exitstatus}: #{command}"
       end
     end
 
@@ -34,14 +54,16 @@ module Grit
     end
 
     class << self
-      attr_accessor :git_binary, :git_timeout, :git_max_size
+      attr_accessor :git_timeout, :git_max_size
+      def git_binary
+        @git_binary ||=
+          ENV['PATH'].split(':').
+            map  { |p| File.join(p, 'git') }.
+            find { |p| File.exist?(p) }
+      end
+      attr_writer :git_binary
     end
 
-    if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/
-      self.git_binary   = "git" # using search path
-    else
-      self.git_binary   = "/usr/bin/env git"
-    end
     self.git_timeout  = 10
     self.git_max_size = 5242880 # 5.megabytes
 
@@ -206,27 +228,145 @@ module Grit
     # RAW CALLS WITH ENV SETTINGS END
 
 
-
-    # Run the given git command with the specified arguments and return
-    # the result as a String
-    #   +cmd+ is the command
-    #   +options+ is a hash of Ruby style options
-    #   +args+ is the list of arguments (to be joined by spaces)
+    # Execute a git command, bypassing any library implementation.
+    #
+    # cmd - The name of the git command as a Symbol. Underscores are
+    #   converted to dashes as in :rev_parse => 'rev-parse'.
+    # options - Command line option arguments passed to the git command.
+    #   Single char keys are converted to short options (:a => -a).
+    #   Multi-char keys are converted to long options (:arg => '--arg').
+    #   Underscores in keys are converted to dashes. These special options
+    #   are used to control command execution and are not passed in command
+    #   invocation:
+    #     :timeout - Maximum amount of time the command can run for before
+    #       being aborted. When true, use Grit::Git.git_timeout; when numeric,
+    #       use that number of seconds; when false or 0, disable timeout.
+    #     :base - Set false to avoid passing the --git-dir argument when
+    #       invoking the git command.
+    #     :env - Hash of environment variable key/values that are set on the
+    #       child process.
+    #     :raise - When set true, commands that exit with a non-zero status
+    #       raise a CommandFailed exception. This option is available only on
+    #       platforms that support fork(2).
+    # args - Non-option arguments passed on the command line.
+    #
+    # Optionally yields to the block an IO object attached to the child
+    # process's STDIN.
     #
     # Examples
-    #   git.rev_list({:max_count => 10, :header => true}, "master")
+    #   git.native(:rev_list, {:max_count => 10, :header => true}, "master")
     #
-    # Returns String
-    def method_missing(cmd, options = {}, *args, &block)
-      run('', cmd, '', options, args, &block)
+    # Returns a String with all output written to the child process's stdout.
+    # Raises Grit::Git::GitTimeout when the timeout is exceeded or when more
+    #   than Grit::Git.git_max_size bytes are output.
+    # Raises Grit::Git::CommandFailed when the :raise option is set true and the
+    #   git command exits with a non-zero exit status. The CommandFailed's #command,
+    #   #exitstatus, and #err attributes can be used to retrieve additional
+    #   detail about the error.
+    def native(cmd, options = {}, *args, &block)
+      args     = args.first if args.size == 1 && args[0].is_a?(Array)
+      args.map!    { |a| a.to_s.strip }
+      args.reject! { |a| a.empty? }
+
+      # special option arguments
+      env = options.delete(:env) || {}
+      raise_errors = options.delete(:raise)
+
+      # fall back to using a shell when the last argument looks like it wants to
+      # start a pipeline for compatibility with previous versions of grit.
+      return run(prefix, cmd, '', options, args) if args[-1].to_s[0] == ?|
+
+      # more options
+      input    = options.delete(:input)
+      timeout  = options.delete(:timeout); timeout = true if timeout.nil?
+      base     = options.delete(:base);    base    = true if base.nil?
+      chdir    = options.delete(:chdir)
+
+      # build up the git process argv
+      argv = []
+      argv << Git.git_binary
+      argv << "--git-dir=#{git_dir}" if base
+      argv << cmd.to_s.tr('_', '-')
+      argv.concat(options_to_argv(options))
+      argv.concat(args)
+
+      # run it and deal with fallout
+      Grit.log(argv.join(' ')) if Grit.debug
+
+      process =
+        Grit::Process.new(argv, env,
+          :input   => input,
+          :chdir   => chdir,
+          :timeout => (Grit::Git.git_timeout if timeout == true),
+          :max     => (Grit::Git.git_max_size if timeout == true)
+        )
+      status = process.status
+      Grit.log(process.out) if Grit.debug
+      Grit.log(process.err) if Grit.debug
+      if raise_errors && !status.success?
+        raise CommandFailed.new(argv.join(' '), status.exitstatus, process.err)
+      else
+        process.out
+      end
+    rescue Grit::Process::TimeoutExceeded, Grit::Process::MaximumOutputExceeded
+      raise GitTimeout, argv.join(' ')
     end
 
-    # Bypass any pure Ruby implementations and go straight to the native Git command
+    # Methods not defined by a library implementation execute the git command
+    # using #native, passing the method name as the git command name.
     #
-    # Returns String
-    def native(cmd, options = {}, *args, &block)
-      method_missing(cmd, options, *args, &block)
+    # Examples:
+    #   git.rev_list({:max_count => 10, :header => true}, "master")
+    def method_missing(cmd, options={}, *args, &block)
+      native(cmd, options, *args, &block)
     end
+
+    # Transform a ruby-style options hash to command-line arguments sutiable for
+    # use with Kernel::exec. No shell escaping is performed.
+    #
+    # Returns an Array of String option arguments.
+    def options_to_argv(options)
+      argv = []
+      options.each do |key, val|
+        if key.to_s.size == 1
+          if val == true
+            argv << "-#{key}"
+          elsif val == false
+            # ignore
+          else
+            argv << "-#{key}"
+            argv << val.to_s
+          end
+        else
+          if val == true
+            argv << "--#{key.to_s.tr('_', '-')}"
+          elsif val == false
+            # ignore
+          else
+            argv << "--#{key.to_s.tr('_', '-')}=#{val}"
+          end
+        end
+      end
+      argv
+    end
+
+    # Simple wrapper around Timeout::timeout.
+    #
+    # seconds - Float number of seconds before a Timeout::Error is raised. When
+    #   true, the Grit::Git.git_timeout value is used. When the timeout is less
+    #   than or equal to 0, no timeout is established.
+    #
+    # Raises Timeout::Error when the timeout has elapsed.
+    def timeout_after(seconds)
+      seconds = self.class.git_timeout if seconds == true
+      if seconds && seconds > 0
+        Timeout.timeout(seconds) { yield }
+      else
+        yield
+      end
+    end
+
+    # DEPRECATED OPEN3-BASED COMMAND EXECUTION
 
     def run(prefix, cmd, postfix, options, args, &block)
       timeout  = options.delete(:timeout) rescue nil
@@ -234,6 +374,10 @@ module Grit
 
       base     = options.delete(:base) rescue nil
       base     = true if base.nil?
+
+      if input = options.delete(:input)
+        block = lambda { |stdin| stdin.write(input) }
+      end
 
       opt_args = transform_options(options)
 
@@ -246,6 +390,7 @@ module Grit
         gitdir = base ? "--git-dir='#{self.git_dir}'" : ""
         call = "#{prefix}#{Git.git_binary} #{gitdir} #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
       end
+
       Grit.log(call) if Grit.debug
       response, err = timeout ? sh(call, &block) : wild_sh(call, &block)
       Grit.log(response) if Grit.debug
@@ -254,39 +399,20 @@ module Grit
     end
 
     def sh(command, &block)
-      ret, err = '', ''
-      max = self.class.git_max_size
-      Open3.popen3(command) do |stdin, stdout, stderr|
-        block.call(stdin) if block
-        Timeout.timeout(self.class.git_timeout) do
-          while tmp = stdout.read(8192)
-            ret << tmp
-            raise GitTimeout.new(command, ret.size) if ret.size > max
-          end
-        end
-
-        while tmp = stderr.read(8192)
-          err << tmp
-        end
-      end
-      [ret, err]
-    rescue Timeout::Error, Grit::Git::GitTimeout
-      raise GitTimeout.new(command, ret.size)
+      process =
+        Grit::Process.new(
+          command, {},
+          :timeout => Git.git_timeout,
+          :max     => Git.git_max_size
+        )
+      [process.out, process.err]
+    rescue Grit::Process::TimeoutExceeded, Grit::Process::MaximumOutputExceeded
+      raise GitTimeout, command
     end
 
     def wild_sh(command, &block)
-      ret, err = '', ''
-      Open3.popen3(command) do |stdin, stdout, stderr|
-        block.call(stdin) if block
-        while tmp = stdout.read(8192)
-          ret << tmp
-        end
-
-        while tmp = stderr.read(8192)
-          err << tmp
-        end
-      end
-      [ret, err]
+      process = Grit::Process.new(command)
+      [process.out, process.err]
     end
 
     # Transform Ruby style options into git command line options

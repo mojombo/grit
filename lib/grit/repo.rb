@@ -167,11 +167,7 @@ module Grit
     # Returns an Array of Grit objects (Grit::Commit).
     def batch(*shas)
       shas.flatten!
-      text = git.native(:cat_file, {:batch => true}) do |stdin|
-        stdin.write(shas * "\n")
-        stdin.close
-      end
-
+      text = git.native(:cat_file, {:batch => true, :input => (shas * "\n")})
       parse_batch(text)
     end
 
@@ -457,7 +453,8 @@ module Grit
       else
         # NO PARENTS:
         cmd = "-r -t #{commit_sha}"
-        revs = self.git.method_missing('ls-tree', {:timeout => false}, "-r -t #{commit_sha}").split("\n").map{ |a| a.split("\t").first.split(' ')[2] }
+        revs = self.git.native(:ls_tree, {:timeout => false, :r => true, :t => true}, commit_sha).
+          split("\n").map{ |a| a.split("\t").first.split(' ')[2] }
       end
       revs << self.commit(commit_sha).tree.id
       Grit.no_quote = false
