@@ -36,7 +36,7 @@ module Grit
         end
 
         def get_raw_object(buf)
-          if buf.length < 2
+          if buf.bytesize < 2
             raise LooseObjectError, "object file too small"
           end
 
@@ -56,14 +56,14 @@ module Grit
             type, size, used = unpack_object_header_gently(buf)
             content = Zlib::Inflate.inflate(buf[used..-1])
           end
-          raise LooseObjectError, "size mismatch" if content.length != size
+          raise LooseObjectError, "size mismatch" if content.bytesize != size
           return RawObject.new(type, content)
         end
 
         # currently, I'm using the legacy format because it's easier to do
         # this function takes content and a type and writes out the loose object and returns a sha
         def put_raw_object(content, type)
-          size = content.length.to_s
+          size = content.bytesize.to_s
           LooseStorage.verify_header(type, size)
 
           header = "#{type} #{size}\0"
@@ -85,7 +85,7 @@ module Grit
 
         # simply figure out the sha
         def self.calculate_sha(content, type)
-          size = content.length.to_s
+          size = content.bytesize.to_s
           verify_header(type, size)
           header = "#{type} #{size}\0"
           store = header + content
@@ -109,7 +109,7 @@ module Grit
           size = c & 15;
           shift = 4;
           while c & 0x80 != 0
-            if buf.length <= used
+            if buf.bytesize <= used
               raise LooseObjectError, "object file too short"
             end
             c = buf.getord(used)
