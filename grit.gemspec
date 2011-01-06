@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.rubygems_version = '1.3.5'
 
   s.name              = 'grit'
-  s.version           = '2.3.0'
+  s.version           = '2.3.2'
   s.date              = '2010-09-29'
   s.rubyforge_project = 'grit'
 
