@@ -61,7 +61,6 @@ Gem::Specification.new do |s|
     lib/grit/index.rb
     lib/grit/lazy.rb
     lib/grit/merge.rb
-    lib/grit/open3_detach.rb
     lib/grit/ref.rb
     lib/grit/repo.rb
     lib/grit/ruby1.9.rb
