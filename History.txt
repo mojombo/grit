@@ -1,4 +1,4 @@
-== git
+== 2.4.1 / 2011-01-13
   * Minor Enhancements
     * Grit::Process is used to implement Grit::Git#check_applies,
       Grit::Git#get_patch, and Grit::Git#apply_patch.
