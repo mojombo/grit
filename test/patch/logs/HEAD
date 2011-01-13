@@ -1,0 +1,8 @@
+0000000000000000000000000000000000000000 5da862ffd84e42b687b65605788f4158f4610400 rick <technoweenie@gmail.com> 1294902968 -0800	commit (initial): initial
+5da862ffd84e42b687b65605788f4158f4610400 5da862ffd84e42b687b65605788f4158f4610400 rick <technoweenie@gmail.com> 1294902973 -0800	checkout: moving from master to bad
+5da862ffd84e42b687b65605788f4158f4610400 f252f9a68245f465d27b31fcdbf63ab55de58b06 rick <technoweenie@gmail.com> 1294902998 -0800	commit: bad patch
+f252f9a68245f465d27b31fcdbf63ab55de58b06 5da862ffd84e42b687b65605788f4158f4610400 rick <technoweenie@gmail.com> 1294902999 -0800	checkout: moving from bad to master
+5da862ffd84e42b687b65605788f4158f4610400 cf75ecfce82fb2a8723f86b140980994f0065ecd rick <technoweenie@gmail.com> 1294903011 -0800	commit: update
+cf75ecfce82fb2a8723f86b140980994f0065ecd cf75ecfce82fb2a8723f86b140980994f0065ecd rick <technoweenie@gmail.com> 1294903013 -0800	checkout: moving from master to good
+cf75ecfce82fb2a8723f86b140980994f0065ecd f3c031e78b368d1b9b03c3eb1b90d8a122277e67 rick <technoweenie@gmail.com> 1294903038 -0800	commit: good patch
+f3c031e78b368d1b9b03c3eb1b90d8a122277e67 cf75ecfce82fb2a8723f86b140980994f0065ecd rick <technoweenie@gmail.com> 1294903041 -0800	checkout: moving from good to master
