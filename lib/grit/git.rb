@@ -186,8 +186,8 @@ module Grit
         native(:read_tree, options.dup, head_sha)
         stdin = native(:diff, options.dup, "#{applies_sha}^", applies_sha)
         native(:apply, options.merge(:check => true, :cached => true, :input => stdin))
-      rescue CommandFailed
-        status += 1
+      rescue CommandFailed => fail
+        status += fail.exitstatus
       end
       status
     end
