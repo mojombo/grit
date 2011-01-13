@@ -1,3 +1,7 @@
+== git
+  * Bug Fixes
+    * Fix Loose Objects with non-ASCII content in Ruby 1.9
+
 == 2.4.1 / 2011-01-13
   * Minor Enhancements
     * Grit::Process is used to implement Grit::Git#check_applies,
