@@ -178,6 +178,14 @@ module Grit
       end
     end
 
+    # Checks if the patch of a commit can be applied to the given head.
+    #
+    # head_sha    - String SHA or ref to check the patch against.
+    # applies_sha - String SHA of the patch.  The patch itself is retrieved
+    #               with #get_patch.
+    #
+    # Returns 0 if the patch applies cleanly (according to `git apply`), or
+    # an Integer that is the sum of the failed exit statuses.
     def check_applies(head_sha, applies_sha)
       git_index = create_tempfile('index', true)
       options   = {:env => {'GIT_INDEX_FILE' => git_index}, :raise => true}
@@ -192,6 +200,12 @@ module Grit
       status
     end
 
+    # Gets a patch for a given SHA using `git diff`.
+    #
+    # applies_sha - String SHA to get the patch from, using this command:
+    #               `git diff #{applies_sha}^ #{applies_sha}`
+    #
+    # Returns the String patch from `git diff`.
     def get_patch(applies_sha)
       git_index = create_tempfile('index', true)
       native(:diff, {
@@ -199,6 +213,12 @@ module Grit
         "#{applies_sha}^", applies_sha)
     end
 
+    # Applies the given patch against the given SHA of the current repo.
+    #
+    # head_sha - String SHA or ref to apply the patch to.
+    # patch    - The String patch to apply.  Get this from #get_patch.
+    #
+    # Returns the String Tree SHA on a successful patch application, or false.
     def apply_patch(head_sha, patch)
       git_index = create_tempfile('index', true)
 
