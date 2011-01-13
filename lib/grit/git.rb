@@ -180,53 +180,37 @@ module Grit
 
     def check_applies(head_sha, applies_sha)
       git_index = create_tempfile('index', true)
-      (o1, exit1) = raw_git("git read-tree #{head_sha} 2>/dev/null", git_index)
-      (o2, exit2) = raw_git("git diff #{applies_sha}^ #{applies_sha} | git apply --check --cached >/dev/null 2>/dev/null", git_index)
-      return (exit1 + exit2)
+      options   = {:env => {'GIT_INDEX_FILE' => git_index}, :raise => true}
+      status    = 0
+      begin
+        native(:read_tree, options.dup, head_sha)
+        stdin = native(:diff, options.dup, "#{applies_sha}^", applies_sha)
+        native(:apply, options.merge(:check => true, :cached => true, :input => stdin))
+      rescue CommandFailed
+        status += 1
+      end
+      status
     end
 
     def get_patch(applies_sha)
       git_index = create_tempfile('index', true)
-      (patch, exit2) = raw_git("git diff #{applies_sha}^ #{applies_sha}", git_index)
-      patch
+      native(:diff, {
+        :env => {'GIT_INDEX_FILE' => git_index}},
+        "#{applies_sha}^", applies_sha)
     end
 
     def apply_patch(head_sha, patch)
       git_index = create_tempfile('index', true)
 
-      git_patch = create_tempfile('patch')
-      File.open(git_patch, 'w+') { |f| f.print patch }
-
-      raw_git("git read-tree #{head_sha} 2>/dev/null", git_index)
-      (op, exit) = raw_git("git apply --cached < #{git_patch}", git_index)
-      if exit == 0
-        return raw_git("git write-tree", git_index).first.chomp
+      options = {:env => {'GIT_INDEX_FILE' => git_index}, :raise => true}
+      begin
+        native(:read_tree, options.dup, head_sha)
+        native(:apply, options.merge(:cached => true, :input => patch))
+      rescue CommandFailed
+        return false
       end
-      false
+      native(:write_tree, :env => options[:env]).to_s.chomp!
     end
-
-    # RAW CALLS WITH ENV SETTINGS
-    def raw_git_call(command, index)
-      tmp = ENV['GIT_INDEX_FILE']
-      ENV['GIT_INDEX_FILE'] = index
-      out = `#{command}`
-      after = ENV['GIT_INDEX_FILE'] # someone fucking with us ??
-      ENV['GIT_INDEX_FILE'] = tmp
-      if after != index
-        raise 'environment was changed for the git call'
-      end
-      [out, $?.exitstatus]
-    end
-
-    def raw_git(command, index)
-      output = nil
-      Dir.chdir(self.git_dir) do
-        output = raw_git_call(command, index)
-      end
-      output
-    end
-    # RAW CALLS WITH ENV SETTINGS END
-
 
     # Execute a git command, bypassing any library implementation.
     #
