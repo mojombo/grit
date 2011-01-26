@@ -625,7 +625,7 @@ module Grit
     end
 
     def index
-      Index.new(self)
+      @index ||= Index.new(self)
     end
 
     def update_ref(head, commit_sha)
