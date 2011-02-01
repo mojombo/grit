@@ -121,4 +121,19 @@ class TestRubyGitIndex < Test::Unit::TestCase
     b = @git.commits.first.tree/'README.txt'
     assert_equal 'e45d6b418e34951ddaa3e78e4fc4d3d92a46d3d1', b.id
   end
+
+  def test_delete_files
+    sha = @git.commits.first.tree.id
+
+    i = @git.index
+    i.read_tree(sha)
+    i.delete('README.txt')
+    i.delete('lib')
+    i.delete('test/fixtures')
+    i.commit('message', [@git.commits.first], @user, nil, 'master')
+
+    assert_nil @git.commits.first.tree/'README.txt'
+    assert_nil @git.commits.first.tree/'lib'
+    assert_nil @git.commits.first.tree/'test/fixtures'
+  end
 end
