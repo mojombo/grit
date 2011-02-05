@@ -23,11 +23,15 @@ module Grit
       # Everything output on the command's stderr as a String.
       attr_reader :err
 
-      def initialize(command, exitstatus, err='')
-        @command = command
-        @exitstatus = exitstatus
-        @err = err
-        super "Command exited with #{exitstatus}: #{command}"
+      def initialize(command, exitstatus=nil, err='')
+        if exitstatus
+          @command = command
+          @exitstatus = exitstatus
+          @err = err
+          super "Command exited with #{exitstatus}: #{command}"
+        else
+          super command
+        end
       end
     end
 
