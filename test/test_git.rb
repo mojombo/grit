@@ -114,6 +114,19 @@ class TestGit < Test::Unit::TestCase
     @git.native(:help, {:a => true, :env => { 'A' => 'B' }})
   end
 
+  def test_native_process_info_option_on_failure
+    exitstatus, out, err = @git.no_such_command({:process_info => true})
+    assert_equal 1, exitstatus
+    assert !err.empty?
+  end
+
+  def test_native_process_info_option_on_success
+    exitstatus, out, err = @git.help({:process_info => true})
+    assert_equal 0, exitstatus
+    assert !out.empty?
+    assert err.empty?
+  end
+
   def test_raising_exceptions_when_native_git_commands_fail
     assert_raise Grit::Git::CommandFailed do
       @git.native(:bad, {:raise => true})

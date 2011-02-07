@@ -256,6 +256,9 @@ module Grit
     #     :raise - When set true, commands that exit with a non-zero status
     #       raise a CommandFailed exception. This option is available only on
     #       platforms that support fork(2).
+    #     :process_info - By default, a single string with output written to
+    #       the process's stdout is returned. Setting this option to true
+    #       results in a [exitstatus, out, err] tuple being returned instead.
     # args - Non-option arguments passed on the command line.
     #
     # Optionally yields to the block an IO object attached to the child
@@ -264,7 +267,12 @@ module Grit
     # Examples
     #   git.native(:rev_list, {:max_count => 10, :header => true}, "master")
     #
-    # Returns a String with all output written to the child process's stdout.
+    # Returns a String with all output written to the child process's stdout
+    #   when the :process_info option is not set.
+    # Returns a [exitstatus, out, err] tuple when the :process_info option is
+    #   set. The exitstatus is an small integer that was the process's exit
+    #   status. The out and err elements are the data written to stdout and
+    #   stderr as Strings.
     # Raises Grit::Git::GitTimeout when the timeout is exceeded or when more
     #   than Grit::Git.git_max_size bytes are output.
     # Raises Grit::Git::CommandFailed when the :raise option is set true and the
@@ -279,6 +287,7 @@ module Grit
       # special option arguments
       env = options.delete(:env) || {}
       raise_errors = options.delete(:raise)
+      process_info = options.delete(:process_info)
 
       # fall back to using a shell when the last argument looks like it wants to
       # start a pipeline for compatibility with previous versions of grit.
@@ -308,11 +317,14 @@ module Grit
           :timeout => (Grit::Git.git_timeout if timeout == true),
           :max     => (Grit::Git.git_max_size if timeout == true)
         )
-      status = process.status
       Grit.log(process.out) if Grit.debug
       Grit.log(process.err) if Grit.debug
+
+      status = process.status
       if raise_errors && !status.success?
         raise CommandFailed.new(argv.join(' '), status.exitstatus, process.err)
+      elsif process_info
+        [status.exitstatus, process.out, process.err]
       else
         process.out
       end
