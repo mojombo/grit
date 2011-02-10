@@ -97,7 +97,8 @@ module Grit
     #
     # Returns a String of the SHA1 of the new commit.
     def commit(message, parents = nil, actor = nil, last_tree = nil, head = 'master')
-      return false unless self.repo.hook('pre-commit')
+      hook = self.repo.hook('pre-commit')
+      return false unless hook && hook.success?
 
       if parents.is_a?(Hash)
         actor          = parents[:actor]

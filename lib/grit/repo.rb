@@ -204,14 +204,12 @@ module Grit
     #
     # name - The name of the hook as a String
     #
-    # Returns false if the hook was fired and the hook did not return 0. Return true in all other circumstances
+    # Returns Grit::Process or nil
     def hook(name, timeout = 10)
       file = File.join(self.git.git_dir, 'hooks', name)
 
       if File.executable?(file)
-        Grit::Process.new(file, {}, { :timeout => timeout }).success?
-      else
-        true
+        Grit::Process.new(file, {}, { :timeout => timeout })
       end
     end
 
