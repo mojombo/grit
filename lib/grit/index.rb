@@ -138,6 +138,7 @@ module Grit
       commit_sha1 = self.repo.git.put_raw_object(contents.join("\n"), 'commit')
 
       self.repo.update_ref(head, commit_sha1)
+      self.repo.hook('post-commit')
     end
 
     # Recursively write a tree to the index.
