@@ -200,6 +200,17 @@ module Grit
       self.git.fs_read('description').chomp
     end
 
+    # Execute a hook
+    #
+    # name - The name of the hook as a String
+    def hook(name, timeout = 10)
+      file = File.join(self.git.git_dir, 'hooks', name)
+
+      if File.executable?(file)
+        Grit::Process.new(file, {}, { :timeout => timeout })
+      end
+    end
+
     def blame(file, commit = nil)
       Blame.new(self, file, commit)
     end
