@@ -421,17 +421,14 @@ module Grit
     end
 
     def objects(refs)
-      Grit.no_quote = true
-      obj = self.git.rev_list({:objects => true, :timeout => false}, refs).split("\n").map { |a| a[0, 40] }
-      Grit.no_quote = false
-      obj
+      refs = refs.split(/\s+/) if refs.respond_to?(:to_str)
+      self.git.rev_list({:objects => true, :timeout => false}, *refs).
+        split("\n").map { |a| a[0, 40] }
     end
 
     def commit_objects(refs)
-      Grit.no_quote = true
-      obj = self.git.rev_list({:timeout => false}, refs).split("\n").map { |a| a[0, 40] }
-      Grit.no_quote = false
-      obj
+      refs = refs.split(/\s+/) if refs.respond_to?(:to_str)
+      self.git.rev_list({:timeout => false}, *refs).split("\n").map { |a| a[0, 40] }
     end
 
     def objects_between(ref1, ref2 = nil)
