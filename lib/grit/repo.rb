@@ -445,11 +445,10 @@ module Grit
       Grit.no_quote = true
       if parents
         # PARENTS:
-        cmd = "-r -t -m #{commit_sha}"
-        revs = self.git.diff_tree({:timeout => false}, cmd).strip.split("\n").map{ |a| r = a.split(' '); r[3] if r[1] != '160000' }
+        revs = self.git.diff_tree({:timeout => false, :r => true, :t => true, :m => true}, commit_sha).
+          strip.split("\n").map{ |a| r = a.split(' '); r[3] if r[1] != '160000' }
       else
         # NO PARENTS:
-        cmd = "-r -t #{commit_sha}"
         revs = self.git.native(:ls_tree, {:timeout => false, :r => true, :t => true}, commit_sha).
           split("\n").map{ |a| a.split("\t").first.split(' ')[2] }
       end
