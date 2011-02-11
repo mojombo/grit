@@ -1,6 +1,8 @@
 == git
   * Bug Fixes
     * Fix Loose Objects with non-ASCII content in Ruby 1.9
+    * Fix bugs in Grit::Repo #objects, #commit_objects, and #diff_objects
+      due to passing multiple arguments in a single argv element.
 
 == 2.4.1 / 2011-01-13
   * Minor Enhancements
