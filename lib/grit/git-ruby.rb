@@ -48,24 +48,27 @@ module Grit
       try_run { ruby_git.diff(sha1, sha2, options) }
     end
 
-    def rev_list(options, ref = 'master')
+    def rev_list(options, *refs)
+      refs = ['master'] if refs.empty?
       options.delete(:skip) if options[:skip].to_i == 0
       allowed_options = [:max_count, :since, :until, :pretty]  # this is all I can do right now
-      if ((options.keys - allowed_options).size > 0)
-        return method_missing('rev-list', options, ref)
+      if ((options.keys - allowed_options).size > 0) || refs.size > 1
+        method_missing('rev-list', options, *refs)
       elsif (options.size == 0)
         # pure rev-list
+        ref = refs.first
         begin
-          return file_index.commits_from(rev_parse({}, ref)).join("\n") + "\n"
+          file_index.commits_from(rev_parse({}, ref)).join("\n") + "\n"
         rescue
-          return method_missing('rev-list', options, ref)
+          method_missing('rev-list', options, *refs)
         end
       else
+        ref = refs.first
         aref = rev_parse({}, ref)
         if aref.is_a? Array
-          return method_missing('rev-list', options, ref)
+          method_missing('rev-list', options, *refs)
         else
-          return try_run { ruby_git.rev_list(aref, options) }
+          try_run { ruby_git.rev_list(aref, options) }
         end
       end
     end
