@@ -28,7 +28,9 @@ module Grit
           @command = command
           @exitstatus = exitstatus
           @err = err
-          super "Command exited with #{exitstatus}: #{command}"
+          message = "Command failed [#{exitstatus}]: #{command}"
+          message << "\n\n" << err unless err.nil? || err.empty?
+          super message
         else
           super command
         end
