@@ -131,10 +131,8 @@ class TestRubyGitIndex < Test::Unit::TestCase
     i.delete('lib')
     i.commit('message', [@git.commits.first], @user, nil, 'master')
 
-    b = @git.commits.first.tree/'README.txt'
-    assert_equal nil, b
-    b = @git.commits.first.tree/'lib'
-    assert_equal nil, b
+    assert_nil @git.commits.first.tree/'README.txt'
+    assert_nil @git.commits.first.tree/'lib'
     assert_raise NoMethodError do
       @git.commits.first.tree/'lib'/'grit.rb'
     end
