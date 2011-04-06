@@ -38,6 +38,15 @@ class TestGritSpaces < Test::Unit::TestCase
     assert_equal "36a4f6bc8c5e4e67534b98c996f4e91ffff73ea5", log.first.to_s
   end
 
-  
+  def test_tree_with_leading_space
+    tree = @repo.tree()
+    names = tree.blobs.collect { |b| b.name }
+    assert names.include?(" an evil file with a leading space"), "does not contain the leading space named file"
+  end
 
+  def test_tree_with_trailing_space
+    tree = @repo.tree()
+    names = tree.blobs.collect { |b| b.name }
+    assert names.include?("an evil file with a trailing space "), "does not contain the trailing space named file"
+  end
 end

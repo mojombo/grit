@@ -65,7 +65,7 @@ module Grit
     #
     # Returns Grit::Blob or Grit::Tree
     def content_from_string(repo, text)
-      mode, type, id, name = text.split(" ", 4)
+      mode, type, id, name = text.split(/ |\t/, 4)
       case type
         when "tree"
           Tree.create(repo, :id => id, :mode => mode, :name => name)
