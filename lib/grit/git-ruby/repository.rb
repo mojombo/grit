@@ -304,11 +304,7 @@ module Grit
         end
 
         log = log(sha, options)
-        log = log.sort { |a, b| a[2] <=> b[2] }.reverse
-
-        if end_sha
-          log = truncate_arr(log, end_sha)
-        end
+        log = truncate_arr(log, end_sha) if end_sha
 
         # shorten the list if it's longer than max_count (had to get everything in branches)
         if options[:max_count]
