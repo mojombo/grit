@@ -137,7 +137,8 @@ module Grit
 
       commit_sha1 = self.repo.git.put_raw_object(contents.join("\n"), 'commit')
 
-      self.repo.update_ref(head, commit_sha1)
+      self.repo.update_ref(head, commit_sha1) if head
+      commit_sha1
     end
 
     # Recursively write a tree to the index.
