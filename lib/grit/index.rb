@@ -71,16 +71,16 @@ module Grit
     #           :parents        - Array of String commit SHA1s or Grit::Commit
     #                             objects to attach this commit to to form a 
     #                             new head (default: nil).
-    #           :actor          - The Grit::Actor details of the user making 
+    #           :actor          - The Grit::Actor details of the user making
     #                             the commit (default: nil).
     #           :last_tree      - The String SHA1 of a tree to compare with
-    #                             in order to avoid making empty commits 
+    #                             in order to avoid making empty commits
     #                             (default: nil).
     #           :head           - The String branch name to write this head to
-    #                             (default: "master").
-    #           :committed_date - The Time that the commit was made.  
+    #                             (default: nil).
+    #           :committed_date - The Time that the commit was made.
     #                             (Default: Time.now)
-    #           :authored_date  - The Time that the commit was authored.  
+    #           :authored_date  - The Time that the commit was authored.
     #                             (Default: committed_date)
     #
     # The legacy argument style looks like:
