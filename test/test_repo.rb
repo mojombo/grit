@@ -132,6 +132,20 @@ class TestRepo < Test::Unit::TestCase
     assert_equal "tom@mojombo.com", commits[1].author.email
   end
 
+  def test_commit_batch_with_non_commit_objects
+    commits = @r.batch(
+      '4c8124ffcf4039d292442eeccabdeca5af5c5017',
+      '608b0482499341bd2fe32002192936f7241a8569', # this is a blob SHA1
+      '634396b2f541a9f2d58b00be1a07f0c358b999b3'
+    )
+    assert_equal 3, commits.size
+    assert_nil commits[1]
+    assert_equal "4c8124ffcf4039d292442eeccabdeca5af5c5017", commits[0].id
+    assert_equal "634396b2f541a9f2d58b00be1a07f0c358b999b3", commits[2].id
+    assert_equal "tom@mojombo.com", commits[0].author.email
+    assert_equal "tom@mojombo.com", commits[2].author.email
+  end
+
   # generate enough input to overflow the max pipe input buffer. this will cause
   # the git child process hang if stdin is not written at the same time as stdout
   # is being read.
