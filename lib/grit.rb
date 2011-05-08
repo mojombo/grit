@@ -28,7 +28,6 @@ end
 require 'grit/ruby1.9'
 
 # internal requires
-require 'grit/process'
 require 'grit/lazy'
 require 'grit/errors'
 require 'grit/git-ruby'
