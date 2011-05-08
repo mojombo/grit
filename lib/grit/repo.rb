@@ -183,6 +183,7 @@ module Grit
         sha, type, size = line.split(" ", 3)
         parser = BATCH_PARSERS[type]
         if type == 'missing' || !parser
+          io.seek(size.to_i + 1, IO::SEEK_CUR)
           objects << nil
           next
         end
