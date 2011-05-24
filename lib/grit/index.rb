@@ -162,7 +162,8 @@ module Grit
     #            this tree will be based (default: nil).
     #
     # Returns the String SHA1 String of the tree.
-    def write_tree(tree, now_tree = nil)
+    def write_tree(tree = nil, now_tree = nil)
+      tree = self.tree if !tree
       tree_contents = {}
 
       # fill in original tree
@@ -178,6 +179,15 @@ module Grit
       # overwrite with new tree contents
       tree.each do |k, v|
         case v
+          when Array
+            sha, mode = v
+            if sha.size == 40        # must be a sha
+              sha = [sha].pack("H*")
+              mode = mode.to_i.to_s  # leading 0s not allowed
+              k = k.split('/').last  # slashes not allowed
+              str = "%s %s\0%s" % [mode, k, sha]
+              tree_contents[k] = str
+            end
           when String
             sha = write_blob(v)
             sha = [sha].pack("H*")

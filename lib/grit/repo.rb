@@ -490,6 +490,35 @@ module Grit
       Tree.construct(self, treeish, paths)
     end
 
+    # quick way to get a simple array of hashes of the entries
+    # of a single tree or recursive tree listing from a given 
+    # sha or reference
+    #   +treeish+ is the reference (default 'master')
+    #   +options+ is a hash or options - currently only takes :recursive
+    #
+    # Examples
+    #   repo.lstree('master', :recursive => true)
+    #
+    # Returns array of hashes - one per tree entry
+    def lstree(treeish = 'master', options = {})
+      # check recursive option
+      opts = {:timeout => false, :l => true, :t => true}
+      if options[:recursive]
+        opts[:r] = true
+      end
+      # mode, type, sha, size, path
+      revs = self.git.native(:ls_tree, opts, treeish)
+      lines = revs.split("\n")
+      revs = lines.map do |a|
+        stuff, path = a.split("\t")
+        mode, type, sha, size = stuff.split(" ")
+        entry = {:mode => mode, :type => type, :sha => sha, :path => path}
+        entry[:size] = size.strip.to_i if size.strip != '-'
+        entry
+      end
+      revs
+    end
+
     # The Blob object for the given id
     #   +id+ is the SHA1 id of the blob
     #
