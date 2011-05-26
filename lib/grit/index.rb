@@ -12,6 +12,9 @@ module Grit
     # which the next commit will be based.
     attr_accessor :current_tree
 
+    # Public: if a tree is written, this stores the size of that tree
+    attr_reader :last_tree_size
+
     # Initialize a new Index object.
     #
     # repo - The Grit::Repo to which the index belongs.
@@ -154,6 +157,7 @@ module Grit
       tree_contents = {}
 
       # fill in original tree
+      now_tree = read_tree(now_tree) if(now_tree && now_tree.is_a?(String))
       now_tree.contents.each do |obj|
         sha = [obj.id].pack("H*")
         k = obj.name
@@ -182,6 +186,7 @@ module Grit
       end
 
       tr = tree_contents.sort.map { |k, v| v }.join('')
+      @last_tree_size = tr.size
       self.repo.git.put_raw_object(tr, 'tree')
     end
 
