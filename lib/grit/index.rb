@@ -12,8 +12,9 @@ module Grit
     # which the next commit will be based.
     attr_accessor :current_tree
 
-    # Public: if a tree is written, this stores the size of that tree
+    # Public: if a tree or commit is written, this stores the size of that object
     attr_reader :last_tree_size
+    attr_reader :last_commit_size
 
     # Initialize a new Index object.
     #
@@ -100,7 +101,9 @@ module Grit
     #
     # Returns a String of the SHA1 of the new commit.
     def commit(message, parents = nil, actor = nil, last_tree = nil, head = 'master')
+      commit_tree_sha = nil
       if parents.is_a?(Hash)
+        commit_tree_sha = parents[:commit_tree_sha]
         actor          = parents[:actor]
         committer      = parents[:committer]
         author         = parents[:author]
@@ -114,7 +117,11 @@ module Grit
       committer ||= actor
       author    ||= committer
 
-      tree_sha1 = write_tree(self.tree, self.current_tree)
+      if commit_tree_sha
+        tree_sha1 = commit_tree_sha
+      else
+        tree_sha1 = write_tree(self.tree, self.current_tree)
+      end
 
       # don't write identical commits
       return false if tree_sha1 == last_tree
@@ -138,7 +145,9 @@ module Grit
       contents << ''
       contents << message
 
-      commit_sha1 = self.repo.git.put_raw_object(contents.join("\n"), 'commit')
+      contents = contents.join("\n")
+      @last_commit_size = contents.size
+      commit_sha1 = self.repo.git.put_raw_object(contents, 'commit')
 
       self.repo.update_ref(head, commit_sha1) if head
       commit_sha1
