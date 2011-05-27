@@ -34,9 +34,9 @@ module Grit
       return unless data =~ /^object/
       parsed = {}
       lines  = data.split("\n")
-      lines.shift # type commit
-      lines.shift # tag name
-      lines.shift
+      parsed[:object] = lines.shift.sub(/^object /, '')
+      parsed[:type] = lines.shift.sub(/^type /, '')
+      parsed[:tag] = lines.shift.sub(/^tag /, '')
       author_line = lines.shift
       parsed[:tagger], parsed[:tag_date] = Commit.actor(author_line)
       if !parsed[:tagger] || !parsed[:tagger].name
