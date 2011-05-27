@@ -18,6 +18,32 @@ module Grit
       end
     end
 
+    # Writes a new tag object from a hash
+    #  +repo+ is a Grit repo
+    #  +hash+ is the hash of tag values
+    #
+    # Returns a hash with +sha+ and +size+ of the created object
+    def self.create_tag_object(repo, hash, default_actor = nil)
+      tagger = hash[:tagger]
+      if !tagger
+        tagger = default_actor ? default_actor : Actor.new("none", "none@none")
+        tagger_date = Time.now
+      else
+        tagger_date = tagger[:date] ? Time.parse(tagger[:date]) : Time.now
+        tagger = Actor.new(tagger[:name], tagger[:email])
+      end
+      data = []
+      data << "object #{hash[:object]}"
+      data << "type #{hash[:type]}"
+      data << "tag #{hash[:tag]}"
+      data << "tagger #{tagger.output(tagger_date)}"
+      data << ""
+      data << hash[:message]
+      data = data.join("\n")
+      sha = repo.git.put_raw_object(data, 'tag')
+      { :sha => sha, :size => data.size }
+    end
+
     # Parses the results from `cat-file -p`
     #
     # data - String tag object data.  Example:
@@ -49,6 +75,11 @@ module Grit
         parsed[:message] << lines.shift
       end
       parsed[:message] = parsed[:message] * "\n"
+      parsed[:pgp] = []
+      while lines.first
+        parsed[:pgp] << lines.shift
+      end
+      parsed[:pgp] = parsed[:pgp] * "\n"
       parsed
     end
 
