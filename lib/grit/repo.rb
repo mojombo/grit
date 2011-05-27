@@ -346,6 +346,17 @@ module Grit
       [ Head.find_all(self), Tag.find_all(self), Remote.find_all(self) ].flatten
     end
 
+    # returns an array of hashes representing all references
+    def refs_list
+      refs = self.git.for_each_ref
+      refarr = refs.split("\n").map do |line|
+        shatype, ref = line.split("\t")
+        sha, type = shatype.split(' ')
+        [ref, sha, type]
+      end
+      refarr
+    end
+
     def commit_stats(start = 'master', max_count = 10, skip = 0)
       options = {:max_count => max_count,
                  :skip => skip}
