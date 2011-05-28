@@ -357,6 +357,10 @@ module Grit
       refarr
     end
 
+    def delete_ref(ref)
+      self.git.native(:update_ref, {:d => true}, ref)
+    end
+
     def commit_stats(start = 'master', max_count = 10, skip = 0)
       options = {:max_count => max_count,
                  :skip => skip}
@@ -385,6 +389,11 @@ module Grit
     # Returns Grit::Commit[] (baked)
     def commits_between(from, to)
       Commit.find_all(self, "#{from}..#{to}").reverse
+    end
+
+    def fast_forwardable?(to, from)
+      mb = self.git.native(:merge_base, {}, [to, from]).strip
+      mb == from
     end
 
     # The Commits objects that are newer than the specified date.
@@ -634,12 +643,6 @@ module Grit
 
     def index
       Index.new(self)
-    end
-
-    def update_ref(head, commit_sha)
-      return nil if !commit_sha || (commit_sha.size != 40)
-      self.git.fs_write("refs/heads/#{head}", commit_sha)
-      commit_sha
     end
 
     # Rename the current repository directory.
