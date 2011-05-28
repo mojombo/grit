@@ -645,6 +645,12 @@ module Grit
       Index.new(self)
     end
 
+    def update_ref(head, commit_sha)
+      return nil if !commit_sha || (commit_sha.size != 40)
+      self.git.fs_write("refs/heads/#{head}", commit_sha)
+      commit_sha
+    end
+
     # Rename the current repository directory.
     #   +name+ is the new name
     #
