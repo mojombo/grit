@@ -73,7 +73,7 @@ module Grit
     self.git_timeout  = 10
     self.git_max_size = 5242880 # 5.megabytes
 
-    def self.with_timeout(timeout = 10.seconds)
+    def self.with_timeout(timeout = 10)
       old_timeout = Grit::Git.git_timeout
       Grit::Git.git_timeout = timeout
       yield
