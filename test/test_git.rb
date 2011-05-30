@@ -64,6 +64,14 @@ class TestGit < Test::Unit::TestCase
     Grit::Git.git_timeout = 5.0
   end
 
+  def test_with_timeout_default_parameter
+    assert_nothing_raised do
+      Git::Git.with_timeout do
+        @git.version
+      end
+    end
+  end
+
   def test_it_really_shell_escapes_arguments_to_the_git_shell
     @git.expects(:sh).with("#{Git.git_binary} --git-dir='#{@git.git_dir}' foo --bar='bazz\\'er'")
     @git.run('', :foo, '', {:bar => "bazz'er"}, [])
