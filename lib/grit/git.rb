@@ -283,7 +283,7 @@ module Grit
     #   detail about the error.
     def native(cmd, options = {}, *args, &block)
       args     = args.first if args.size == 1 && args[0].is_a?(Array)
-      args.map!    { |a| a.to_s.strip }
+      args.map!    { |a| a.to_s }
       args.reject! { |a| a.empty? }
 
       # special option arguments
