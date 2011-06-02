@@ -146,6 +146,14 @@ class TestRepo < Test::Unit::TestCase
     assert_equal "tom@mojombo.com", commits[2].author.email
   end
 
+  def test_commits_since
+    repo = Repo.new(File.join(File.dirname(__FILE__), *%w[dot_git]), :is_bare => true)
+
+    commits = repo.commits_since('master', Time.at(1208561167))
+    assert_equal 1, commits.size
+    assert_equal "ca8a30f5a7f0f163bbe3b6f0abf18a6c83b0687a", commits[0].id
+  end
+
   # generate enough input to overflow the max pipe input buffer. this will cause
   # the git child process hang if stdin is not written at the same time as stdout
   # is being read.

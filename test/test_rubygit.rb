@@ -140,7 +140,8 @@ class TestRubyGit < Test::Unit::TestCase
 
   def test_rev_list_raw_since
     out = @git.rev_list({:since => Time.at(1204644738)}, 'master')
-    assert_match fixture('rev_list_since'), out  # I return slightly more for now
+    last_commit = fixture('rev_list_since')[0..39]
+    assert_equal last_commit, out
   end
 
   def test_rev_list_pretty_raw

@@ -379,11 +379,11 @@ module Grit
     # The Commits objects that are newer than the specified date.
     # Commits are returned in chronological order.
     #   +start+ is the branch/commit name (default 'master')
-    #   +since+ is a string represeting a date/time
+    #   +since+ is a Time object you want all the commits after
     #   +extra_options+ is a hash of extra options
     #
     # Returns Grit::Commit[] (baked)
-    def commits_since(start = 'master', since = '1970-01-01', extra_options = {})
+    def commits_since(start = 'master', since = Time.at(25200), extra_options = {})
       options = {:since => since}.merge(extra_options)
 
       Commit.find_all(self, start, options)
