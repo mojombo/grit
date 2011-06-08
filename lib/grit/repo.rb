@@ -346,6 +346,21 @@ module Grit
       [ Head.find_all(self), Tag.find_all(self), Remote.find_all(self) ].flatten
     end
 
+    # returns an array of hashes representing all references
+    def refs_list
+      refs = self.git.for_each_ref
+      refarr = refs.split("\n").map do |line|
+        shatype, ref = line.split("\t")
+        sha, type = shatype.split(' ')
+        [ref, sha, type]
+      end
+      refarr
+    end
+
+    def delete_ref(ref)
+      self.git.native(:update_ref, {:d => true}, ref)
+    end
+
     def commit_stats(start = 'master', max_count = 10, skip = 0)
       options = {:max_count => max_count,
                  :skip => skip}
@@ -374,6 +389,11 @@ module Grit
     # Returns Grit::Commit[] (baked)
     def commits_between(from, to)
       Commit.find_all(self, "#{from}..#{to}").reverse
+    end
+
+    def fast_forwardable?(to, from)
+      mb = self.git.native(:merge_base, {}, [to, from]).strip
+      mb == from
     end
 
     # The Commits objects that are newer than the specified date.
@@ -468,6 +488,35 @@ module Grit
     # Returns Grit::Tree (baked)
     def tree(treeish = 'master', paths = [])
       Tree.construct(self, treeish, paths)
+    end
+
+    # quick way to get a simple array of hashes of the entries
+    # of a single tree or recursive tree listing from a given 
+    # sha or reference
+    #   +treeish+ is the reference (default 'master')
+    #   +options+ is a hash or options - currently only takes :recursive
+    #
+    # Examples
+    #   repo.lstree('master', :recursive => true)
+    #
+    # Returns array of hashes - one per tree entry
+    def lstree(treeish = 'master', options = {})
+      # check recursive option
+      opts = {:timeout => false, :l => true, :t => true}
+      if options[:recursive]
+        opts[:r] = true
+      end
+      # mode, type, sha, size, path
+      revs = self.git.native(:ls_tree, opts, treeish)
+      lines = revs.split("\n")
+      revs = lines.map do |a|
+        stuff, path = a.split("\t")
+        mode, type, sha, size = stuff.split(" ")
+        entry = {:mode => mode, :type => type, :sha => sha, :path => path}
+        entry[:size] = size.strip.to_i if size.strip != '-'
+        entry
+      end
+      revs
     end
 
     # The Blob object for the given id

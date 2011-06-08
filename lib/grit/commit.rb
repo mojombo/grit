@@ -252,6 +252,21 @@ module Grit
       ret
     end
 
+    # Calculates the commit's Patch ID. The Patch ID is essentially the SHA1
+    # of the diff that the commit is introducing.
+    #
+    # Returns the 40 character hex String if a patch-id could be calculated
+    #   or nil otherwise.
+    def patch_id
+      show = @repo.git.show({}, @id)
+      patch_line = @repo.git.native(:patch_id, :input => show)
+      if patch_line =~ /^([0-9a-f]{40}) [0-9a-f]{40}\n$/
+        $1
+      else
+        nil
+      end
+    end
+
     # Pretty object inspection
     def inspect
       %Q{#<Grit::Commit "#{@id}">}
