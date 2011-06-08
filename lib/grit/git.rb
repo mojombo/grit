@@ -1,7 +1,10 @@
 require 'tempfile'
+require 'posix-spawn'
 module Grit
 
   class Git
+    include POSIX::Spawn
+
     class GitTimeout < RuntimeError
       attr_accessor :command
       attr_accessor :bytes_read
@@ -313,12 +316,12 @@ module Grit
       Grit.log(argv.join(' ')) if Grit.debug
 
       process =
-        Grit::Process.new(argv, env,
+        Child.new(env, *(argv + [{
           :input   => input,
           :chdir   => chdir,
           :timeout => (Grit::Git.git_timeout if timeout == true),
           :max     => (Grit::Git.git_max_size if timeout == true)
-        )
+        }]))
       Grit.log(process.out) if Grit.debug
       Grit.log(process.err) if Grit.debug
 
@@ -330,7 +333,7 @@ module Grit
       else
         process.out
       end
-    rescue Grit::Process::TimeoutExceeded, Grit::Process::MaximumOutputExceeded
+    rescue TimeoutExceeded, MaximumOutputExceeded
       raise GitTimeout, argv.join(' ')
     end
 
@@ -422,18 +425,18 @@ module Grit
 
     def sh(command, &block)
       process =
-        Grit::Process.new(
-          command, {},
+        Child.new(
+          command,
           :timeout => Git.git_timeout,
           :max     => Git.git_max_size
         )
       [process.out, process.err]
-    rescue Grit::Process::TimeoutExceeded, Grit::Process::MaximumOutputExceeded
+    rescue TimeoutExceeded, MaximumOutputExceeded
       raise GitTimeout, command
     end
 
     def wild_sh(command, &block)
-      process = Grit::Process.new(command)
+      process = Child.new(command)
       [process.out, process.err]
     end
 
