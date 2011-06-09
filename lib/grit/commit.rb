@@ -13,7 +13,7 @@ module Grit
     lazy_reader :committed_date
     lazy_reader :message
     lazy_reader :short_message
-    lazy_reader :author_string
+    # lazy_reader :author_string
 
     # Parses output from the `git-cat-file --batch'.
     #

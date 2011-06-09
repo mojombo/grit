@@ -436,8 +436,8 @@ module Grit
       repo_refs       = self.git.rev_list({}, ref).strip.split("\n")
       other_repo_refs = other_repo.git.rev_list({}, other_ref).strip.split("\n")
 
-      (other_repo_refs - repo_refs).map do |ref|
-        Commit.find_all(other_repo, ref, {:max_count => 1}).first
+      (other_repo_refs - repo_refs).map do |refn|
+        Commit.find_all(other_repo, refn, {:max_count => 1}).first
       end
     end
 
@@ -491,7 +491,7 @@ module Grit
     end
 
     # quick way to get a simple array of hashes of the entries
-    # of a single tree or recursive tree listing from a given 
+    # of a single tree or recursive tree listing from a given
     # sha or reference
     #   +treeish+ is the reference (default 'master')
     #   +options+ is a hash or options - currently only takes :recursive
