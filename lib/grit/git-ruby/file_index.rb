@@ -28,8 +28,6 @@ module Grit
 
     self.max_file_size = 10_000_000 # ~10M
 
-    attr_reader :files
-
     # initializes index given repo_path
     def initialize(repo_path)
       @index_file = File.join(repo_path, 'file-index')
