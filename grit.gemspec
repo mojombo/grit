@@ -60,10 +60,8 @@ Gem::Specification.new do |s|
     lib/grit/git-ruby/repository.rb
     lib/grit/git.rb
     lib/grit/index.rb
-    lib/grit/jruby.rb
     lib/grit/lazy.rb
     lib/grit/merge.rb
-    lib/grit/process.rb
     lib/grit/ref.rb
     lib/grit/repo.rb
     lib/grit/ruby1.9.rb
