@@ -64,7 +64,7 @@ module Grit
         end
       else
         ref = refs.first
-        aref = rev_parse({}, ref)
+        aref = rev_parse({:verify => true}, ref)
         if aref.is_a? Array
           method_missing('rev-list', options, *refs)
         else
