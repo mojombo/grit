@@ -1,5 +1,4 @@
 require 'grit/git-ruby/repository'
-require 'grit/git-ruby/file_index'
 
 module Grit
 
@@ -198,21 +197,6 @@ module Grit
 
     def file_type(ref)
       try_run { ruby_git.cat_file_type(ref).to_s }
-    end
-
-    def blame_tree(commit, path = nil)
-      begin
-        path = [path].join('/').to_s + '/' if (path && path != '')
-        path = '' if !path.is_a? String
-        commits = file_index.last_commits(rev_parse({}, commit), looking_for(commit, path))
-        clean_paths(commits)
-      rescue FileIndex::IndexFileNotFound
-        {}
-      end
-    end
-
-    def file_index
-      @git_file_index ||= FileIndex.new(@git_dir)
     end
 
     def ruby_git

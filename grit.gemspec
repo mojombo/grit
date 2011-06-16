@@ -50,13 +50,11 @@ Gem::Specification.new do |s|
     lib/grit/errors.rb
     lib/grit/git-ruby.rb
     lib/grit/git-ruby/commit_db.rb
-    lib/grit/git-ruby/file_index.rb
     lib/grit/git-ruby/git_object.rb
     lib/grit/git-ruby/internal/file_window.rb
     lib/grit/git-ruby/internal/loose.rb
     lib/grit/git-ruby/internal/pack.rb
     lib/grit/git-ruby/internal/raw_object.rb
-    lib/grit/git-ruby/object.rb
     lib/grit/git-ruby/repository.rb
     lib/grit/git.rb
     lib/grit/index.rb
