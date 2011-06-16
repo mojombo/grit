@@ -49,6 +49,7 @@ module Grit
   # base class for all git objects (blob, tree, commit, tag)
   class GitObject
     attr_accessor :repository
+    attr_accessor :sha
 
     def GitObject.from_raw(rawobject, repository = nil)
       case rawobject.type

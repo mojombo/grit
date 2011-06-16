@@ -519,6 +519,14 @@ module Grit
       revs
     end
 
+    def object(sha)
+      obj = git.get_git_object(sha)
+      raw = Grit::GitRuby::Internal::RawObject.new(obj[:type], obj[:content])
+      object = Grit::GitRuby::GitObject.from_raw(raw)
+      object.sha = sha
+      object
+    end
+
     # The Blob object for the given id
     #   +id+ is the SHA1 id of the blob
     #

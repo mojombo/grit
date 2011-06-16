@@ -56,6 +56,10 @@ module Grit
       ruby_git.get_raw_object_by_sha1(object_id).content
     end
 
+    def get_git_object(object_id)
+      ruby_git.get_raw_object_by_sha1(object_id).to_hash
+    end
+
     def object_exists?(object_id)
       ruby_git.object_exists?(object_id)
     end
