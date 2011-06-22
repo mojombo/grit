@@ -197,16 +197,23 @@ module Grit
 
     # Checks if the patch of a commit can be applied to the given head.
     #
+    # options     - grit command options hash
     # head_sha    - String SHA or ref to check the patch against.
     # applies_sha - String SHA of the patch.  The patch itself is retrieved
     #               with #get_patch.
     #
     # Returns 0 if the patch applies cleanly (according to `git apply`), or
     # an Integer that is the sum of the failed exit statuses.
-    def check_applies(head_sha, applies_sha)
+    def check_applies(options={}, head_sha=nil, applies_sha=nil)
+      options, head_sha, applies_sha = {}, options, head_sha if !options.is_a?(Hash)
+      options = options.dup
+      options[:env] &&= options[:env].dup
+
       git_index = create_tempfile('index', true)
-      options   = {:env => {'GIT_INDEX_FILE' => git_index}, :raise => true}
-      status    = 0
+      (options[:env] ||= {}).merge!('GIT_INDEX_FILE' => git_index)
+      options[:raise] = true
+
+      status = 0
       begin
         native(:read_tree, options.dup, head_sha)
         stdin = native(:diff, options.dup, "#{applies_sha}^", applies_sha)
@@ -219,27 +226,38 @@ module Grit
 
     # Gets a patch for a given SHA using `git diff`.
     #
+    # options     - grit command options hash
     # applies_sha - String SHA to get the patch from, using this command:
     #               `git diff #{applies_sha}^ #{applies_sha}`
     #
     # Returns the String patch from `git diff`.
-    def get_patch(applies_sha)
+    def get_patch(options={}, applies_sha=nil)
+      options, applies_sha = {}, options if !options.is_a?(Hash)
+      options = options.dup
+      options[:env] &&= options[:env].dup
+
       git_index = create_tempfile('index', true)
-      native(:diff, {
-        :env => {'GIT_INDEX_FILE' => git_index}},
-        "#{applies_sha}^", applies_sha)
+      (options[:env] ||= {}).merge!('GIT_INDEX_FILE' => git_index)
+
+      native(:diff, options, "#{applies_sha}^", applies_sha)
     end
 
     # Applies the given patch against the given SHA of the current repo.
     #
+    # options  - grit command hash
     # head_sha - String SHA or ref to apply the patch to.
     # patch    - The String patch to apply.  Get this from #get_patch.
     #
     # Returns the String Tree SHA on a successful patch application, or false.
-    def apply_patch(head_sha, patch)
-      git_index = create_tempfile('index', true)
+    def apply_patch(options={}, head_sha=nil, patch=nil)
+      options, head_sha, patch = {}, options, head_sha if !options.is_a?(Hash)
+      options = options.dup
+      options[:env] &&= options[:env].dup
+      options[:raise] = true
 
-      options = {:env => {'GIT_INDEX_FILE' => git_index}, :raise => true}
+      git_index = create_tempfile('index', true)
+      (options[:env] ||= {}).merge!('GIT_INDEX_FILE' => git_index)
+
       begin
         native(:read_tree, options.dup, head_sha)
         native(:apply, options.merge(:cached => true, :input => patch))
