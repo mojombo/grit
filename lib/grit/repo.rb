@@ -480,7 +480,7 @@ module Grit
 
     # The Tree object for the given treeish reference
     #   +treeish+ is the reference (default 'master')
-    #   +paths+ is an optional Array of directory paths to restrict the tree (deafult [])
+    #   +paths+ is an optional Array of directory paths to restrict the tree (default [])
     #
     # Examples
     #   repo.tree('master', ['lib/'])
