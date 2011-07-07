@@ -99,7 +99,7 @@ module Grit
     #
     # Returns Integer
     def self.count(repo, ref)
-      repo.git.rev_list({}, ref).size / 41
+      repo.git.rev_list({:all => true, :count => true, :timeout => false}, ref).to_i
     end
 
     # Find all commits matching the given criteria.
