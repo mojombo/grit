@@ -193,6 +193,13 @@ class TestCommit < Test::Unit::TestCase
     assert patch.include?("1.7.")
   end
 
+  # patch_id
+  
+  def test_patch_id
+    @c = Commit.create(@r, :id => '80f136f500dfdb8c3e8abf4ae716f875f0a1b57f')
+    assert_equal '9450b04e4f83ad0067199c9e9e338197d1835cbb', @c.patch_id
+  end
+
   # inspect
 
   def test_inspect

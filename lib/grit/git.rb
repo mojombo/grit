@@ -1,7 +1,10 @@
 require 'tempfile'
+require 'posix-spawn'
 module Grit
 
   class Git
+    include POSIX::Spawn
+
     class GitTimeout < RuntimeError
       attr_accessor :command
       attr_accessor :bytes_read
@@ -47,6 +50,14 @@ module Grit
 
     def put_raw_object(content, type)
       ruby_git.put_raw_object(content, type)
+    end
+
+    def get_raw_object(object_id)
+      ruby_git.get_raw_object_by_sha1(object_id).content
+    end
+
+    def get_git_object(object_id)
+      ruby_git.get_raw_object_by_sha1(object_id).to_hash
     end
 
     def object_exists?(object_id)
@@ -186,16 +197,23 @@ module Grit
 
     # Checks if the patch of a commit can be applied to the given head.
     #
+    # options     - grit command options hash
     # head_sha    - String SHA or ref to check the patch against.
     # applies_sha - String SHA of the patch.  The patch itself is retrieved
     #               with #get_patch.
     #
     # Returns 0 if the patch applies cleanly (according to `git apply`), or
     # an Integer that is the sum of the failed exit statuses.
-    def check_applies(head_sha, applies_sha)
+    def check_applies(options={}, head_sha=nil, applies_sha=nil)
+      options, head_sha, applies_sha = {}, options, head_sha if !options.is_a?(Hash)
+      options = options.dup
+      options[:env] &&= options[:env].dup
+
       git_index = create_tempfile('index', true)
-      options   = {:env => {'GIT_INDEX_FILE' => git_index}, :raise => true}
-      status    = 0
+      (options[:env] ||= {}).merge!('GIT_INDEX_FILE' => git_index)
+      options[:raise] = true
+
+      status = 0
       begin
         native(:read_tree, options.dup, head_sha)
         stdin = native(:diff, options.dup, "#{applies_sha}^", applies_sha)
@@ -208,27 +226,38 @@ module Grit
 
     # Gets a patch for a given SHA using `git diff`.
     #
+    # options     - grit command options hash
     # applies_sha - String SHA to get the patch from, using this command:
     #               `git diff #{applies_sha}^ #{applies_sha}`
     #
     # Returns the String patch from `git diff`.
-    def get_patch(applies_sha)
+    def get_patch(options={}, applies_sha=nil)
+      options, applies_sha = {}, options if !options.is_a?(Hash)
+      options = options.dup
+      options[:env] &&= options[:env].dup
+
       git_index = create_tempfile('index', true)
-      native(:diff, {
-        :env => {'GIT_INDEX_FILE' => git_index}},
-        "#{applies_sha}^", applies_sha)
+      (options[:env] ||= {}).merge!('GIT_INDEX_FILE' => git_index)
+
+      native(:diff, options, "#{applies_sha}^", applies_sha)
     end
 
     # Applies the given patch against the given SHA of the current repo.
     #
+    # options  - grit command hash
     # head_sha - String SHA or ref to apply the patch to.
     # patch    - The String patch to apply.  Get this from #get_patch.
     #
     # Returns the String Tree SHA on a successful patch application, or false.
-    def apply_patch(head_sha, patch)
-      git_index = create_tempfile('index', true)
+    def apply_patch(options={}, head_sha=nil, patch=nil)
+      options, head_sha, patch = {}, options, head_sha if !options.is_a?(Hash)
+      options = options.dup
+      options[:env] &&= options[:env].dup
+      options[:raise] = true
 
-      options = {:env => {'GIT_INDEX_FILE' => git_index}, :raise => true}
+      git_index = create_tempfile('index', true)
+      (options[:env] ||= {}).merge!('GIT_INDEX_FILE' => git_index)
+
       begin
         native(:read_tree, options.dup, head_sha)
         native(:apply, options.merge(:cached => true, :input => patch))
@@ -313,12 +342,12 @@ module Grit
       Grit.log(argv.join(' ')) if Grit.debug
 
       process =
-        Grit::Process.new(argv, env,
+        Child.new(env, *(argv + [{
           :input   => input,
           :chdir   => chdir,
           :timeout => (Grit::Git.git_timeout if timeout == true),
           :max     => (Grit::Git.git_max_size if timeout == true)
-        )
+        }]))
       Grit.log(process.out) if Grit.debug
       Grit.log(process.err) if Grit.debug
 
@@ -330,7 +359,7 @@ module Grit
       else
         process.out
       end
-    rescue Grit::Process::TimeoutExceeded, Grit::Process::MaximumOutputExceeded
+    rescue TimeoutExceeded, MaximumOutputExceeded
       raise GitTimeout, argv.join(' ')
     end
 
@@ -422,18 +451,18 @@ module Grit
 
     def sh(command, &block)
       process =
-        Grit::Process.new(
-          command, {},
+        Child.new(
+          command,
           :timeout => Git.git_timeout,
           :max     => Git.git_max_size
         )
       [process.out, process.err]
-    rescue Grit::Process::TimeoutExceeded, Grit::Process::MaximumOutputExceeded
+    rescue TimeoutExceeded, MaximumOutputExceeded
       raise GitTimeout, command
     end
 
     def wild_sh(command, &block)
-      process = Grit::Process.new(command)
+      process = Child.new(command)
       [process.out, process.err]
     end
 

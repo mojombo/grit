@@ -475,60 +475,60 @@ module Grit
       #   [full_path, 'modified', tree1_hash, tree2_hash]
       #  ]
       def quick_diff(tree1, tree2, path = '.', recurse = true)
-         # handle empty trees
-         changed = []
-         return changed if tree1 == tree2
+        # handle empty trees
+        changed = []
+        return changed if tree1 == tree2
 
-         t1 = list_tree(tree1) if tree1
-         t2 = list_tree(tree2) if tree2
+        t1 = list_tree(tree1) if tree1
+        t2 = list_tree(tree2) if tree2
 
-         # finding files that are different
-         t1['blob'].each do |file, hsh|
-           t2_file = t2['blob'][file] rescue nil
-           full = File.join(path, file)
-           if !t2_file
-             changed << [full, 'added', hsh[:sha], nil]      # not in parent
-           elsif (hsh[:sha] != t2_file[:sha])
-             changed << [full, 'modified', hsh[:sha], t2_file[:sha]]   # file changed
-           end
-         end if t1
-         t2['blob'].each do |file, hsh|
-           if !t1 || !t1['blob'][file]
-             changed << [File.join(path, file), 'removed', nil, hsh[:sha]]
-           end
-         end if t2
+        # finding files that are different
+        t1['blob'].each do |file, hsh|
+          t2_file = t2['blob'][file] rescue nil
+          full = File.join(path, file)
+          if !t2_file
+            changed << [full, 'added', hsh[:sha], nil]      # not in parent
+          elsif (hsh[:sha] != t2_file[:sha])
+            changed << [full, 'modified', hsh[:sha], t2_file[:sha]]   # file changed
+          end
+        end if t1
+        t2['blob'].each do |file, hsh|
+          if !t1 || !t1['blob'][file]
+            changed << [File.join(path, file), 'removed', nil, hsh[:sha]]
+          end
+        end if t2
 
-         t1['tree'].each do |dir, hsh|
-           t2_tree = t2['tree'][dir] rescue nil
-           full = File.join(path, dir)
-           if !t2_tree
-             if recurse
-               changed += quick_diff(hsh[:sha], nil, full, true)
-             else
-               changed << [full, 'added', hsh[:sha], nil]      # not in parent
-             end
-           elsif (hsh[:sha] != t2_tree[:sha])
-             if recurse
-               changed += quick_diff(hsh[:sha], t2_tree[:sha], full, true)
-             else
-               changed << [full, 'modified', hsh[:sha], t2_tree[:sha]]   # file changed
-             end
-           end
-         end if t1
-         t2['tree'].each do |dir, hsh|
-           t1_tree = t1['tree'][dir] rescue nil
-           full = File.join(path, dir)
-           if !t1_tree
-             if recurse
-               changed += quick_diff(nil, hsh[:sha], full, true)
-             else
-               changed << [full, 'removed', nil, hsh[:sha]]
-             end
-           end
-         end if t2
+        t1['tree'].each do |dir, hsh|
+          t2_tree = t2['tree'][dir] rescue nil
+          full = File.join(path, dir)
+          if !t2_tree
+            if recurse
+              changed += quick_diff(hsh[:sha], nil, full, true)
+            else
+              changed << [full, 'added', hsh[:sha], nil]      # not in parent
+            end
+          elsif (hsh[:sha] != t2_tree[:sha])
+            if recurse
+              changed += quick_diff(hsh[:sha], t2_tree[:sha], full, true)
+            else
+              changed << [full, 'modified', hsh[:sha], t2_tree[:sha]]   # file changed
+            end
+          end
+        end if t1
+        t2['tree'].each do |dir, hsh|
+          t1_tree = t1['tree'][dir] rescue nil
+          full = File.join(path, dir)
+          if !t1_tree
+            if recurse
+              changed += quick_diff(nil, hsh[:sha], full, true)
+            else
+              changed << [full, 'removed', nil, hsh[:sha]]
+            end
+          end
+        end if t2
 
-         changed
-       end
+        changed
+      end
 
       # returns true if the files in path_limiter were changed, or no path limiter
       # used by the log() function when passed with a path_limiter
@@ -551,9 +551,9 @@ module Grit
 
         if path && !(path == '' || path == '.' || path == './')
           paths = path.split('/')
-          paths.each do |path|
+          paths.each do |pathname|
             tree = get_object_by_sha1(tree_sha)
-            if entry = tree.entry.select { |e| e.name == path }.first
+            if entry = tree.entry.select { |e| e.name == pathname }.first
               tree_sha = entry.sha1 rescue nil
             else
               return false
@@ -720,9 +720,9 @@ module Grit
           end
         end
 
-        def load_alternate_loose(path)
+        def load_alternate_loose(pathname)
           # load alternate loose, too
-          each_alternate_path path do |path|
+          each_alternate_path pathname do |path|
             next if @loaded.include?(path)
             next if !File.exist?(path)
             load_loose(path)
@@ -745,8 +745,8 @@ module Grit
           @packs
         end
 
-        def load_alternate_packs(path)
-          each_alternate_path path do |path|
+        def load_alternate_packs(pathname)
+          each_alternate_path pathname do |path|
             full_pack = File.join(path, 'pack')
             next if @loaded_packs.include?(full_pack)
             load_packs(full_pack)
