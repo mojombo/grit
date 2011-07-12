@@ -152,6 +152,15 @@ class TestRubyGit < Test::Unit::TestCase
     assert_equal fixture('rev_list_until'), out
   end
 
+  def test_rev_list_raw_since_until
+
+    # should match the output of:
+    # git --git-dir=./test/dot_git rev-list master --since="2008-01-01" --until="2008-01-31"
+
+    out = @git.rev_list({:since=>Time.new(2008, 01, 01), :until=>Time.new(2008, 01, 31)}, 'master')
+    assert_equal fixture('rev_list_since_until'), out
+  end
+
   def test_rev_list_pretty_raw
     out = @git.rev_list({:pretty => 'raw'}, 'f1964ad1919180dd1d9eae9d21a1a1f68ac60e77')
     assert_match 'f1964ad1919180dd1d9eae9d21a1a1f68ac60e77', out
