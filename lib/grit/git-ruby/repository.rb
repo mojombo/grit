@@ -70,7 +70,7 @@ module Grit
 
       # returns a raw object given a SHA1
       def get_raw_object_by_sha1(sha1o)
-        raise NoSuchShaFound if sha1o.nil? || sha1o.empty? || !sha1o.is_a?(String)
+        raise NoSuchShaFound if !sha1o.is_a?(String) || sha1o.empty?
 
         sha1 = [sha1o.chomp].pack("H*")
         # try packs
