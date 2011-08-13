@@ -49,4 +49,12 @@ class TestGritSpaces < Test::Unit::TestCase
     names = tree.blobs.collect { |b| b.name }
     assert names.include?("an evil file with a trailing space "), "does not contain the trailing space named file"
   end
+
+  def test_commit_stats_with_file_paths_containing_spaces
+      commited_files = @repo.commit('2edb031f77340b65a897e8536ad75f7b7596a607').stats.files
+      file_with_leading_space = commited_files[0][0]
+      file_with_trailing_space = commited_files[1][0]
+      assert_equal " an evil file with a leading space", file_with_leading_space
+      assert_equal "an evil file with a trailing space ", file_with_trailing_space
+  end
 end
