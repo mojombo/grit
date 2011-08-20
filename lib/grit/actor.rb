@@ -34,11 +34,13 @@ module Grit
     #
     # Returns a String.
     def output(time)
-      out = @name.to_s.dup
-      if @email
-        out << " <#{@email}>"
-      end
-      out << time.strftime(" %s %z")
+      offset = time.utc_offset / 60
+      "%s <%s> %d %+.2d%.2d" % [
+        @name,
+        @email || "null",
+        time.to_i,
+        offset / 60,
+        offset.abs % 60]
     end
 
     # Pretty object inspection
