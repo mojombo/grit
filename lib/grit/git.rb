@@ -76,7 +76,7 @@ module Grit
         @git_binary ||=
           ENV['PATH'].split(':').
             map  { |p| File.join(p, 'git') }.
-            find { |p| File.exist?(p) }
+            find { |p| File.file?(p) && File.executable?(p) }
       end
       attr_writer :git_binary
     end

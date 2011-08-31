@@ -140,4 +140,18 @@ class TestGit < Test::Unit::TestCase
       @git.native(:bad, {:raise => true})
     end
   end
+
+  def test_git_binary_is_found_correctly
+    # Setting git_binary to nil so it is fetched
+    Grit::Git.git_binary = nil
+
+    paths       = %w(a b).map { |p| File.expand_path("../fixtures/git_bin/#{p}", __FILE__) }.join(':')
+    saved_path  = ENV['PATH']
+    ENV['PATH'] = [paths, ENV['PATH']].join(':')
+
+    assert_match %r(git_bin/b/git$), Grit::Git.git_binary
+
+    # Re-Setting the git_binary so other tests don't fail
+    ENV['PATH'] = saved_path and Grit::Git.git_binary = nil
+  end
 end
