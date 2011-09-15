@@ -4,16 +4,20 @@ module Grit
 
     attr_reader :lines
 
-    def initialize(repo, file, commit)
+    def initialize(repo, file, commit, start_line = nil, end_line = nil)
       @repo = repo
       @file = file
       @commit = commit
       @lines = []
+      @start_line = start_line
+      @end_line = end_line || start_line
       load_blame
     end
 
     def load_blame
-      output = @repo.git.blame({'p' => true}, @commit, '--', @file)
+      params = {'p' => true}
+      params['L'] = "#{@start_line},#{@end_line}" if @start_line
+      output = @repo.git.blame(params, @commit, '--', @file)
       process_raw_blame(output)
     end
 
@@ -40,7 +44,7 @@ module Grit
       # get it together
       info.sort.each do |lineno, (commit_id, old_lineno)|
         commit = commits[commit_id]
-        final << BlameLine.new(lineno, old_lineno, commit, lines[lineno - 1])
+        final << BlameLine.new(lineno, old_lineno, commit, lines[lineno - (@start_line || 1)])
       end
 
       @lines = final

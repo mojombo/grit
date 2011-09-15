@@ -29,4 +29,30 @@ class TestBlame < Test::Unit::TestCase
     assert_equal '46291865ba0f6e0c9818b11be799fe2db6964d56', line.commit.id
   end
 
+  def test_line_range_blame
+    commit = '2d3acf90f35989df8f262dc50beadc4ee3ae1560'
+    blame = @r.blame('lib/grit.rb', commit, 25, 26)
+    assert_equal 2, blame.lines.size
+    line = blame.lines[0]
+    assert_equal "require 'grit/diff'", line.line
+    assert_equal 25, line.lineno
+    assert_equal 16, line.oldlineno
+    assert_equal '46291865ba0f6e0c9818b11be799fe2db6964d56', line.commit.id
+    line = blame.lines[1]
+    assert_equal "require 'grit/config'", line.line
+    assert_equal 26, line.lineno
+    assert_equal 23, line.oldlineno
+    assert_equal 'f1964ad1919180dd1d9eae9d21a1a1f68ac60e77', line.commit.id
+  end
+
+  def test_single_line_blame
+    commit = '2d3acf90f35989df8f262dc50beadc4ee3ae1560'
+    blame = @r.blame('lib/grit.rb', commit, 25)
+    assert_equal 1, blame.lines.size
+    line = blame.lines[0]
+    assert_equal "require 'grit/diff'", line.line
+    assert_equal 25, line.lineno
+    assert_equal 16, line.oldlineno
+    assert_equal '46291865ba0f6e0c9818b11be799fe2db6964d56', line.commit.id
+  end
 end
