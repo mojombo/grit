@@ -114,10 +114,7 @@ module Grit
     S_IFGITLINK = 0160000
     attr_accessor :mode, :name, :sha1
     def initialize(mode, filename, sha1o)
-      @mode = 0
-      mode.each_byte do |i|
-        @mode = (@mode << 3) | (i-'0'.getord(0))
-      end
+      @mode = mode.to_i(8)
       @name = filename
       @sha1 = sha1o
       if ![S_IFLNK, S_IFDIR, S_IFREG, S_IFGITLINK].include?(@mode & S_IFMT)
