@@ -179,7 +179,7 @@ module Grit
     attr_accessor :entry
 
     def self.from_raw(rawobject, repository=nil)
-      entries = rawobject.content.scan(/(\d+) ([^\x00]*)\x00(.{20})/).map do |mode, file_name, raw_sha|
+      entries = rawobject.content.scan(/(\d+) ([^\x00]*)\x00(.{20})/m).map do |mode, file_name, raw_sha|
         DirectoryEntry.new(mode, file_name, raw_sha.unpack("H*").first)
       end
       new(entries, repository)
