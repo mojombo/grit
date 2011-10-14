@@ -29,7 +29,8 @@ class TestIndexStatus < Test::Unit::TestCase
     Git.any_instance.expects(:diff_index).with({}, 'HEAD').returns(fixture('diff_index'))
     Git.any_instance.expects(:diff_files).returns(fixture('diff_files'))
     Git.any_instance.expects(:ls_files).with({:stage => true}).returns(fixture('ls_files'))
-    Dir.expects(:glob).with("**/*").yields(*%w{pkg/grit-2.4.1.gem})
+    Dir.expects(:glob).with("**/*").
+                       multiple_yields("pkg/grit-2.4.1.gem", "ignored.txt")
     status = @r.status
 
     stat = status['lib/grit/repo.rb']
@@ -40,6 +41,9 @@ class TestIndexStatus < Test::Unit::TestCase
     assert_nil stat.ignored
 
     stat = status['pkg/grit-2.4.1.gem']
+    assert stat.untracked
+
+    stat = status['ignored.txt']
     assert stat.untracked
 
     stat = status['.DS_Store']
