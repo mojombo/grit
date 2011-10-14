@@ -28,8 +28,15 @@ class TestIndexStatus < Test::Unit::TestCase
   def test_status
     Git.any_instance.expects(:diff_index).with({}, 'HEAD').returns(fixture('diff_index'))
     Git.any_instance.expects(:diff_files).returns(fixture('diff_files'))
-    Git.any_instance.expects(:ls_files).with({:stage => true}).returns(fixture('ls_files'))
-    Git.any_instance.expects(:ls_files).with({:others => true}).returns(fixture('ls_others'))
+    Git.any_instance.expects(:ls_files).
+                     with({:stage => true}).
+                     returns(fixture('ls_files'))
+    Git.any_instance.expects(:ls_files).
+                     with({:others => true, :ignore => true, :"exclude-standard" => true}).
+                     returns(fixture('ls_others_ignore'))
+    Git.any_instance.expects(:ls_files).
+                     with({:others => true}).
+                     returns(fixture('ls_others'))
 
     status = @r.status
 
@@ -46,9 +53,11 @@ class TestIndexStatus < Test::Unit::TestCase
 
     stat = status['pkg/grit-2.4.1.gem']
     assert stat.untracked
+    #assert stat.ignored
 
     stat = status['ignored.txt']
     assert stat.untracked
+    assert stat.ignored
 
     stat = status['.DS_Store']
     assert_nil stat
