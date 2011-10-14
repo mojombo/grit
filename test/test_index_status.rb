@@ -32,7 +32,8 @@ class TestIndexStatus < Test::Unit::TestCase
                      with({:stage => true}).
                      returns(fixture('ls_files'))
     Git.any_instance.expects(:ls_files).
-                     with({:others => true, :ignore => true, :"exclude-standard" => true}).
+                     with({:others => true, :ignore => true, :directory => true,
+                           :"exclude-standard" => true}).
                      returns(fixture('ls_others_ignore'))
     Git.any_instance.expects(:ls_files).
                      with({:others => true}).
@@ -53,7 +54,7 @@ class TestIndexStatus < Test::Unit::TestCase
 
     stat = status['pkg/grit-2.4.1.gem']
     assert stat.untracked
-    #assert stat.ignored
+    assert stat.ignored
 
     stat = status['ignored.txt']
     assert stat.untracked

@@ -157,22 +157,34 @@ module Grit
           File.directory?(File.join(wdir, f)) || f =~ /^\./
         }
 
-        # `git ls-files --others --ignore --exclude-standard`
-        # returns untracked and ignored files
-        @base.git.ls_files({:others => true, :ignore => true,
+        # `git ls-files --others --ignore --exclude-standard --directory`
+        # returns untracked and ignored files as well as ignored 
+        # directories
+        ignored_dirs = []
+        @base.git.ls_files({:others => true, 
+                            :ignore => true, :directory => true,
                             :"exclude-standard" => true}).
                   split("\n").each do |file|
-          next if skip[file]
-          hsh[file] = {:path => file, 
-                       :untracked => true,
-                       :ignored => true}
+          if File.directory?(File.join(wdir, file))
+            ignored_dirs << file
+          elsif !skip[file]
+            hsh[file] = {:path => file, 
+                         :untracked => true,
+                         :ignored => true}
+          end
         end
 
         # `git ls-files --others` is used for remaining files
         @base.git.ls_files({:others => true}).
                   split("\n").each do |file|
-          next if skip[file] || hsh[file]
-          hsh[file] = {:path => file, :untracked => true}
+          if ignored_dirs.any?{|d| file.index(d) == 0}
+            hsh[file] = {:path => file, 
+                         :untracked => true,
+                         :ignored => true}
+          elsif !(skip[file] || hsh[file])
+            hsh[file] = {:path => file, 
+                         :untracked => true}
+          end
         end
 
         hsh
