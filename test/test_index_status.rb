@@ -40,6 +40,10 @@ class TestIndexStatus < Test::Unit::TestCase
     assert_nil stat.untracked
     assert_nil stat.ignored
 
+    stat = status['lib/grit/added_class.rb']
+    assert stat.untracked
+    assert_nil stat.ignored
+
     stat = status['pkg/grit-2.4.1.gem']
     assert stat.untracked
 

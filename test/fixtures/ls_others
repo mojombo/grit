@@ -1,3 +1,4 @@
 .DS_Store
 pkg/grit-2.4.1.gem
 ignored.txt
+lib/grit/added_class.rb
