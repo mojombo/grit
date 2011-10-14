@@ -67,5 +67,4 @@ class TestIndexStatus < Test::Unit::TestCase
     assert_nil stat
   end
 
-
 end
