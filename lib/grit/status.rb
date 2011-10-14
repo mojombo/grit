@@ -93,10 +93,8 @@ module Grit
 
         Dir.chdir(@base.working_dir) do
           # find untracked in working dir
-          Dir.glob('**/*') do |file|
-            if !@files[file]
-              @files[file] = {:path => file, :untracked => true} if !File.directory?(file)
-            end
+          ls_untracked.each do |path, data|
+            @files[path] = data unless @files[path]
           end
 
           # find modified in tree
@@ -146,6 +144,20 @@ module Grit
           (info, file) = line.split("\t")
           (mode, sha, stage) = info.split
           hsh[file] = {:path => file, :mode_index => mode, :sha_index => sha, :stage => stage}
+        end
+        hsh
+      end
+
+      def ls_untracked
+        hsh = {}
+        wdir = @base.working_dir
+        lines = @base.git.ls_files({:others => true})
+        lines.split("\n").each do |file|
+          # ignore directories and hidden files so as to preserve
+          # backward compatibility with 2.4.1
+          next if File.directory?(File.join(wdir, file))
+          next if file =~ /^\./
+          hsh[file] = {:path => file, :untracked => true}
         end
         hsh
       end
