@@ -48,6 +48,9 @@ class TestIndexStatus < Test::Unit::TestCase
 
     stat = status['.DS_Store']
     assert_nil stat
+
+    stat = status['pkg']
+    assert_nil stat
   end
 
 
