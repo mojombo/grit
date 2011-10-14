@@ -100,7 +100,7 @@ module Grit
           end
 
           # find modified in tree
-         diff_files.each do |path, data|
+          diff_files.each do |path, data|
             @files[path] ? @files[path].merge!(data) : @files[path] = data
           end
 
