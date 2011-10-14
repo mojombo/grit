@@ -57,7 +57,7 @@ module Grit
     end
 
     class StatusFile
-      attr_accessor :path, :type, :stage, :untracked
+      attr_accessor :path, :type, :stage, :untracked, :ignored
       attr_accessor :mode_index, :mode_repo
       attr_accessor :sha_index, :sha_repo
 
@@ -73,6 +73,7 @@ module Grit
         @sha_index = hash[:sha_index]
         @sha_repo = hash[:sha_repo]
         @untracked = hash[:untracked]
+        @ignored = !!hash[:ignored]
       end
 
       def blob(type = :index)
