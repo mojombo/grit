@@ -57,7 +57,7 @@ module Grit
     end
 
     class StatusFile
-      attr_accessor :path, :type, :stage, :untracked
+      attr_accessor :path, :type, :stage, :untracked, :ignored
       attr_accessor :mode_index, :mode_repo
       attr_accessor :sha_index, :sha_repo
 
@@ -73,6 +73,7 @@ module Grit
         @sha_index = hash[:sha_index]
         @sha_repo = hash[:sha_repo]
         @untracked = hash[:untracked]
+        @ignored = hash[:ignored]
       end
 
       def blob(type = :index)
@@ -92,14 +93,12 @@ module Grit
 
         Dir.chdir(@base.working_dir) do
           # find untracked in working dir
-          Dir.glob('**/*') do |file|
-            if !@files[file]
-              @files[file] = {:path => file, :untracked => true} if !File.directory?(file)
-            end
+          ls_untracked.each do |path, data|
+            @files[path] = data unless @files[path]
           end
 
           # find modified in tree
-         diff_files.each do |path, data|
+          diff_files.each do |path, data|
             @files[path] ? @files[path].merge!(data) : @files[path] = data
           end
 
@@ -146,6 +145,48 @@ module Grit
           (mode, sha, stage) = info.split
           hsh[file] = {:path => file, :mode_index => mode, :sha_index => sha, :stage => stage}
         end
+        hsh
+      end
+
+      def ls_untracked
+        hsh, wdir = {}, @base.working_dir
+
+        # directories and hidden files are skiped so as to preserve
+        # backward compatibility with 2.4.1
+        skip = lambda{|f| 
+          File.directory?(File.join(wdir, f)) || f =~ /^\./
+        }
+
+        # `git ls-files --others --ignore --exclude-standard --directory`
+        # returns untracked and ignored files as well as ignored 
+        # directories
+        ignored_dirs = []
+        @base.git.ls_files({:others => true, 
+                            :ignore => true, :directory => true,
+                            :"exclude-standard" => true}).
+                  split("\n").each do |file|
+          if File.directory?(File.join(wdir, file))
+            ignored_dirs << file
+          elsif !skip[file]
+            hsh[file] = {:path => file, 
+                         :untracked => true,
+                         :ignored => true}
+          end
+        end
+
+        # `git ls-files --others` is used for remaining files
+        @base.git.ls_files({:others => true}).
+                  split("\n").each do |file|
+          if ignored_dirs.any?{|d| file.index(d) == 0}
+            hsh[file] = {:path => file, 
+                         :untracked => true,
+                         :ignored => true}
+          elsif !(skip[file] || hsh[file])
+            hsh[file] = {:path => file, 
+                         :untracked => true}
+          end
+        end
+
         hsh
       end
   end
