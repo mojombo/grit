@@ -73,7 +73,7 @@ module Grit
         @sha_index = hash[:sha_index]
         @sha_repo = hash[:sha_repo]
         @untracked = hash[:untracked]
-        @ignored = !!hash[:ignored]
+        @ignored = hash[:ignored]
       end
 
       def blob(type = :index)

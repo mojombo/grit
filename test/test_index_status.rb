@@ -34,7 +34,8 @@ class TestIndexStatus < Test::Unit::TestCase
     assert_equal stat.sha_repo, "71e930d551c413a123f43e35c632ea6ba3e3705e"
     assert_equal stat.mode_repo, "100644"
     assert_equal stat.type, "M"
-    assert_equal stat.ignored, false
+    assert_nil stat.untracked
+    assert_nil stat.ignored
   end
 
 

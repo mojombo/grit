@@ -1,3 +1,4 @@
+100644 0b4eb9fbbcbfb5fb8c0c8160d83ef637c89553d9 0	lib/grit/repo.rb
 100644 ae0786b99fc23d5a227bcfb54f12252f109ce39f 0	test/helper.rb
 100644 9bd6016010e5ad9e787104e75ac2ab5ad7e04096 0	test/profile.rb
 100644 373baa48adf7da63ec6bddc4adfece673c8bc2ad 0	test/suite.rb
