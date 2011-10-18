@@ -32,7 +32,7 @@ class TestIndexStatus < Test::Unit::TestCase
                      with({:stage => true}).
                      returns(fixture('ls_files'))
     Git.any_instance.expects(:ls_files).
-                     with({:others => true, :ignore => true, :directory => true,
+                     with({:others => true, :ignored => true, :directory => true,
                            :"exclude-standard" => true}).
                      returns(fixture('ls_others_ignore'))
     Git.any_instance.expects(:ls_files).

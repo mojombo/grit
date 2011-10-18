@@ -162,7 +162,7 @@ module Grit
         # directories
         ignored_dirs = []
         @base.git.ls_files({:others => true, 
-                            :ignore => true, :directory => true,
+                            :ignored => true, :directory => true,
                             :"exclude-standard" => true}).
                   split("\n").each do |file|
           if File.directory?(File.join(wdir, file))
