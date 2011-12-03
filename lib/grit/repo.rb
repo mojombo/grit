@@ -310,6 +310,17 @@ module Grit
       Remote.find_all(self)
     end
 
+    # takes a remote branch name and returns Grit::Remote object
+    # that matches the name
+    def remote(name)
+      remotes.each do |r|
+        if r.name == name
+          return r
+        end
+      end
+      nil
+    end
+
     def remote_list
       self.git.list_remotes
     end

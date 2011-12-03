@@ -11,4 +11,10 @@ class TestRemote < Test::Unit::TestCase
     remote = @r.remotes.first
     assert_equal %Q{#<Grit::Remote "#{remote.name}">}, remote.inspect
   end
+
+  def test_remote
+    remote = @r.remote('origin/HEAD')
+    assert_equal remote.name, 'origin/HEAD'
+  end
+
 end
