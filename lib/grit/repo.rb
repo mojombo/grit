@@ -313,12 +313,7 @@ module Grit
     # takes a remote branch name and returns Grit::Remote object
     # that matches the name
     def remote(name)
-      remotes.each do |r|
-        if r.name == name
-          return r
-        end
-      end
-      nil
+      remotes.detect { |r| r.name == name }
     end
 
     def remote_list
