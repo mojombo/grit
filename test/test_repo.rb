@@ -51,6 +51,41 @@ class TestRepo < Test::Unit::TestCase
     end
   end
 
+  # new with gitfile
+
+  def with_new_gitfile_repo(gitfile_contents, &block)
+    temp_repo = "/tmp/gitfile_repo_test_" + Time.now.to_i.to_s
+    begin
+      FileUtils.mkdir temp_repo
+      File.open(File.join(temp_repo, ".git"), "w") do |gitfile|
+        gitfile.puts gitfile_contents
+      end
+      yield temp_repo
+    ensure
+      FileUtils.rm_rf temp_repo
+    end
+  end
+
+  def test_new_should_raise_on_invalid_gitfile
+    with_new_gitfile_repo("foobar") do |repo_path|
+      assert_raise(InvalidGitRepositoryError) { Repo.new repo_path }
+    end
+  end
+
+  def test_new_should_raise_on_bad_gitdir_in_gitfile
+    with_new_gitfile_repo("gitdir: /a/b/c/d") do |repo_path|
+      assert_raise(InvalidGitRepositoryError) { Repo.new repo_path }
+    end
+  end
+
+  def test_new_with_gitfile
+    dot_git_path = File.expand_path(File.join(File.dirname(__FILE__), "dot_git"))
+    with_new_gitfile_repo("gitdir: #{dot_git_path}") do |repo_path|
+      repo = Repo.new repo_path
+      assert_equal "ca8a30f5a7f0f163bbe3b6f0abf18a6c83b0687a", repo.commits.first.id
+    end
+  end
+
   # descriptions
 
   def test_description
