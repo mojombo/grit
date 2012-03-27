@@ -89,12 +89,13 @@ module Grit
 
       def construct_status
         @files = ls_files
+        submodules = @files.values.select{ |file| file[:mode_index] == '160000' }.map!{ |file| file[:path] }
 
         Dir.chdir(@base.working_dir) do
           # find untracked in working dir
           Dir.glob('**/*') do |file|
-            if !@files[file]
-              @files[file] = {:path => file, :untracked => true} if !File.directory?(file)
+            if !@files[file] && !File.directory?(file) && submodules.select{ |path| file.start_with?(path) }.empty?
+              @files[file] = {:path => file, :untracked => true}
             end
           end
 
