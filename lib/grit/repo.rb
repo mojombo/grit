@@ -201,8 +201,8 @@ module Grit
       self.git.fs_read('description').chomp
     end
 
-    def blame(file, commit = nil)
-      Blame.new(self, file, commit)
+    def blame(file, commit = nil, start_line = nil, end_line = nil)
+      Blame.new(self, file, commit, start_line, end_line)
     end
 
     # An array of Head objects representing the branch heads in
