@@ -343,10 +343,10 @@ module Grit
 
           add_sha = true
 
-          if opts[:since] && opts[:since].is_a?(Time) && (opts[:since] > c.committer.date)
+          if opts[:since] && opts[:since].is_a?(Time) && (opts[:since] < c.committer.date)
             add_sha = false
           end
-          if opts[:until] && opts[:until].is_a?(Time) && (opts[:until] < c.committer.date)
+          if opts[:until] && opts[:until].is_a?(Time) && (opts[:until] > c.committer.date)
             add_sha = false
           end
 
