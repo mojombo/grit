@@ -78,9 +78,18 @@ class TestRepo < Test::Unit::TestCase
     end
   end
 
-  def test_new_with_gitfile
+  def test_new_with_absolute_gitfile
     dot_git_path = File.expand_path(File.join(File.dirname(__FILE__), "dot_git"))
     with_new_gitfile_repo("gitdir: #{dot_git_path}") do |repo_path|
+      repo = Repo.new repo_path
+      assert_equal "ca8a30f5a7f0f163bbe3b6f0abf18a6c83b0687a", repo.commits.first.id
+    end
+  end
+
+  def test_new_with_relative_gitfile
+    absolute_dot_git_path = File.expand_path(File.join(File.dirname(__FILE__), "dot_git"))
+    relative_dot_git_path = File.join("../..", absolute_dot_git_path)
+    with_new_gitfile_repo("gitdir: #{relative_dot_git_path}") do |repo_path|
       repo = Repo.new repo_path
       assert_equal "ca8a30f5a7f0f163bbe3b6f0abf18a6c83b0687a", repo.commits.first.id
     end

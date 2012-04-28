@@ -44,6 +44,9 @@ module Grit
       if File.exist?(git_dir_or_file)
         if File.file?(git_dir_or_file)
           self.path = parse_gitfile(git_dir_or_file)
+          if self.path && self.path !~ %r[^/]
+            self.path = File.join(epath, self.path)
+          end
         else
           self.path = git_dir_or_file
         end
