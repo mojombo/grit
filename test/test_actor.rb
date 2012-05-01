@@ -43,4 +43,25 @@ class TestActor < Test::Unit::TestCase
     a = Actor.from_string("Tom Werner <tom@example.com>")
     assert_equal a.name, a.to_s
   end
+
+  # equality
+
+  def test_equality
+    a = Actor.from_string("Tom Werner <tom@example.com>")
+    assert_equal a, a.dup
+  end
+
+  def test_inequality
+    assert_not_equal(
+      Actor.from_string("Tom Werner <tom@example.com>"),
+      Actor.from_string("Paul Annesley <paul@example.org>")
+    )
+  end
+
+  def test_inequality_due_to_class
+    assert_not_equal(
+      Actor.from_string("Tom Werner <tom@example.com>"),
+      Struct.new(:name, :email).new("Tom Werner", "tom@example.com")
+    )
+  end
 end
