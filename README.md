@@ -1,6 +1,9 @@
 Grit
 ====
 
+[![Build Status](https://secure.travis-ci.org/mojombo/grit.png?branch=master)](http://travis-ci.org/mojombo/grit)
+[![Dependency Status](https://gemnasium.com/mojombo/grit.png)](https://gemnasium.com/mojombo/grit)
+
 Grit gives you object oriented read/write access to Git repositories via Ruby.
 The main goals are stability and performance. To this end, some of the
 interactions with Git repositories are done by shelling out to the system's
