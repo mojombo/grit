@@ -196,11 +196,12 @@ module Grit
 	    str = "%s %s\0%s" % ['100644', p.force_encoding("UTF-8"), sha.force_encoding("UTF-8")]
             tree_contents[p] = str
           when Hash
+	    p = k.dup
             ctree = now_tree/k if now_tree
             sha = write_tree(v, ctree)
             sha = [sha].pack("H*")
-            str = "%s %s\0%s" % ['40000', k, sha]
-            tree_contents[k + '/'] = str.force_encoding("UTF-8")
+            str = "%s %s\0%s" % ['40000', p.force_encoding("UTF-8"), sha.force_encoding("UTF-8")]
+            tree_contents[p + '/'] = str.force_encoding("UTF-8")
           when false
             tree_contents.delete(k)
         end
