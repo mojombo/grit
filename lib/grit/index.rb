@@ -103,8 +103,7 @@ module Grit
     def commit(message, parents = nil, actor = nil, last_tree = nil, head = 'master')
       commit_tree_sha = nil
 
-      hook = self.repo.hook('pre-commit')
-      return false unless hook && hook.success?
+      return false unless self.repo.execute_hook('pre-commit')
 
       if parents.is_a?(Hash)
         commit_tree_sha = parents[:commit_tree_sha]
@@ -155,7 +154,7 @@ module Grit
 
       self.repo.update_ref(head, commit_sha1) if head
 
-      self.repo.hook('post-commit')
+      self.repo.execute_hook('post-commit')
 
       commit_sha1
     end
