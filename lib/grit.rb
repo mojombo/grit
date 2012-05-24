@@ -10,6 +10,7 @@ require 'logger'
 require 'digest/sha1'
 
 # third party
+require 'active_support/core_ext/array/extract_options'     # extract_options
 
 begin
   require 'mime/types'
