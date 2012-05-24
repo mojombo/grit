@@ -340,7 +340,6 @@ module Grit
       argv << Git.git_binary
       argv << "--git-dir=#{git_dir}" if base
       if work && work_tree && work_tree.length > 0
-        p "work_tree=#{work_tree}"
         argv << "--work-tree=#{work_tree}"
       end
       argv << cmd.to_s.tr('_', '-')
