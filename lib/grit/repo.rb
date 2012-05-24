@@ -46,6 +46,7 @@ module Grit
         @bare = false
       elsif File.exist?(epath) && (epath =~ /\.git$/ || options[:is_bare])
         self.path = epath
+        self.working_dir = options[:working_dir] if options[:working_dir]
         @bare = true
       elsif File.exist?(epath)
         raise InvalidGitRepositoryError.new(epath)
@@ -53,7 +54,7 @@ module Grit
         raise NoSuchPathError.new(epath)
       end
 
-      self.git = Git.new(self.path)
+      self.git = Git.new(self.path, self.working_dir)
     end
 
     # Public: Initialize a git repository (create it on the filesystem). By
@@ -234,20 +235,20 @@ module Grit
     # Commits current index
     #
     # Returns true/false if commit worked
-    def commit_index(message)
-      self.git.commit({}, '-m', message)
+    def commit_index(message, options = {})
+      self.git.commit(options, '-m', message)
     end
 
     # Commits all tracked and modified files
     #
     # Returns true/false if commit worked
-    def commit_all(message)
-      self.git.commit({}, '-a', '-m', message)
+    def commit_all(message, options = {})
+      self.git.commit(options, '-a', '-m', message)
     end
 
     # Adds files to the index
-    def add(*files)
-      self.git.add({}, *files.flatten)
+    def add(*files, options = {})
+      self.git.add(options, *files.flatten)
     end
 
     # Remove files from the index
