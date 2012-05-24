@@ -4,12 +4,16 @@ module Grit
 
     attr_reader :lines
 
-    def initialize(repo, file, commit)
+    def initialize(repo, file, commit, lines=nil)
       @repo = repo
       @file = file
       @commit = commit
-      @lines = []
-      load_blame
+      if lines.nil?
+        @lines = []
+        load_blame
+      else
+        @lines = lines
+      end
     end
 
     def load_blame
