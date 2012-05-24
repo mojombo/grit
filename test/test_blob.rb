@@ -79,5 +79,6 @@ class TestBlob < Test::Unit::TestCase
   def test_basename
     @b = Blob.create(@r, :name => 'foo/bar.rb')
     assert_equal "bar.rb", @b.basename
+    assert_equal "bar", @b.basename('.rb')
   end
 end
