@@ -218,6 +218,7 @@ module Grit
     end
 
     alias_method :branches, :heads
+    alias_method :branch_count, :head_count
 
     def get_head(head_name)
       heads.find { |h| h.name == head_name }
