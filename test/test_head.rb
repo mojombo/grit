@@ -43,6 +43,7 @@ class TestHead < Test::Unit::TestCase
 
   def test_head_count
     assert_equal 5, @r.heads.size
+    assert_equal 5, @r.head_count
   end
 
 

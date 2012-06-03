@@ -4,6 +4,16 @@ module Grit
 
     class << self
 
+      # Count all Refs
+      #   +repo+ is the Repo
+      #   +options+ is a Hash of options
+      #
+      # Returns int
+      def count_all(repo, options = {})
+        refs = repo.git.refs(options, prefix)
+        refs.split("\n").size
+      end
+
       # Find all Refs
       #   +repo+ is the Repo
       #   +options+ is a Hash of options
