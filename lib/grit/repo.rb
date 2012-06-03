@@ -213,6 +213,10 @@ module Grit
       Head.find_all(self)
     end
 
+    def head_count
+      Head.count_all(self)
+    end
+
     alias_method :branches, :heads
 
     def get_head(head_name)
@@ -278,6 +282,10 @@ module Grit
       Tag.find_all(self)
     end
 
+    def tag_count
+      Tag.count_all(self)
+    end
+
     # Finds the most recent annotated tag name that is reachable from a commit.
     #
     #   @repo.recent_tag_name('master')
@@ -308,6 +316,10 @@ module Grit
     # Returns Grit::Remote[] (baked)
     def remotes
       Remote.find_all(self)
+    end
+
+    def remote_count
+      Remote.count_all(self)
     end
 
     def remote_list
