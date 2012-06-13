@@ -13,6 +13,6 @@ class TestRemote < Test::Unit::TestCase
   end
 
   def test_remote_count
-    assert_equal 7, @r.remote_count
+    assert_equal 4, @r.remote_count
   end
 end
