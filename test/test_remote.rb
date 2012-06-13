@@ -11,4 +11,8 @@ class TestRemote < Test::Unit::TestCase
     remote = @r.remotes.first
     assert_equal %Q{#<Grit::Remote "#{remote.name}">}, remote.inspect
   end
+
+  def test_remote_count
+    assert_equal 4, @r.remote_count
+  end
 end

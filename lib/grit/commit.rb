@@ -142,6 +142,12 @@ module Grit
       commits = []
 
       while !lines.empty?
+        # GITLAB patch
+        # Skip all garbage unless we get real commit
+        while !lines.empty? && lines.first !~ /^commit [a-zA-Z0-9]*$/
+          lines.shift 
+        end
+
         id = lines.shift.split.last
         tree = lines.shift.split.last
 
@@ -158,6 +164,10 @@ module Grit
 
         # not doing anything with this yet, but it's sometimes there
         encoding = lines.shift.split.last if lines.first =~ /^encoding/
+
+        # GITLAB patch
+        # Skip Signature and other raw data
+        lines.shift while lines.first =~ /^ /
 
         lines.shift
 

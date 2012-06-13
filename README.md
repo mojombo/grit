@@ -1,5 +1,7 @@
-Grit
+Grit [![build status](https://secure.travis-ci.org/gitlabhq/grit.png)](https://secure.travis-ci.org/gitlabhq/grit)
 ====
+
+
 
 Grit gives you object oriented read/write access to Git repositories via Ruby.
 The main goals are stability and performance. To this end, some of the
