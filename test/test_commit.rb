@@ -187,7 +187,7 @@ class TestCommit < Test::Unit::TestCase
     assert patch.include?('From: tom <tom@taco.(none)>')
     assert patch.include?('Date: Tue, 20 Nov 2007 17:27:42 -0800')
     assert patch.include?('Subject: [PATCH] fix tests on other machines')
-    assert patch.include?('test/test_reality.rb |   30 +++++++++++++++---------------')
+    assert patch.include?('test/test_reality.rb | 30 +++++++++++++++---------------')
     assert patch.include?('@@ -1,17 +1,17 @@')
     assert patch.include?('+#     recurse(t)')
     assert patch.include?("1.7.")
