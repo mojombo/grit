@@ -228,4 +228,12 @@ class TestCommit < Test::Unit::TestCase
   ensure
     ENV["TZ"] = old_tz
   end
+
+  # .list_from_string
+
+  def test_list_from_string
+    commits = Commit.list_from_string(@r, fixture('mergetag'))
+
+    assert commits
+  end
 end

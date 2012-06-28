@@ -159,6 +159,13 @@ module Grit
         # not doing anything with this yet, but it's sometimes there
         encoding = lines.shift.split.last if lines.first =~ /^encoding/
 
+        if lines[1] && lines[1][0] == ' ' && lines[1][1] && lines[1][1] != ' '
+          lines.shift
+          while lines[0] && lines[0][0] == ' '
+            lines.shift
+          end
+        end
+
         lines.shift
 
         message_lines = []
