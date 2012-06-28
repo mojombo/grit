@@ -1,0 +1,7 @@
+0000000000000000000000000000000000000000 2ae8b20538f5d358e97978632965efc380c42c9a Jonathan Hoyt <hoyt@github.com> 1340922996 -0700	commit (initial): first commit
+2ae8b20538f5d358e97978632965efc380c42c9a 2ae8b20538f5d358e97978632965efc380c42c9a Jonathan Hoyt <hoyt@github.com> 1340923620 -0700	checkout: moving from master to foo
+2ae8b20538f5d358e97978632965efc380c42c9a b2b1760347d797f3dc79360d487b9afa7baafd6a Jonathan Hoyt <hoyt@github.com> 1340923676 -0700	commit: foo
+b2b1760347d797f3dc79360d487b9afa7baafd6a 2ae8b20538f5d358e97978632965efc380c42c9a Jonathan Hoyt <hoyt@github.com> 1340923788 -0700	checkout: moving from foo to master
+2ae8b20538f5d358e97978632965efc380c42c9a 2ae8b20538f5d358e97978632965efc380c42c9a Jonathan Hoyt <hoyt@github.com> 1340923793 -0700	checkout: moving from master to bar
+2ae8b20538f5d358e97978632965efc380c42c9a dce37589cfa5748900d05ab07ee2af5010866838 Jonathan Hoyt <hoyt@github.com> 1340923810 -0700	commit: bar
+dce37589cfa5748900d05ab07ee2af5010866838 671d0b0a85af271395eb71ff91f942f54681b144 Jonathan Hoyt <hoyt@github.com> 1340923820 -0700	merge v1.1: Merge made by the 'recursive' strategy.

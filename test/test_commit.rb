@@ -232,8 +232,10 @@ class TestCommit < Test::Unit::TestCase
   # .list_from_string
 
   def test_list_from_string
-    commits = Commit.list_from_string(@r, fixture('mergetag'))
+    repo = Repo.new(File.join(File.dirname(__FILE__), *%w[dot_git_signed_tag_merged]), :is_bare => true)
+    rev_list = repo.git.rev_list({:pretty => "raw", :all => true})
+    commits = Commit.list_from_string(@r, rev_list)
 
-    assert commits
+    assert_equal 4, commits.size
   end
 end
