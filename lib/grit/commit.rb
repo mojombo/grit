@@ -150,7 +150,7 @@ module Grit
         committer = nil
         committed_date = nil
         encoding = nil
-        while lines.present?
+        while !lines.empty?
           line = lines.shift
           if line =~ /^ {4}/
             message_lines << line[4..-1]
