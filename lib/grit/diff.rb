@@ -29,7 +29,10 @@ module Grit
       diffs = []
 
       while !lines.empty?
-        m, a_path, b_path = *lines.shift.match(%r{^diff --git a/(.+?) b/(.+)$})
+        m, q1, a_path, q2, b_path = *lines.shift.match(%r{^diff --git ("?)a/(.+?)\1 ("?)b/(.+?)\3$})
+
+        a_path = a_path.gsub(/\\([0-9]{3})/){|c| c[1..-1].oct.chr}.force_encoding('UTF-8')
+        b_path = b_path.gsub(/\\([0-9]{3})/){|c| c[1..-1].oct.chr}.force_encoding('UTF-8')
 
         if lines.first =~ /^old mode/
           m, a_mode = *lines.shift.match(/^old mode (\d+)/)
