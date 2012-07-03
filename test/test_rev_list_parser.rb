@@ -13,15 +13,15 @@ class TestRevListParser < Test::Unit::TestCase
     assert_equal 1, parser.entries.size
     assert entry = parser.entries.first
     assert_equal "Merge tag 'v1.1' into bar", entry.message_lines.first
-    assert_equal '671d0b0a85af271395eb71ff91f942f54681b144', entry.meta['commit'].to_s
-    assert_equal 'a9ac6c1e58bbdd7693e49ce34b32d9b0b53c0bcf', entry.meta['tree'].to_s
+    assert_equal '671d0b0a85af271395eb71ff91f942f54681b144', entry.commit
+    assert_equal 'a9ac6c1e58bbdd7693e49ce34b32d9b0b53c0bcf', entry.tree
     assert_equal [
       'dce37589cfa5748900d05ab07ee2af5010866838', 'b2b1760347d797f3dc79360d487b9afa7baafd6a'],
-      entry.meta['parent']
+      entry.parents
 
-    assert_match /^Jonathan /, entry.meta['author'].to_s
-    assert_match /^Jonathan /, entry.meta['committer'].to_s
-    assert_equal 'object b2b1760347d797f3dc79360d487b9afa7baafd6a', entry.meta['mergetag'].to_s
+    assert_match /^Jonathan /, entry.author
+    assert_match /^Jonathan /, entry.committer
+    assert_equal 'object b2b1760347d797f3dc79360d487b9afa7baafd6a', entry.meta[:mergetag].to_s
   end
 
   def test_parsing_multiple_commits
@@ -35,7 +35,7 @@ class TestRevListParser < Test::Unit::TestCase
               2ae8b20538f5d358e97978632965efc380c42c9a)
     shas.each_with_index do |sha, idx|
       assert entry = parser.entries[idx], "no entry for commit #{idx+1}"
-      assert_equal sha, entry.meta['commit'].to_s, "different sha for commit #{idx+1}"
+      assert_equal sha, entry.commit, "different sha for commit #{idx+1}"
     end
   end
 end

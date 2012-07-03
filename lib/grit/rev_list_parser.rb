@@ -9,6 +9,26 @@ module Grit
         @message_lines = []
       end
 
+      def commit
+        @meta[:commit].to_s
+      end
+
+      def parents
+        @meta[:parent] || []
+      end
+
+      def tree
+        @meta[:tree].to_s
+      end
+
+      def author
+        @meta[:author].to_s
+      end
+
+      def committer
+        @meta[:committer].to_s
+      end
+
       def parse(line)
         spaces = line.scan(/^ */).first
         if spaces.size >= 4
@@ -19,9 +39,9 @@ module Grit
       end
 
       def parse_meta(line, spaces)
-        return if spaces > 0
+        return if spaces > 0 || line.empty?
         header, value = line.split(' ', 2)
-        values = @meta[header] ||= []
+        values = @meta[header.to_sym] ||= []
         values << value
       end
 
