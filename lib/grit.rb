@@ -47,6 +47,7 @@ require 'grit/status'
 require 'grit/submodule'
 require 'grit/blame'
 require 'grit/merge'
+require 'grit/rev_list_parser'
 
 module Grit
   VERSION = '2.5.0'
