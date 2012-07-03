@@ -1,13 +1,10 @@
 require File.dirname(__FILE__) + '/helper'
 
 class TestRevListParser < Test::Unit::TestCase
-  def setup
-    @r = Repo.new(File.join(File.dirname(__FILE__), *%w[dot_git_signed_tag_merged]), :is_bare => true)
-  end
-
   def test_parsing_single_commit
     sha = '671d0b0a85af271395eb71ff91f942f54681b144'
-    rev_list = @r.git.rev_list({:pretty => "raw", :max_count => 1}, sha)
+    r = repo(:dot_git_signed_tag_merged)
+    rev_list = r.git.rev_list({:pretty => "raw", :max_count => 1}, sha)
 
     parser = Grit::RevListParser.new(rev_list)
     assert_equal 1, parser.entries.size
@@ -25,10 +22,10 @@ class TestRevListParser < Test::Unit::TestCase
   end
 
   def test_parsing_multiple_commits
-    rev_list = @r.git.rev_list({:pretty => "raw", :all => true})
+    r = repo(:dot_git_signed_tag_merged)
+    rev_list = r.git.rev_list({:pretty => "raw", :all => true})
 
     parser = Grit::RevListParser.new(rev_list)
-    assert_equal 4, parser.entries.size
     shas = %w(671d0b0a85af271395eb71ff91f942f54681b144
               dce37589cfa5748900d05ab07ee2af5010866838
               b2b1760347d797f3dc79360d487b9afa7baafd6a
@@ -37,6 +34,25 @@ class TestRevListParser < Test::Unit::TestCase
       assert entry = parser.entries[idx], "no entry for commit #{idx+1}"
       assert_equal sha, entry.commit, "different sha for commit #{idx+1}"
     end
+    assert_equal 4, parser.entries.size
+  end
+
+  def test_parsing_multiple_commits_with_empty_message
+    r = repo(:dot_git_empty_messages)
+    rev_list = r.git.rev_list({:pretty => "raw", :all => true})
+
+    parser = Grit::RevListParser.new(rev_list)
+    shas = %w(4a295262f134e3b97b3988d631e3bd9f9b132c8a
+              c01a96da0c12a4c49260cefa744b34c53a0c7c68)
+    shas.each_with_index do |sha, idx|
+      assert entry = parser.entries[idx], "no entry for commit #{idx+1}"
+      assert_equal sha, entry.commit, "different sha for commit #{idx+1}"
+    end
+    assert_equal 2, parser.entries.size
+  end
+
+  def repo(name)
+    Repo.new(File.join(File.dirname(__FILE__), name.to_s), :is_bare => true)
   end
 end
 

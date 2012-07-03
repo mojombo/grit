@@ -4,7 +4,7 @@ module Grit
       attr_reader :meta, :message_lines
 
       def initialize
-        @done = false
+        @finished_meta = false
         @meta = {}
         @message_lines = []
       end
@@ -30,12 +30,25 @@ module Grit
       end
 
       def parse(line)
+        if line.empty?
+          # 2 blank lines after meta data means no commit message
+          return if @finished_meta
+
+          # if this is our first blank line, lets get the message
+          return @finished_meta = true
+        end
+
         spaces = line.scan(/^ */).first
-        if spaces.size >= 4
+
+        if @finished_meta
+          # messages should be prefixed by at least 4 spaces.  Otherwise we
+          # may be in the next commit.
+          return if spaces.size < 4
           parse_message(line)
         else
           parse_meta(line, spaces.size)
         end
+        true
       end
 
       def parse_meta(line, spaces)
@@ -59,23 +72,21 @@ module Grit
     def initialize(text)
       @entries = []
       lines = text.split("\n")
-      entry = nil
+      @entry = nil
       while !lines.empty?
-        line = lines.shift
-        entry = current_entry(entry, line)
-        entry.parse(line)
+        parse_line(lines.shift)
       end
     end
 
-    def current_entry(entry, line)
-      if entry && entry.message? && line.empty?
-        entry = nil
+    def parse_line(line)
+      if @entry && !@entry.parse(line)
+        @entry = nil
       end
 
-      if !entry
-        @entries << (entry = Entry.new)
+      if !@entry && !line.empty?
+        @entries << (@entry = Entry.new)
+        @entry.parse(line)
       end
-      entry
     end
   end
 end
