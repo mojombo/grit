@@ -34,8 +34,20 @@ module Grit
       while !lines.empty?
         m, q1, a_path, q2, b_path = *lines.shift.match(%r{^diff --git ("?)a/(.+?)\1 ("?)b/(.+?)\3$})
 
-        a_path = transcode( a_path.gsub(/\\([0-9]{3})/){|c| c[1..-1].oct.chr} )
-        b_path = transcode( b_path.gsub(/\\([0-9]{3})/){|c| c[1..-1].oct.chr} )
+        # If the filename(s) are quoted, they contain special characters that may be escaped.
+        #
+        # While it's possible for systems that are eg. old or badly configured to store
+        # filenames that are not UTF-8 encoded, the most reasonable thing to do is assume
+        # that they are UTF-8 encoded.
+        if !q1.empty? || !q2.empty?
+          a_path = a_path.gsub(/\\([0-9]{3})/){|c| c[1..-1].oct.chr}
+          b_path = b_path.gsub(/\\([0-9]{3})/){|c| c[1..-1].oct.chr}
+
+          # The above gsub returns a string with ASCII-8BIT encoding in Ruby 1.9,
+          # even though a_path and b_path are UTF-8 encoded.
+          a_path.force_encoding( 'UTF-8' ) if a_path.respond_to?( :force_encoding )
+          b_path.force_encoding( 'UTF-8' ) if b_path.respond_to?( :force_encoding )
+        end
 
         if lines.first =~ /^old mode/
           m, a_mode = *lines.shift.match(/^old mode (\d+)/)
@@ -81,21 +93,6 @@ module Grit
       diffs
     end
 
-    private
-
-      def self.transcode(string, target_encoding = 'UTF-8')
-        detected = string.detect_encoding
-
-        if detected.nil? || detected[:encoding].nil? || detected[:encoding] == target_encoding
-          string
-        else
-          begin
-            CharlockHolmes::Converter.convert( string, detected[:encoding], target_encoding )
-          rescue
-            string
-          end
-        end
-      end
   end # Diff
 
 end # Grit
