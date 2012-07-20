@@ -1,6 +1,3 @@
-require 'charlock_holmes'
-require 'charlock_holmes/string'
-
 module Grit
 
   class Diff
