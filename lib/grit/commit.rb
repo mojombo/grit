@@ -2,6 +2,7 @@ module Grit
 
   class Commit
     extend Lazy
+    extend Encode
 
     attr_reader :id
     attr_reader :repo
@@ -25,12 +26,17 @@ module Grit
     def self.parse_batch(repo, sha, size, object)
       info, message = object.split("\n\n", 2)
 
+      encoding = nil
+
       lines = info.split("\n")
       tree = lines.shift.split(' ', 2).last
       parents = []
       parents << lines.shift[7..-1] while lines.first[0, 6] == 'parent'
       author,    authored_date  = Grit::Commit.actor(lines.shift)
       committer, committed_date = Grit::Commit.actor(lines.shift)
+      encoding = $1  if lines.detect { |line| line =~ /\Aencoding\s*(.+)\z/ }
+
+      message = message_in_utf8(message, encoding)
 
       Grit::Commit.new(
         repo, sha, parents, tree,
@@ -165,6 +171,8 @@ module Grit
         message_lines << lines.shift[4..-1] while lines.first =~ /^ {4}/
 
         lines.shift while lines.first && lines.first.empty?
+
+        message_lines = message_lines.map { |line| message_in_utf8(line, encoding) }  if encoding
 
         commits << Commit.new(repo, id, parents, tree, author, authored_date, committer, committed_date, message_lines)
       end
