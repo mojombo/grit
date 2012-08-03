@@ -235,7 +235,7 @@ module Grit
   class Commit < GitObject
     extend Grit::Encode
 
-    attr_accessor :author, :committer, :tree, :parent, :message, :decoded_message, :encoding, :headers
+    attr_accessor :author, :committer, :tree, :parent, :message, :encoding, :headers
 
     def self.from_raw(rawobject, repository=nil)
       parent = []
@@ -263,11 +263,10 @@ module Grit
       if not tree && author && committer
         raise RuntimeError, "incomplete raw commit object"
       end
-      decoded_message = message_in_utf8(message, encoding)
-      new(tree, parent, author, committer, message, headers, repository, decoded_message, encoding)
+      new(tree, parent, author, committer, message, headers, repository, encoding)
     end
 
-    def initialize(tree, parent, author, committer, message, headers, repository=nil, decoded_message=nil, encoding=nil)
+    def initialize(tree, parent, author, committer, message, headers, repository=nil, encoding=nil)
       @tree = tree
       @author = author
       @parent = parent
@@ -275,8 +274,11 @@ module Grit
       @message = message
       @headers = headers
       @repository = repository
-      @decoded_message = decoded_message || message
       @encoding = encoding
+    end
+
+    def decoded_message
+      message_in_utf8(message, encoding)
     end
 
     def type
