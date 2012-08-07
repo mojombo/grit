@@ -83,7 +83,7 @@ In the above example, the directory `/Users/tom/dev/grit` is my working
 directory and contains the `.git` directory. You can also initialize Grit with
 a bare repo.
 
-    repo = Repo.new("/var/git/grit.git")
+    repo = Grit::Repo.init_bare("/var/git/grit.git")
 
 
 ### Getting a list of commits
