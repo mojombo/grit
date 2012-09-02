@@ -75,7 +75,10 @@ module Grit
     def rev_parse(options, string)
       raise RuntimeError, "invalid string: #{string.inspect}" unless string.is_a?(String)
 
-      if string =~ /\.\./
+      # Split ranges, but don't split when specifying a ref:path.
+      # Don't split HEAD:some/path/in/repo..txt
+      # Do split sha1..sha2
+      if string !~ /:/ && string =~ /\.\./
         (sha1, sha2) = string.split('..')
         return [rev_parse({}, sha1), rev_parse({}, sha2)]
       end
