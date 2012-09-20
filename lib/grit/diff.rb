@@ -74,6 +74,14 @@ module Grit
 
       diffs
     end
+
+    def self.binary?(diff_file)
+      diff_file.diff[0..256].include?("\000")
+    end
+
+    def bynary?
+      class.self.bynary?(self)
+    end
   end # Diff
 
 end # Grit
