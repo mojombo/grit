@@ -29,6 +29,10 @@ module Grit
       @files.select { |k, f| f.untracked }
     end
 
+    def all_changed
+      @files.select { |k, f| (f.type =~ /(M|A|D)/ || f.untracked) }
+    end
+
     def pretty
       out = ''
       self.each do |file|
