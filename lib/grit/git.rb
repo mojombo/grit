@@ -73,9 +73,15 @@ module Grit
     class << self
       attr_accessor :git_timeout, :git_max_size
       def git_binary
+        if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
+          git_filename = 'git.exe'
+        else
+          git_filename = 'git'
+        end
         @git_binary ||=
-          ENV['PATH'].split(':').
-            map  { |p| File.join(p, 'git') }.
+          ENV['PATH'].split(File::PATH_SEPARATOR).
+            map  { |p| File.join(p, git_filename) }.
+            map  { |p| p.gsub!('\\', '/') }.
             find { |p| File.exist?(p) }
       end
       attr_writer :git_binary
