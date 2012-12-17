@@ -399,7 +399,7 @@ module Grit
     # The Commits objects that are newer than the specified date.
     # Commits are returned in chronological order.
     #   +start+ is the branch/commit name (default 'master')
-    #   +since+ is a string represeting a date/time
+    #   +since+ is a string representing a date/time
     #   +extra_options+ is a hash of extra options
     #
     # Returns Grit::Commit[] (baked)
