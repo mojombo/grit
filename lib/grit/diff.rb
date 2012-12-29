@@ -29,8 +29,7 @@ module Grit
       diffs = []
 
       while !lines.empty?
-        # TODO: What if there is " in the filename? Especially as the end of?
-        m, a_path, b_path = *lines.shift.match(%r{^diff --git "?a/(.+?)"? "?b/(.+?)"?$})
+        m, a_path, b_path = *lines.shift.match(%r{^diff --git "?a\/(.+?)(?<!\\)"? "?b\/(.+?)(?<!\\)"?$})
 
         if lines.first =~ /^old mode/
           m, a_mode = *lines.shift.match(/^old mode (\d+)/)
