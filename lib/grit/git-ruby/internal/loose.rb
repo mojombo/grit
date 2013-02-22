@@ -12,6 +12,7 @@
 require 'zlib'
 require 'digest/sha1'
 require 'grit/git-ruby/internal/raw_object'
+require 'tempfile'
 
 module Grit
   module GitRuby
@@ -60,6 +61,23 @@ module Grit
           return RawObject.new(type, content)
         end
 
+        # write an object to a temporary file, then atomically rename it
+        # into place; this ensures readers never see a half-written file
+        def safe_write(path, content)
+          Tempfile.open("tmp_obj_", File.dirname(path), :opt => "wb") do |f|
+            f.write content
+            f.close
+            begin
+              File.link(f.path, path)
+            rescue Errno::EEXIST
+              # The path already exists; we raced with another process,
+              # but it's OK, because by definition the content is the
+              # same. So we can just ignore the error.
+            end
+            f.unlink
+          end
+        end
+
         # currently, I'm using the legacy format because it's easier to do
         # this function takes content and a type and writes out the loose object and returns a sha
         def put_raw_object(content, type)
@@ -76,9 +94,7 @@ module Grit
             content = Zlib::Deflate.deflate(store)
 
             FileUtils.mkdir_p(@directory+'/'+sha1[0...2])
-            File.open(path, 'wb') do |f|
-              f.write content
-            end
+            safe_write(path, content)
           end
           return sha1
         end
