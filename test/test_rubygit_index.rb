@@ -121,4 +121,20 @@ class TestRubyGitIndex < Test::Unit::TestCase
     b = @git.commits.first.tree/'README.txt'
     assert_equal 'e45d6b418e34951ddaa3e78e4fc4d3d92a46d3d1', b.id
   end
+
+  # deleting the contents of a directory should delete the directory itself
+  def test_delete_dirs
+    i = @git.index
+    i.read_tree(@git.commits.first.tree.id)
+    %w(pack.rb loose.rb raw_object.rb mmap.rb).each {|f| i.delete(File.join('lib/grit/git-ruby/internal', f))}
+    i.commit('message', [@git.commits.first], @user, nil, 'master')
+    assert !(@git.commits.first.tree / 'lib/grit/git-ruby').contents.map {|c| c.name}.include?('internal')
+        
+    i = @git.index
+    i.read_tree(@git.commits.first.tree.id)
+    %w(object.rb repository.rb).each {|f| i.delete(File.join('lib/grit/git-ruby', f))}
+    i.commit('message', [@git.commits.first], @user, nil, 'master')
+    assert !(@git.commits.first.tree / 'lib/grit').contents.map {|c| c.name}.include?('git-ruby')
+  end
+
 end
