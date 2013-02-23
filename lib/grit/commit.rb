@@ -137,39 +137,15 @@ module Grit
     # - it broke when 'encoding' was introduced - not sure what else might show up
     #
     def self.list_from_string(repo, text)
-      lines = text.split("\n")
+      parser = RevListParser.new(text)
+      parser.entries.map { |entry| bake_from_parser(repo, entry) }
+    end
 
-      commits = []
-
-      while !lines.empty?
-        id = lines.shift.split.last
-        tree = lines.shift.split.last
-
-        parents = []
-        parents << lines.shift.split.last while lines.first =~ /^parent/
-
-        author_line = lines.shift
-        author_line << lines.shift if lines[0] !~ /^committer /
-        author, authored_date = self.actor(author_line)
-
-        committer_line = lines.shift
-        committer_line << lines.shift if lines[0] && lines[0] != '' && lines[0] !~ /^encoding/
-        committer, committed_date = self.actor(committer_line)
-
-        # not doing anything with this yet, but it's sometimes there
-        encoding = lines.shift.split.last if lines.first =~ /^encoding/
-
-        lines.shift
-
-        message_lines = []
-        message_lines << lines.shift[4..-1] while lines.first =~ /^ {4}/
-
-        lines.shift while lines.first && lines.first.empty?
-
-        commits << Commit.new(repo, id, parents, tree, author, authored_date, committer, committed_date, message_lines)
-      end
-
-      commits
+    def self.bake_from_parser(repo, entry)
+      author, authored_date = actor('author ' + entry.author)
+      committer, committed_date = actor('committer ' + entry.committer)
+      new(repo, entry.commit, entry.parents, entry.tree, author, authored_date,
+        committer, committed_date, entry.message_lines)
     end
 
     # Show diffs between two trees.

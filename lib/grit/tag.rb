@@ -40,8 +40,11 @@ module Grit
       data << ""
       data << hash[:message]
       data = data.join("\n")
-      sha = repo.git.put_raw_object(data, 'tag')
-      { :sha => sha, :size => data.size }
+
+      repo.git.native(:mktag, {
+        :input => data,
+        :raise => true
+      }).chomp
     end
 
     # Parses the results from `cat-file -p`

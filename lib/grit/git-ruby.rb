@@ -3,7 +3,7 @@ require 'grit/git-ruby/repository'
 module Grit
 
   # the functions in this module intercept the calls to git binary
-  # made by the grit objects and attempts to run them in pure ruby
+  # made buy the grit objects and attempts to run them in pure ruby
   # if it will be faster, or if the git binary is not available (!!TODO!!)
   module GitRuby
 

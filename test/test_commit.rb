@@ -194,7 +194,7 @@ class TestCommit < Test::Unit::TestCase
   end
 
   # patch_id
-  
+
   def test_patch_id
     @c = Commit.create(@r, :id => '80f136f500dfdb8c3e8abf4ae716f875f0a1b57f')
     assert_equal '9450b04e4f83ad0067199c9e9e338197d1835cbb', @c.patch_id
@@ -227,5 +227,24 @@ class TestCommit < Test::Unit::TestCase
     assert_equal expected, @c.to_hash
   ensure
     ENV["TZ"] = old_tz
+  end
+
+  # .list_from_string
+
+  def test_list_from_string
+    repo = Repo.new(File.join(File.dirname(__FILE__), *%w[dot_git_signed_tag_merged]), :is_bare => true)
+    rev_list = repo.git.rev_list({:pretty => "raw", :all => true})
+    commits = Commit.list_from_string(@r, rev_list)
+
+    assert_equal 4, commits.size
+  end
+
+  def test_list_from_string_with_single_signed_commit
+    sha = '671d0b0a85af271395eb71ff91f942f54681b144'
+    repo = Repo.new(File.join(File.dirname(__FILE__), *%w[dot_git_signed_tag_merged]), :is_bare => true)
+    rev_list = repo.git.rev_list({:pretty => "raw", :max_count => 1}, sha)
+    commits = Commit.list_from_string(@r, rev_list)
+
+    assert_equal 1, commits.size
   end
 end
