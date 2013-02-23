@@ -8,6 +8,7 @@ require 'time'
 require 'timeout'
 require 'logger'
 require 'digest/sha1'
+require 'set'
 
 # third party
 
