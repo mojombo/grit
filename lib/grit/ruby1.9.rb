@@ -1,5 +1,5 @@
 class String
-  if ((defined? RUBY_VERSION) && (RUBY_VERSION[0..2] == "1.9"))
+  if self.method_defined?(:ord)
     def getord(offset); self[offset].ord; end
   else
     alias :getord :[]
