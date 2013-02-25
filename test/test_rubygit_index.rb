@@ -137,4 +137,12 @@ class TestRubyGitIndex < Test::Unit::TestCase
     assert !(@git.commits.first.tree / 'lib/grit').contents.map {|c| c.name}.include?('git-ruby')
   end
 
+  def test_delete_whole_dir
+    i = @git.index
+    i.read_tree(@git.commits.first.tree.id)
+    i.delete('lib/grit/git-ruby/internal')
+    i.commit('message', [@git.commits.first], @user, nil, 'master')
+    assert !(@git.commits.first.tree / 'lib/grit/git-ruby').contents.map {|c| c.name}.include?('internal')
+  end
+
 end
