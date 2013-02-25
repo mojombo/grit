@@ -5,5 +5,5 @@ group :development, :test do
   gem 'posix-spawn', "~> 0.3.6"
   gem 'mime-types', "~> 1.15"
   gem 'diff-lcs', "~> 1.1"
-  gem 'mocha'
+  gem 'mocha', "~> 0.13.2"
 end
