@@ -83,7 +83,7 @@ class TestRepo < Test::Unit::TestCase
 
   def test_heads_should_populate_head_data
     @r = Repo.new(File.join(File.dirname(__FILE__), *%w[dot_git]), :is_bare => true)
-    head = @r.heads[1]
+    head = @r.heads[2]
 
     assert_equal 'test/master', head.name
     assert_equal '2d3acf90f35989df8f262dc50beadc4ee3ae1560', head.commit.id
