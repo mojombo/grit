@@ -3,4 +3,5 @@ branches:
     - 'master'
 rvm:
   - 1.9.2
+  - 2.0.0
 script: "bundle exec rake test"
