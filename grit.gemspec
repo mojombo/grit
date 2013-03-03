@@ -3,17 +3,17 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.rubygems_version = '1.3.5'
 
-  s.name              = 'grit'
-  s.version           = '2.5.0'
-  s.date              = '2012-04-22'
+  s.name              = 'gitlab-grit'
+  s.version           = '1.0.0'
+  s.date              = '2013-03-02'
   s.rubyforge_project = 'grit'
 
   s.summary     = "Ruby Git bindings."
   s.description = "Grit is a Ruby library for extracting information from a git repository in an object oriented manner."
 
   s.authors  = ["Tom Preston-Werner", "Scott Chacon"]
-  s.email    = 'tom@github.com'
-  s.homepage = 'http://github.com/mojombo/grit'
+  s.email    = 'm@gitlabhq.com'
+  s.homepage = 'http://github.com/gitlabhq/grit'
 
   s.require_paths = %w[lib]
 
