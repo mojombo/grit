@@ -60,7 +60,13 @@ task :coverage do
   sh "open coverage/index.html"
 end
 
-require 'rake/rdoctask'
+begin
+  # RDoc 2.4.2+
+  require 'rdoc/task'
+rescue LoadError
+  # RDoc < 2.4.2
+  require 'rake/rdoctask'
+end
 Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "#{name} #{version}"
