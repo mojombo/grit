@@ -1,4 +1,3 @@
-# encoding: ascii-8bit
 #
 # converted from the gitrb project
 #
@@ -57,8 +56,8 @@ module Grit
             return
           end
 
-          # read header
-          sig = idxfile.read(4)
+          # read header - read returns ASCII
+          sig = idxfile.read(4).force_encoding("UTF-8")
           ver = idxfile.read(4).unpack("N")[0]
 
           if sig == PACK_IDX_SIGNATURE
