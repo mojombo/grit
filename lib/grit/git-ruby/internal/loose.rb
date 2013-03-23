@@ -64,10 +64,6 @@ module Grit
 
         # write an object to a temporary file, then atomically rename it
         # into place; this ensures readers never see a half-written file
-        #
-        # Tempfile encoding is set to ASCII so that if someone (like Rails) sets
-        # Encoding.external_encoding to something other than ASCII, grit is
-        # still ok.
         def safe_write(path, content)
           f =
             if RUBY_VERSION >= '1.9'
