@@ -1,3 +1,4 @@
+# encoding: utf-8
 #
 # converted from the gitrb project
 #
@@ -63,6 +64,10 @@ module Grit
 
         # write an object to a temporary file, then atomically rename it
         # into place; this ensures readers never see a half-written file
+        #
+        # Tempfile encoding is set to ASCII so that if someone (like Rails) sets
+        # Encoding.external_encoding to something other than ASCII, grit is
+        # still ok.
         def safe_write(path, content)
           f =
             if RUBY_VERSION >= '1.9'
@@ -97,7 +102,6 @@ module Grit
           path = @directory+'/'+sha1[0...2]+'/'+sha1[2..40]
 
           if !File.exists?(path)
-            # Zlib returns a ASCII encoded string
             content = Zlib::Deflate.deflate(store).force_encoding("UTF-8")
 
             FileUtils.mkdir_p(@directory+'/'+sha1[0...2])
