@@ -64,23 +64,18 @@ module Grit
         # write an object to a temporary file, then atomically rename it
         # into place; this ensures readers never see a half-written file
         def safe_write(path, content)
-          f =
-            if RUBY_VERSION >= '1.9'
-              Tempfile.open("tmp_obj_", File.dirname(path), :opt => "wb")
-            else
-              Tempfile.open("tmp_obj_", File.dirname(path))
-            end
-          begin
+          Tempfile.open("tmp_obj_", File.dirname(path), :opt => "wb") do |f|
             f.write content
             f.fsync
-            File.link(f.path, path)
-          rescue Errno::EEXIST
-            # The path already exists; we raced with another process,
-            # but it's OK, because by definition the content is the
-            # same. So we can just ignore the error.
-          ensure
-            f.unlink
             f.close
+            begin
+              File.link(f.path, path)
+            rescue Errno::EEXIST
+              # The path already exists; we raced with another process,
+              # but it's OK, because by definition the content is the
+              # same. So we can just ignore the error.
+            end
+            f.unlink
           end
         end
 
