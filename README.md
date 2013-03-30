@@ -1,5 +1,14 @@
-Grit [![build status](https://secure.travis-ci.org/gitlabhq/grit.png)](https://secure.travis-ci.org/gitlabhq/grit)
-====
+## Grit. GitLab fork 
+
+#### Code status
+
+* [![CI](http://ci.gitlab.org/projects/5/status?ref=master)](http://ci.gitlab.org/projects/5?ref=master)
+
+* [![build status](https://secure.travis-ci.org/gitlabhq/grit.png)](https://secure.travis-ci.org/gitlabhq/grit)
+
+* [![Code Climate](https://codeclimate.com/github/gitlabhq/grit.png)](https://codeclimate.com/github/gitlabhq/grit)
+
+* [![Coverage Status](https://coveralls.io/repos/gitlabhq/grit/badge.png?branch=master)](https://coveralls.io/r/gitlabhq/grit)
 
 
 

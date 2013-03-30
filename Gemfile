@@ -6,4 +6,5 @@ group :development, :test do
   gem 'mime-types', "~> 1.15"
   gem 'diff-lcs', "~> 1.1"
   gem 'mocha', "~> 0.13.2"
+  gem 'coveralls', require: false
 end

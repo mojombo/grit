@@ -1,3 +1,5 @@
+env:
+  - TRAVIS=true
 branches:
   only:
     - 'master'

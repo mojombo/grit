@@ -1,3 +1,8 @@
+if ENV['TRAVIS']
+  require 'coveralls'
+  Coveralls.wear!
+end
+
 require File.join(File.dirname(__FILE__), *%w[.. lib grit])
 
 require 'rubygems'
