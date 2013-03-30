@@ -4,7 +4,7 @@
 
 * [![CI](http://ci.gitlab.org/projects/5/status?ref=master)](http://ci.gitlab.org/projects/5?ref=master)
 
-* [![build status](https://secure.travis-ci.org/gitlabhq/grit.png)](https://secure.travis-ci.org/gitlabhq/grit)
+* [![build status](https://secure.travis-ci.org/gitlabhq/grit.png)](https://travis-ci.org/gitlabhq/grit)
 
 * [![Code Climate](https://codeclimate.com/github/gitlabhq/grit.png)](https://codeclimate.com/github/gitlabhq/grit)
 
