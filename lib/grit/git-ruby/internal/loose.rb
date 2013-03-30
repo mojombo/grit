@@ -66,7 +66,6 @@ module Grit
         def safe_write(path, content)
           Tempfile.open("tmp_obj_", File.dirname(path), :opt => "wb") do |f|
             f.write content
-            f.fsync
             f.close
             begin
               File.link(f.path, path)
