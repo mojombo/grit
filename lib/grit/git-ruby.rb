@@ -3,7 +3,7 @@ require 'grit/git-ruby/repository'
 module Grit
 
   # the functions in this module intercept the calls to git binary
-  # made buy the grit objects and attempts to run them in pure ruby
+  # made by the grit objects and attempts to run them in pure ruby
   # if it will be faster, or if the git binary is not available (!!TODO!!)
   module GitRuby
 
@@ -75,7 +75,10 @@ module Grit
     def rev_parse(options, string)
       raise RuntimeError, "invalid string: #{string.inspect}" unless string.is_a?(String)
 
-      if string =~ /\.\./
+      # Split ranges, but don't split when specifying a ref:path.
+      # Don't split HEAD:some/path/in/repo..txt
+      # Do split sha1..sha2
+      if string !~ /:/ && string =~ /\.\./
         (sha1, sha2) = string.split('..')
         return [rev_parse({}, sha1), rev_parse({}, sha2)]
       end
