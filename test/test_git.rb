@@ -114,7 +114,10 @@ class TestGit < Test::Unit::TestCase
   def test_passing_env_to_native
     args = [
       { 'A' => 'B' },
-      Grit::Git.git_binary, "--git-dir=#{@git.git_dir}", "help", "-a",
+      Grit::Git.git_binary,
+      "--git-dir=#{@git.git_dir}",
+      "--work-tree=#{@git.work_tree}",
+      "help", "-a",
       {:input => nil, :chdir => nil, :timeout => Grit::Git.git_timeout, :max => Grit::Git.git_max_size}
     ]
     p = Grit::Git::Child.new(*args)
