@@ -282,6 +282,9 @@ module Grit
     #       use that number of seconds; when false or 0, disable timeout.
     #     :base - Set false to avoid passing the --git-dir argument when
     #       invoking the git command.
+    #     :work_dir - Set false to avoid passing the --work-tree argument when
+    #       invoking the git command. (GIT_WORK_TREE or --work-tree=<directory> is
+    #       not allowed without specifying GIT_DIR or --git-dir=<directory>.)
     #     :env - Hash of environment variable key/values that are set on the
     #       child process.
     #     :raise - When set true, commands that exit with a non-zero status
@@ -325,15 +328,18 @@ module Grit
       return run(prefix, cmd, '', options, args) if args[-1].to_s[0] == ?|
 
       # more options
-      input    = options.delete(:input)
-      timeout  = options.delete(:timeout); timeout = true if timeout.nil?
-      base     = options.delete(:base);    base    = true if base.nil?
-      chdir    = options.delete(:chdir)
+      input     = options.delete(:input)
+      timeout   = options.delete(:timeout);  timeout   = true  if timeout.nil?
+      base      = options.delete(:base);     base      = true  if base.nil?
+      work_dir  = options.delete(:work_dir); work_dir  = true  if work_dir.nil?
+      chdir     = options.delete(:chdir)
 
       # build up the git process argv
       argv = []
       argv << Git.git_binary
       argv << "--git-dir=#{git_dir}" if base
+      # GIT_WORK_TREE (or --work-tree=<directory>) not allowed without specifying GIT_DIR (or --git-dir=<directory>)
+      argv << "--work-tree=#{work_tree}" if work_dir && base
       argv << cmd.to_s.tr('_', '-')
       argv.concat(options_to_argv(options))
       argv.concat(args)
