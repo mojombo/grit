@@ -699,6 +699,28 @@ module Grit
         self.git.fs_move('/', "../../#{name}")
       end
     end
+    
+    def grep(searchtext, branch = 'master')
+      result = git.native(:grep, {}, '-n', '-E', '-i', '-z', '--no-color', searchtext, branch)
+      
+      greps = []
+      
+      lines = result.split("\n")
+      lines.each do |line|
+        line.chomp!
+        file = line[/^Binary file (.+) matches$/]
+        binary = false
+        if file
+          binary = true
+        else
+          file, lno, ltext = line.split("\0", 3)
+          file[/^#{branch}:/] = ""
+        end
+        greps << Grit::Grep.new(self, file, lno, ltext, binary)
+      end
+      
+      greps
+    end
 
     # Pretty object inspection
     def inspect
