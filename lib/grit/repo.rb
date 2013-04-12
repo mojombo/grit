@@ -701,7 +701,7 @@ module Grit
     end
     
     def grep(searchtext, branch = 'master')
-      result = git.native(:grep, {}, '-n', '-E', '-i', '-z', '--no-color', searchtext, branch)
+      result = git.native(:grep, {}, '-n', '-E', '-i', '-z', searchtext, branch)
       
       greps = []
       

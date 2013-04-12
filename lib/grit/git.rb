@@ -335,6 +335,7 @@ module Grit
       argv << Git.git_binary
       argv << "--git-dir=#{git_dir}" if base
       argv << cmd.to_s.tr('_', '-')
+      argv << "--no-color"
       argv.concat(options_to_argv(options))
       argv.concat(args)
 
