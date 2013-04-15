@@ -416,4 +416,12 @@ class TestRepo < Test::Unit::TestCase
     after = ['634396b2f541a9f2d58b00be1a07f0c358b999b3']
     assert_equal after, @r.git.select_existing_objects(before)
   end
+
+  def test_grep
+    res = @r.grep('def test_select_existing_objects', 'master')
+    assert_equal 1, res.length
+    assert_equal 414, res.first.line
+    assert_equal 'test/test_repo.rb', res.first.filename
+    assert_equal '  def test_select_existing_objects', res.first.text
+  end
 end
