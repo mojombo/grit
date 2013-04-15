@@ -725,7 +725,7 @@ module Grit
           binary = true
         else
           file, lno, ltext = line.split("\0", 3)
-          file[/^#{branch}:/] = ""
+          file.slice! /^#{branch}:/
         end
         greps << Grit::Grep.new(self, file, lno, ltext, binary)
       end
