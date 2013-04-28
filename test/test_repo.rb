@@ -418,10 +418,10 @@ class TestRepo < Test::Unit::TestCase
   end
 
   def test_grep
-    res = @r.grep('def test_select_existing_objects', 'master')
+    res = @r.grep('def test_select_existing_objects', 1, 'master')
     assert_equal 1, res.length
-    assert_equal 414, res.first.line
+    assert_equal 413, res.first.startline
     assert_equal 'test/test_repo.rb', res.first.filename
-    assert_equal '  def test_select_existing_objects', res.first.text
+    assert_equal '  def test_select_existing_objects', res.first.content[1]
   end
 end

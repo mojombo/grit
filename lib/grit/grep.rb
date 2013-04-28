@@ -4,15 +4,15 @@ module Grit
     
     attr_reader :repo
     attr_reader :filename
-    attr_reader :line
-    attr_reader :text
+    attr_reader :startline
+    attr_reader :content
     attr_reader :is_binary
 
-    def initialize(repo, filename, line, text, is_binary)
+    def initialize(repo, filename, startline, content, is_binary)
       @repo   = repo
       @filename = filename
-      @line = line.to_i
-      @text = text
+      @startline = startline.to_i
+      @content = content
       @is_binary = is_binary
     end
     

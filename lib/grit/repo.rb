@@ -713,21 +713,36 @@ module Grit
       end
     end
 
-    def grep(searchtext, branch = 'master')
-      result = git.native(:grep, {}, '-n', '-E', '-i', '-z', searchtext, branch)
+    def grep(searchtext, contextlines = 3, branch = 'master')
+      context_arg = '-C ' + contextlines.to_s
+      result = git.native(:grep, {}, '-n', '-E', '-i', '-z', '--heading', context_arg, searchtext, branch)
       greps = []
-      lines = result.split("\n")
-      lines.each do |line|
-        line.chomp!
-        file = line[/^Binary file (.+) matches$/]
+      matches = result.split("--\n")
+      matches.each do |match|
         binary = false
-        if file
-          binary = true
-        else
-          file, lno, ltext = line.split("\0", 3)
-          file.slice! /^#{branch}:/
+        startline = 0
+        content = []
+        file = ''
+        lines = match.split("\n")
+        lines.each_with_index do |line, i|
+          line.chomp!
+          if i == 0
+            file = line[/^Binary file (.+) matches$/]
+            if file
+              binary = true
+            else
+              line.slice! /^#{branch}:/
+              file = line
+            end
+          else
+            number, text = line.split("\0", 2)
+            if i == 1
+              startline = line
+            end
+            content << text
+          end
         end
-        greps << Grit::Grep.new(self, file, lno, ltext, binary)
+        greps << Grit::Grep.new(self, file, startline, content, binary)
       end
       greps
     end
