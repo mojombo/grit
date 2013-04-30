@@ -715,15 +715,15 @@ module Grit
 
     def grep(searchtext, contextlines = 3, branch = 'master')
       context_arg = '-C ' + contextlines.to_s
-      result = git.native(:grep, {}, '-n', '-E', '-i', '-z', '--heading', '--break', context_arg, searchtext, branch)
+      result = git.native(:grep, {}, '-n', '-E', '-i', '-z', '--heading', '--break', context_arg, searchtext, branch).force_encoding('UTF-8')
       greps = []
       filematches = result.split("\n\n")
       filematches.each do |filematch|
         binary = false
-        content = []
         file = ''
         matches = filematch.split("--\n")
         matches.each_with_index do |match, i|
+          content = []
           startline = 0
           lines = match.split("\n")
           if i == 0
