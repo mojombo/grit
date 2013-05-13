@@ -1,3 +1,11 @@
+commit c86075f49283416c95866f6013d11a81f5b1f827
+Author: Alexey Lapitsky <lex@realisticgroup.com>
+Date:   Mon May 13 21:21:43 2013 +0200
+
+    Spaces in the filename
+
+0       0       filename with spaces.txt
+
 commit a49b96b339c525d7fd455e0ad4f6fe7b550c9543
 Author: Scott Chacon <schacon@gmail.com>
 Date:   Thu May 29 15:56:41 2008 -0700
