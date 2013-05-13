@@ -11,7 +11,7 @@ class TestCommitStats < Test::Unit::TestCase
   end
 
   def test_commit_stats
-    assert_equal 3, @stats.size
+    assert_equal 4, @stats.size
   end
 
   # to_hash
@@ -28,6 +28,11 @@ class TestCommitStats < Test::Unit::TestCase
     }
 
     assert_equal expected, @stats.assoc('a49b96b339c525d7fd455e0ad4f6fe7b550c9543')[1].to_hash
+  end
+
+  def test_spaces_in_filename
+    expected = [["filename with spaces.txt", 0, 0, 0 ]]
+    assert_equal expected, @stats.assoc('c86075f49283416c95866f6013d11a81f5b1f827')[1].to_hash["files"]
   end
 
 end
