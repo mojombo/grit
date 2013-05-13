@@ -53,7 +53,7 @@ class TestBlob < Test::Unit::TestCase
     Git.any_instance.expects(:blame).returns(fixture('blame'))
     b = Blob.blame(@r, 'master', 'lib/grit.rb')
     assert_equal 13, b.size
-    assert_equal 25, b.inject(0) { |acc, x| acc + x.last.size }
+    assert_equal 24, b.inject(0) { |acc, x| acc + x.last.size }
     assert_equal b[0].first.object_id, b[9].first.object_id
     c = b.first.first
     c.expects(:__bake__).times(0)
