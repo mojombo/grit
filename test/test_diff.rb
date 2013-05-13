@@ -13,7 +13,7 @@ class TestDiff < Test::Unit::TestCase
     diffs = Grit::Diff.list_from_string(@r, output)
     assert_equal 2,   diffs.size
     assert_equal 10,  diffs.first.diff.split("\n").size
-    assert_nil        diffs.last.diff
+    assert_equal "",  diffs.last.diff
   end
 
   def test_list_from_string_with_renames
