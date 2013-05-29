@@ -29,6 +29,23 @@ module Grit
       self
     end
 
+    # The repo object of this blob
+    #
+    # Returning Grit::Repo
+    def repo
+      @repo
+    end
+
+    # The path of this blob ( eg. lib/grit/blob.rb )
+    #
+    # Returns String
+    def path(treeish = 'master')
+      revs = @repo.git.native(:ls_tree, {:r => true}, treeish, "| grep #{@id}")
+      revs = revs.split("\n").first
+      path = revs.split("\t").last
+      path
+    end
+
     # The size of this blob in bytes
     #
     # Returns Integer

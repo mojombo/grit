@@ -36,6 +36,13 @@ module Grit
       Tree.construct(@repo, @id, [])
     end
 
+    # The repo object of this blob
+    #
+    # Returning Grit::Repo
+    def repo
+      @repo
+    end
+
     # Create an unbaked Tree containing just the specified attributes
     #   +repo+ is the Repo
     #   +atts+ is a Hash of instance variable data
