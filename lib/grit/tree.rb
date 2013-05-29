@@ -43,6 +43,35 @@ module Grit
       @repo
     end
 
+    # The path of this blob ( eg. lib/grit/git-ruby )
+    #   +treeish+ is the Commit
+    #
+    # Returns String
+    def path(treeish = 'master')
+      @dirs = []
+      @path = ''
+      parent = @repo.tree(treeish)
+      self.loop(parent)
+      @path
+    end
+
+    def loop(parent)
+      @dirs << parent.name if parent.name
+      children = parent.trees
+      if children.collect{ |tree| tree.id }.include?(@id)
+        @dirs << name
+        @path = @dirs.join('/')
+      else
+        if children.count > 0
+          children.each do |child|
+            self.loop(child)
+          end
+        else
+          @dirs.delete(parent.name)
+        end
+      end
+    end    
+
     # Create an unbaked Tree containing just the specified attributes
     #   +repo+ is the Repo
     #   +atts+ is a Hash of instance variable data

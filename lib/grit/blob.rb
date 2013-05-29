@@ -37,12 +37,12 @@ module Grit
     end
 
     # The path of this blob ( eg. lib/grit/blob.rb )
+    #   +treeish+ is the Commit
     #
     # Returns String
     def path(treeish = 'master')
       revs = @repo.git.native(:ls_tree, {:r => true}, treeish, "| grep #{@id}")
-      revs = revs.split("\n").first
-      path = revs.split("\t").last
+      path = revs.split("\n").first.to_s.split("\t").last
       path
     end
 
