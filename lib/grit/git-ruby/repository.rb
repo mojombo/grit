@@ -335,6 +335,7 @@ module Grit
           if o.type == :tag
             commit_sha = get_object_by_sha1(sha).object
             c = get_object_by_sha1(commit_sha)
+            sha = commit_sha # if tags, please use obj's sha to log
           else
             c = GitObject.from_raw(o)
           end
