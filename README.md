@@ -31,7 +31,7 @@ This documentation is accurate as of Grit 2.3.
 
 ## Requirements
 
-* git (http://git-scm.com) tested with 1.7.2.1
+* git (http://git-scm.com) tested with 1.7.4.6
 
 
 ## Install
