@@ -25,6 +25,7 @@ Gem::Specification.new do |s|
   s.add_dependency('diff-lcs', "~> 1.1")
 
   s.add_development_dependency('mocha')
+  s.add_development_dependency('rake')
 
   # = MANIFEST =
   s.files = %w[
