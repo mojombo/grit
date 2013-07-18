@@ -14,7 +14,7 @@ require 'grit/git-ruby/internal/raw_object'
 require 'grit/git-ruby/internal/file_window'
 
 PACK_SIGNATURE = "PACK"
-PACK_IDX_SIGNATURE = "\377tOc"
+PACK_IDX_SIGNATURE = [0xFF, 0x74, 0x4F, 0x63]
 
 module Grit
   module GitRuby
@@ -56,7 +56,7 @@ module Grit
           end
 
           # read header
-          sig = idxfile.read(4)
+          sig = idxfile.read(4).unpack("C*")
           ver = idxfile.read(4).unpack("N")[0]
 
           if sig == PACK_IDX_SIGNATURE
