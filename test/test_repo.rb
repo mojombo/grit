@@ -51,6 +51,19 @@ class TestRepo < Test::Unit::TestCase
     end
   end
 
+  def test_new_should_work_in_subdirectory
+    tmpdir = Dir.mktmpdir
+    gpath = File.join(tmpdir, '.git')
+    subdir_path = File.join(tmpdir, 'test_subdirectory')
+
+    FileUtils.mkdir_p(gpath)
+    FileUtils.mkdir_p(subdir_path)
+
+    assert(Repo.new(subdir_path))
+
+    FileUtils.rm_rf(tmpdir)
+  end
+
   # descriptions
 
   def test_description
