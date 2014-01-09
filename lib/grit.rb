@@ -24,8 +24,8 @@ rescue LoadError
   end
 end
 
-# ruby 1.9 compatibility
-require 'grit/ruby1.9'
+# ruby 1.8 <-> 1.9 compatibility
+require 'grit/compat'
 
 # internal requires
 require 'grit/lazy'

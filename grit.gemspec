@@ -62,7 +62,7 @@ Gem::Specification.new do |s|
     lib/grit/merge.rb
     lib/grit/ref.rb
     lib/grit/repo.rb
-    lib/grit/ruby1.9.rb
+    lib/grit/compat.rb
     lib/grit/status.rb
     lib/grit/submodule.rb
     lib/grit/tag.rb
