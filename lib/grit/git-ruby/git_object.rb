@@ -198,14 +198,8 @@ module Grit
 
     def self.read_bytes_until(io, char)
       string = ''
-      if RUBY_VERSION >= '1.9' then
-        while ((next_char = io.getc) != char) && !io.eof
-          string << next_char
-        end
-      else
-        while ((next_char = io.getc.chr) != char) && !io.eof
-          string << next_char
-        end
+      while ((next_char = io.getc.chr) != char) && !io.eof do
+        string << next_char
       end
       string
     end
