@@ -43,9 +43,9 @@ and cloned with:
 
 ### Development
 
-You will need these gems to get tests to pass:
+You will need bundler, then run:
 
-* mocha
+    script/bootstrap
 
 
 ### Contributing
