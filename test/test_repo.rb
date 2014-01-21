@@ -5,12 +5,12 @@ class TestRepo < Test::Unit::TestCase
     @r = Repo.new(GRIT_REPO)
   end
 
-  def create_temp_repo(clone_path)
+  def create_temp_repo(clone_path, repo_name = 'dot_git')
     filename = 'git_test' + Time.now.to_i.to_s + rand(300).to_s.rjust(3, '0')
     tmp_path = File.join("/tmp/", filename)
     FileUtils.mkdir_p(tmp_path)
     FileUtils.cp_r(clone_path, tmp_path)
-    File.join(tmp_path, 'dot_git')
+    File.join(tmp_path, repo_name)
   end
 
   def test_update_refs_packed
@@ -253,13 +253,13 @@ class TestRepo < Test::Unit::TestCase
   # diff
 
   def test_diff
-    Git.any_instance.expects(:diff).with({}, 'master^', 'master', '--')
+    Git.any_instance.expects(:native).with('diff', {}, 'master^', 'master', '--')
     @r.diff('master^', 'master')
 
-    Git.any_instance.expects(:diff).with({}, 'master^', 'master', '--', 'foo/bar')
+    Git.any_instance.expects(:native).with('diff', {}, 'master^', 'master', '--', 'foo/bar')
     @r.diff('master^', 'master', 'foo/bar')
 
-    Git.any_instance.expects(:diff).with({}, 'master^', 'master', '--', 'foo/bar', 'foo/baz')
+    Git.any_instance.expects(:native).with('diff', {}, 'master^', 'master', '--', 'foo/bar', 'foo/baz')
     @r.diff('master^', 'master', 'foo/bar', 'foo/baz')
   end
 
@@ -272,7 +272,7 @@ class TestRepo < Test::Unit::TestCase
 
   # commit_diff
 
-  def test_diff
+  def test_diff3
     Git.any_instance.expects(:diff).returns(fixture('diff_p'))
     diffs = @r.commit_diff('master')
 

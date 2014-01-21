@@ -416,8 +416,8 @@ module Grit
           sha1 = treeSHA1 || '0000000000000000000000000000000000000000'
           sha2 = treeSHA2 || '0000000000000000000000000000000000000000'
 
-          data_old = fileA.split(/\n/).map! { |e| e.chomp }
-          data_new = fileB.split(/\n/).map! { |e| e.chomp }
+          data_old = fileA.split(/\n/, -1).map! { |e| e.chomp }
+          data_new = fileB.split(/\n/, -1).map! { |e| e.chomp }
 
           diffs = Difference::LCS.diff(data_old, data_new)
           next if diffs.empty?
@@ -463,7 +463,8 @@ module Grit
           patch << header + output.lstrip
         end
         patch
-      rescue
+      rescue Exception => e
+        Grit.log(e) if Grit.debug
         '' # one of the trees was bad or lcs isn't there - no diff
       end
 

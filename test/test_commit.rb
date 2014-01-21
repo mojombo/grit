@@ -62,6 +62,14 @@ class TestCommit < Test::Unit::TestCase
     assert_equal %w(lib/grit/commit.rb test/fixtures/show_empty_commit test/test_commit.rb), diffs.collect { |d| d.a_path }
   end
 
+  def test_real_diff
+    repo = Repo.new("#{File.dirname(__FILE__)}/dot_git_empty_files/", {:is_bare => true})
+
+    diffs = Commit.diff(repo, 'a2237312cb94c12ec679665743ea41b06be7715a', '02921b1aa394807852dee0a9be7d9c6f7fcfe092')
+
+    assert_equal 2, diffs.size
+  end
+
   def test_diff_with_files
     # git diff --full-index 59ddc32 -- lib > test/fixtures/diff_f
     Git.any_instance.expects(:diff).with({:full_index => true}, '59ddc32', '--', 'lib').returns(fixture('diff_f'))
@@ -187,10 +195,9 @@ class TestCommit < Test::Unit::TestCase
     assert patch.include?('From: tom <tom@taco.(none)>')
     assert patch.include?('Date: Tue, 20 Nov 2007 17:27:42 -0800')
     assert patch.include?('Subject: [PATCH] fix tests on other machines')
-    assert patch.include?('test/test_reality.rb |   30 +++++++++++++++---------------')
+    assert patch.include?('test/test_reality.rb | 30 +++++++++++++++---------------')
     assert patch.include?('@@ -1,17 +1,17 @@')
     assert patch.include?('+#     recurse(t)')
-    assert patch.include?("1.7.")
   end
 
   # patch_id
