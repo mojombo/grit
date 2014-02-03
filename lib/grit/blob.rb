@@ -108,8 +108,8 @@ module Grit
       blames
     end
 
-    def basename
-      File.basename(name)
+    def basename(ext = '')
+      File.basename(name, ext)
     end
 
     # Pretty object inspection
