@@ -114,10 +114,7 @@ module Grit
     S_IFGITLINK = 0160000
     attr_accessor :mode, :name, :sha1
     def initialize(mode, filename, sha1o)
-      @mode = 0
-      mode.each_byte do |i|
-        @mode = (@mode << 3) | (i-'0'.getord(0))
-      end
+      @mode = mode.to_i(8)
       @name = filename
       @sha1 = sha1o
       if ![S_IFLNK, S_IFDIR, S_IFREG, S_IFGITLINK].include?(@mode & S_IFMT)
@@ -178,35 +175,12 @@ module Grit
   end
 
 
-  def self.read_bytes_until(io, char)
-    string = ''
-    if RUBY_VERSION > '1.9'
-      while ((next_char = io.getc) != char) && !io.eof
-        string += next_char
-      end
-    else
-      while ((next_char = io.getc.chr) != char) && !io.eof
-        string += next_char
-      end
-    end
-    string
-  end
-
-
   class Tree < GitObject
     attr_accessor :entry
 
     def self.from_raw(rawobject, repository=nil)
-      raw = StringIO.new(rawobject.content)
-
-      entries = []
-      while !raw.eof?
-        mode      = Grit::GitRuby.read_bytes_until(raw, ' ')
-        file_name = Grit::GitRuby.read_bytes_until(raw, "\0")
-        raw_sha   = raw.read(20)
-        sha = raw_sha.unpack("H*").first
-
-        entries << DirectoryEntry.new(mode, file_name, sha)
+      entries = rawobject.content.scan(/(\d+) ([^\x00]*)\x00(.{20})/m).map do |mode, file_name, raw_sha|
+        DirectoryEntry.new(mode, file_name, raw_sha.unpack("H*").first)
       end
       new(entries, repository)
     end
