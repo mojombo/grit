@@ -98,20 +98,29 @@ module Grit
             end
           end
 
+          # "git diff-files" and "git diff-index" include
+          # spurious changes filtered out by "git status".
+          limit = status_files
+
           # find modified in tree
-         diff_files.each do |path, data|
-            @files[path] ? @files[path].merge!(data) : @files[path] = data
+          diff_files.each do |path, data|
+            @files[path] ? @files[path].merge!(data) : @files[path] = data if limit.include?(path)
           end
 
           # find added but not committed - new files
           diff_index('HEAD').each do |path, data|
-            @files[path] ? @files[path].merge!(data) : @files[path] = data
+            @files[path] ? @files[path].merge!(data) : @files[path] = data if limit.include?(path)
           end
 
           @files.each do |k, file_hash|
             @files[k] = StatusFile.new(@base, file_hash)
           end
         end
+      end
+
+      # gets locally changed filenames
+      def status_files
+        @base.git.status(:porcelain => true).split("\n").map {|l| l[3..-1]}
       end
 
       # compares the index and the working directory
