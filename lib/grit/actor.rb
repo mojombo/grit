@@ -47,6 +47,13 @@ module Grit
     def inspect
       %Q{#<Grit::Actor "#{@name} <#{@email}>">}
     end
+
+    # Equality
+    def ==(other)
+      other.class == self.class &&
+        other.name == name &&
+        other.email == email
+    end
   end # Actor
 
 end # Grit
