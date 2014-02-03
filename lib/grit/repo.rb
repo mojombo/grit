@@ -73,7 +73,7 @@ module Grit
     #
     # Returns the newly created Grit::Repo.
     def self.init(path, git_options = {}, repo_options = {})
-      git_options = {:base => false}.merge(git_options)
+      git_options = {:bare => false}.merge(git_options)
       git = Git.new(path)
       git.fs_mkdir('..')
       git.init(git_options, path)
