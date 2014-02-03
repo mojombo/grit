@@ -60,12 +60,12 @@ module Grit
       current = nil
 
       lines.each do |line|
-        if line =~ /^\[submodule "(.+)"\]$/
+        if line =~ /^\[submodule\s+"(.+)"\]$/
           current = $1
           config[current] = {}
           config[current]['id'] = (commit.tree/current).id
-        elsif line =~ /^\t(\w+) = (.+)$/
-          config[current][$1] = $2
+        elsif line =~ /^\s*(\w+)\s*=(.+)$/
+          config[current][$1] = $2.strip
           config[current]['id'] = (commit.tree/$2).id if $1 == 'path'
         else
           # ignore

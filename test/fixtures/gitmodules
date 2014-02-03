@@ -4,3 +4,7 @@
 [submodule "test/glowstick"]
 	path = test/glowstick
 	url = git://github.com/mojombo/glowstick
+# test various indentation and spacing
+[submodule   "spacetest"]
+path = 		test/spacetest   
+  url 	= git://github.com/spacetest

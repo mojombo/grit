@@ -19,6 +19,7 @@ class TestSubmodule < Test::Unit::TestCase
 
     assert_equal "git://github.com/mojombo/glowstick", config['test/glowstick']['url']
     assert_equal "git://github.com/mojombo/god", config['god']['url']
+    assert_equal "git://github.com/spacetest", config['spacetest']['url']
   end
 
   def test_config_with_windows_lineendings
