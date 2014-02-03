@@ -178,21 +178,6 @@ module Grit
   end
 
 
-  def self.read_bytes_until(io, char)
-    string = ''
-    if RUBY_VERSION > '1.9'
-      while ((next_char = io.getc) != char) && !io.eof
-        string += next_char
-      end
-    else
-      while ((next_char = io.getc.chr) != char) && !io.eof
-        string += next_char
-      end
-    end
-    string
-  end
-
-
   class Tree < GitObject
     attr_accessor :entry
 
@@ -201,14 +186,22 @@ module Grit
 
       entries = []
       while !raw.eof?
-        mode      = Grit::GitRuby.read_bytes_until(raw, ' ')
-        file_name = Grit::GitRuby.read_bytes_until(raw, "\0")
+        mode      = read_bytes_until(raw, ' ')
+        file_name = read_bytes_until(raw, "\0")
         raw_sha   = raw.read(20)
         sha = raw_sha.unpack("H*").first
 
         entries << DirectoryEntry.new(mode, file_name, sha)
       end
       new(entries, repository)
+    end
+
+    def self.read_bytes_until(io, char)
+      string = ''
+      while ((next_char = io.getc.chr) != char) && !io.eof do
+        string << next_char
+      end
+      string
     end
 
     def initialize(entries=[], repository = nil)

@@ -1,3 +1,4 @@
+# encoding: ascii-8bit
 #
 # converted from the gitrb project
 #

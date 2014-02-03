@@ -28,7 +28,7 @@ module Grit
         end
 
         def [](*idx)
-          idx = idx[0] if idx.length == 1
+          idx, = idx if idx.length == 1
           case idx
           when Range
             offset = idx.first
