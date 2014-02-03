@@ -282,12 +282,19 @@ module Grit
     #
     # Returns [String (actor name and email), Time (acted at time)]
     def self.actor(line)
-      m, actor, epoch = *line.match(/^.+? (.*) (\d+) .*$/)
-      [Actor.from_string(actor), Time.at(epoch.to_i)]
+      m, actor, epoch, tz = *line.match(/^.+? (.*) (\d+) ((\-|\+)\d+).*$/)
+      time = Time.at(epoch.to_i)
+      begin
+        time = time.localtime Time.zone_offset(tz) if tz
+      rescue ArgumentError
+        # Leave times in the local timezone in Ruby 1.8.
+      end
+
+      [Actor.from_string(actor), time]
     end
 
     def author_string
-      "%s <%s> %s %+05d" % [author.name, author.email, authored_date.to_i, 800]
+      "%s <%s> %s %+05d" % [author.name, author.email, authored_date.to_i, authored_date.strftime('%z')]
     end
 
     def to_hash
