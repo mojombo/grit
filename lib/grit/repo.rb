@@ -1,6 +1,7 @@
 module Grit
 
   class Repo
+    GIT_DIR_NAME = '.git'
     DAEMON_EXPORT_FILE = 'git-daemon-export-ok'
     BATCH_PARSERS      = {
       'commit' => ::Grit::Commit
@@ -21,8 +22,9 @@ module Grit
 
     # Public: Create a new Repo instance.
     #
-    # path    - The String path to either the root git directory or the bare
-    #           git repo. Bare repos are expected to end with ".git".
+    # path    - The String path to either the root git directory, a directory within
+    #           the git hierarchy or the bare git repo. 
+    #           Bare repos are expected to end with ".git".
     # options - A Hash of options (default: {}):
     #           :is_bare - Boolean whether to consider the repo as bare even
     #                      if the repo name does not end with ".git".
@@ -39,10 +41,11 @@ module Grit
     # Raises Grit::NoSuchPathError if the path does not exist.
     def initialize(path, options = {})
       epath = File.expand_path(path)
+      git_root = find_git_root(epath)
 
-      if File.exist?(File.join(epath, '.git'))
+      if git_root
         self.working_dir = epath
-        self.path = File.join(epath, '.git')
+        self.path = File.join(git_root, GIT_DIR_NAME)
         @bare = false
       elsif File.exist?(epath) && (epath =~ /\.git$/ || options[:is_bare])
         self.path = epath
@@ -703,6 +706,46 @@ module Grit
     # Pretty object inspection
     def inspect
       %Q{#<Grit::Repo "#{@path}">}
+    end
+
+    private
+
+    # Determines if the specified directory is the top of the file hierarchy (e.g., / or C:/).
+    #   +file_path+ is the path to inspect.
+    #
+    # Returns true if the specified directory is the root of the volume, false if not.
+    def root_directory?(file_path)
+      # Implementation inspired by http://stackoverflow.com/a/4969416:
+      # Does file + ".." resolve to the same directory as file_path?
+      File.directory?(file_path) && 
+        File.expand_path(file_path) == File.expand_path(File.join(file_path, '..'))
+    end
+
+    # Finds the git root directory, either in this directory or a parent.
+    #   +start_path+ is the path to the directory to start with.
+    # 
+    # Returns the directory name of the directory containing the .git repo, or nil if there's
+    # no git repo anywhere in the parent hierarchy
+    def find_git_root(start_path)
+      raise NoSuchPathError unless File.exists?(start_path)
+
+      current_path = File.expand_path(start_path)
+
+      # for clarity: set to an explicit nil and then just return whatever
+      # the current value of this variable is (nil or otherwise)
+      return_path = nil
+
+      until root_directory?(current_path)
+        if File.exists?(File.join(current_path, '.git'))   
+          # done
+          return_path = current_path
+          break
+        else
+          # go up a directory and try again
+          current_path = File.dirname(current_path)
+        end
+      end
+      return_path
     end
   end # Repo
 
