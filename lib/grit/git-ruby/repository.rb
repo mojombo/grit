@@ -359,7 +359,7 @@ module Grit
 
           if (!opts[:max_count] || ((array.size + total_size) < opts[:max_count]))
 
-            if !opts[:path_limiter]
+            if !opts[:path_limiter] && add_sha
               output = c.raw_log(sha)
               array << [sha, output, c.committer.date]
             end
@@ -382,9 +382,7 @@ module Grit
               array << [sha, output, c.committer.date]
             end
 
-            if add_sha
-              array += subarray
-            end
+            array += subarray
           end
 
         end
