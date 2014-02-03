@@ -20,3 +20,10 @@ end
 def jruby?
   defined?(RUBY_ENGINE) && RUBY_ENGINE =~ /jruby/
 end
+
+def temp_repo(repo_name)
+  Dir.mktmpdir do |tmp_dir|
+    FileUtils.cp_r(File.join(File.dirname(__FILE__), repo_name), tmp_dir)
+    yield File.join(tmp_dir, repo_name)
+  end
+end

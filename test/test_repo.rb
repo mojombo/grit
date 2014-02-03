@@ -5,36 +5,27 @@ class TestRepo < Test::Unit::TestCase
     @r = Repo.new(GRIT_REPO)
   end
 
-  def create_temp_repo(clone_path)
-    filename = 'git_test' + Time.now.to_i.to_s + rand(300).to_s.rjust(3, '0')
-    tmp_path = File.join("/tmp/", filename)
-    FileUtils.mkdir_p(tmp_path)
-    FileUtils.cp_r(clone_path, tmp_path)
-    File.join(tmp_path, 'dot_git')
-  end
-
   def test_update_refs_packed
-    gpath = create_temp_repo(File.join(File.dirname(__FILE__), *%w[dot_git]))
-    @git = Grit::Repo.new(gpath, :is_bare => true)
+    temp_repo("dot_git") do |repo_path|
+      git = Grit::Repo.new(repo_path, :is_bare => true)
 
-    # new and existing
-    test   = 'ac9a30f5a7f0f163bbe3b6f0abf18a6c83b06872'
-    master = 'ca8a30f5a7f0f163bbe3b6f0abf18a6c83b0687a'
+      # new and existing
+      test   = 'ac9a30f5a7f0f163bbe3b6f0abf18a6c83b06872'
+      master = 'ca8a30f5a7f0f163bbe3b6f0abf18a6c83b0687a'
 
-    @git.update_ref('testref', test)
-    new_t = @git.get_head('testref').commit.sha
-    assert new_t != master
+      git.update_ref('testref', test)
+      new_t = git.get_head('testref').commit.sha
+      assert new_t != master
 
-    @git.update_ref('master', test)
-    new_m = @git.get_head('master').commit.sha
-    assert new_m != master
+      git.update_ref('master', test)
+      new_m = git.get_head('master').commit.sha
+      assert new_m != master
 
-    old = @git.get_head('nonpack').commit.sha
-    @git.update_ref('nonpack', test)
-    newp = @git.get_head('nonpack').commit.sha
-    assert newp != old
-
-    FileUtils.rm_r(gpath)
+      old = git.get_head('nonpack').commit.sha
+      git.update_ref('nonpack', test)
+      newp = git.get_head('nonpack').commit.sha
+      assert newp != old
+    end
   end
 
   # new
