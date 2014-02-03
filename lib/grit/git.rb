@@ -72,6 +72,7 @@ module Grit
 
     class << self
       attr_accessor :git_timeout, :git_max_size
+
       def git_binary
         @git_binary ||=
           ENV['PATH'].split(':').
@@ -79,6 +80,10 @@ module Grit
             find { |p| File.exist?(p) }
       end
       attr_writer :git_binary
+
+      def git_hook_whitelist
+        ['pre-commit', 'post-commit']
+      end
     end
 
     self.git_timeout  = 10
@@ -496,6 +501,31 @@ module Grit
       end
       args
     end
-  end # Git
 
+    # Execute a hook
+    #
+    # name - The name of the hook as a String
+    #
+    # Returns false if the hook exits with a non-zero exitstatus, true in
+    # all other cases.
+    def execute_hook(name)
+      hooks = File.join(self.git_dir, 'hooks')
+      hook  = File.join(hooks, name)
+
+      if Git.git_hook_whitelist.include?(name) && File.executable?(hook)
+        process = Child.new(hook, :chdir   => self.work_tree,
+                                  :timeout => Grit::Git.git_timeout,
+                                  :max     => Git.git_max_size)
+        status  = process.status
+
+        Grit.log(process.out) if Grit.debug
+        Grit.log(process.err) if Grit.debug
+
+        status.exitstatus.zero?
+      else
+        true
+      end
+    end
+
+  end # Git
 end # Grit

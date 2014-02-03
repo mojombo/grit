@@ -73,7 +73,7 @@ module Grit
     # message - The String commit message.
     # options - An optional Hash of index options.
     #           :parents        - Array of String commit SHA1s or Grit::Commit
-    #                             objects to attach this commit to to form a 
+    #                             objects to attach this commit to to form a
     #                             new head (default: nil).
     #           :actor          - The Grit::Actor details of the user making
     #                             the commit (default: nil).
@@ -102,6 +102,9 @@ module Grit
     # Returns a String of the SHA1 of the new commit.
     def commit(message, parents = nil, actor = nil, last_tree = nil, head = 'master')
       commit_tree_sha = nil
+
+      return false unless self.repo.execute_hook('pre-commit')
+
       if parents.is_a?(Hash)
         commit_tree_sha = parents[:commit_tree_sha]
         actor          = parents[:actor]
@@ -150,6 +153,9 @@ module Grit
       commit_sha1 = self.repo.git.put_raw_object(contents, 'commit')
 
       self.repo.update_ref(head, commit_sha1) if head
+
+      self.repo.execute_hook('post-commit')
+
       commit_sha1
     end
 

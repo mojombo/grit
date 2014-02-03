@@ -19,26 +19,31 @@ module Grit
     # Public: The Grit::Git command line interface object.
     attr_accessor :git
 
+    # Public: Boolean indicating whether git hooks should be executed
+    attr_reader :should_execute_hooks
+
     # Public: Create a new Repo instance.
     #
     # path    - The String path to either the root git directory or the bare
     #           git repo. Bare repos are expected to end with ".git".
-    # options - A Hash of options (default: {}):
-    #           :is_bare - Boolean whether to consider the repo as bare even
-    #                      if the repo name does not end with ".git".
-    #
+    # options - A Hash of options (default: { :is_bare => false, :execute_hooks => true }):
+    #           :is_bare              - Boolean whether to consider the repo as bare even
+    #                                   if the repo name does not end with ".git".
+    #           :should_execute_hooks - Boolean indicating whether git hooks should be
+    #                                   executed.
     # Examples
     #
     #   r = Repo.new("/Users/tom/dev/normal")
     #   r = Repo.new("/Users/tom/public/bare.git")
-    #   r = Repo.new("/Users/tom/public/bare", {:is_bare => true})
+    #   r = Repo.new("/Users/tom/public/bare", {:is_bare => true, :should_execute_hooks => false})
     #
     # Returns a newly initialized Grit::Repo.
     # Raises Grit::InvalidGitRepositoryError if the path exists but is not
     #   a Git repository.
     # Raises Grit::NoSuchPathError if the path does not exist.
     def initialize(path, options = {})
-      epath = File.expand_path(path)
+      epath                 = File.expand_path(path)
+      @should_execute_hooks = options[:should_execute_hooks] || true
 
       if File.exist?(File.join(epath, '.git'))
         self.working_dir = epath
@@ -199,6 +204,21 @@ module Grit
     # Returns String
     def description
       self.git.fs_read('description').chomp
+    end
+
+    # If should_execute_hooks is true then the hook is executed (see
+    # [Git#execute_hooks]). Otherwise it returns true and executes nothing.
+    #
+    # name - The name of the hook as a String
+    #
+    # Returns true if the hook exits with a zero exitstatus, false in
+    # all other cases.
+    def execute_hook(name)
+      if self.should_execute_hooks
+        self.git.execute_hook(name)
+      else
+        true
+      end
     end
 
     def blame(file, commit = nil)
