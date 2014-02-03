@@ -164,19 +164,16 @@ module Grit
     # Returns the String SHA1 String of the tree.
     def write_tree(tree = nil, now_tree = nil)
       tree = self.tree if !tree
-      tree_contents = {}
 
-      # fill in original tree
-      now_tree = read_tree(now_tree) if(now_tree && now_tree.is_a?(String))
-      now_tree.contents.each do |obj|
-        sha = [obj.id].pack("H*")
-        k = obj.name
-        k += '/' if (obj.class == Grit::Tree)
-        tmode = obj.mode.to_i.to_s  ## remove zero-padding
-        tree_contents[k] = "%s %s\0%s" % [tmode, obj.name, sha]
-      end if now_tree
+      # keep blobs and dirs separate to enforce order
+      tree_contents_blobs = {}
+      tree_contents_dirs = {}
 
-      # overwrite with new tree contents
+      # merge original and new trees recursively
+      now_tree = read_tree(now_tree) if (now_tree && now_tree.is_a?(String))
+      tree = (merge_tree_and_hash(now_tree, tree) || {}) if now_tree
+
+      # prepare raw object output
       tree.each do |k, v|
         case v
           when Array
@@ -186,25 +183,26 @@ module Grit
               mode = mode.to_i.to_s  # leading 0s not allowed
               k = k.split('/').last  # slashes not allowed
               str = "%s %s\0%s" % [mode, k, sha]
-              tree_contents[k] = str
+              if mode == '40000'
+                tree_contents_dirs[k] = str
+              else
+                tree_contents_blobs[k] = str
+              end
             end
           when String
             sha = write_blob(v)
             sha = [sha].pack("H*")
             str = "%s %s\0%s" % ['100644', k, sha]
-            tree_contents[k] = str
+            tree_contents_blobs[k] = str
           when Hash
-            ctree = now_tree/k if now_tree
-            sha = write_tree(v, ctree)
+            sha = write_tree(v)
             sha = [sha].pack("H*")
             str = "%s %s\0%s" % ['40000', k, sha]
-            tree_contents[k + '/'] = str
-          when false
-            tree_contents.delete(k)
+            tree_contents_dirs[k] = str
         end
       end
 
-      tr = tree_contents.sort.map { |k, v| v }.join('')
+      tr = [tree_contents_blobs, tree_contents_dirs].map {|tree_contents| tree_contents.sort.map { |k, v| v }.join('')}.inject(:+)
       @last_tree_size = tr.size
       self.repo.git.put_raw_object(tr, 'tree')
     end
@@ -217,6 +215,33 @@ module Grit
     def write_blob(data)
       self.repo.git.put_raw_object(data, 'blob')
     end
+
+    # Merge now_tree and tree for write_tree
+    #
+    # tree - a Grit::Tree representing previous state
+    # hash - a hash representing the new state to merge in
+    #        (created by the add and delete methods)
+    def merge_tree_and_hash(tree, hash)
+      result = {}
+      merge_keys = Set.new
+      tree.contents.each do |object|
+        k = object.name
+        if hash.has_key?(k)
+          v = hash[k]
+          if v.kind_of?(Hash) && object.kind_of?(Grit::Tree)
+            result[k] = merge_tree_and_hash(object, v)
+            merge_keys.add k
+          end
+        else
+          result[object.name] = [object.id, object.mode]
+        end
+      end
+      result.merge!(hash.select {|k, v| !merge_keys.include?(k)})
+      result = false if result.select {|k,v| v}.empty?
+      result
+    end
+    private :merge_tree_and_hash
+
   end # Index
 
 end # Grit
