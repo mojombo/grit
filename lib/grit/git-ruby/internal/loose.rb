@@ -71,6 +71,7 @@ module Grit
               Tempfile.open("tmp_obj_", File.dirname(path))
             end
           begin
+            f.binmode # change the mode to binary before write
             f.write content
             f.fsync
             File.link(f.path, path)
