@@ -33,7 +33,7 @@ module Grit
     #
     # Returns Integer
     def size
-      @size ||= @repo.git.cat_file({:s => true}, id).chomp.to_i
+      @size ||= @repo.git.native(:cat_file, { :s => true }, id).chomp.to_i
     end
 
     # The binary contents of this blob.
