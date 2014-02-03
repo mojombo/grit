@@ -66,7 +66,10 @@ module Grit
         def safe_write(path, content)
           f =
             if RUBY_VERSION >= '1.9'
-              Tempfile.open("tmp_obj_", File.dirname(path), :opt => "wb")
+              Tempfile.open("tmp_obj_",
+                            File.dirname(path),
+                            :binmode => true,
+                            :external_encoding => 'BINARY')
             else
               Tempfile.open("tmp_obj_", File.dirname(path))
             end
