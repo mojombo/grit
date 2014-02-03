@@ -83,7 +83,7 @@ class TestRepo < Test::Unit::TestCase
 
   def test_heads_should_populate_head_data
     @r = Repo.new(File.join(File.dirname(__FILE__), *%w[dot_git]), :is_bare => true)
-    head = @r.heads[1]
+    head = @r.heads[2]
 
     assert_equal 'test/master', head.name
     assert_equal '2d3acf90f35989df8f262dc50beadc4ee3ae1560', head.commit.id
@@ -415,5 +415,13 @@ class TestRepo < Test::Unit::TestCase
     before = ['634396b2f541a9f2d58b00be1a07f0c358b999b3', 'deadbeef']
     after = ['634396b2f541a9f2d58b00be1a07f0c358b999b3']
     assert_equal after, @r.git.select_existing_objects(before)
+  end
+
+  def test_grep
+    res = @r.grep('def test_select_existing_objects', 1, 'master')
+    assert_equal 1, res.length
+    assert_equal 413, res.first.startline
+    assert_equal 'test/test_repo.rb', res.first.filename
+    assert_equal '  def test_select_existing_objects', res.first.content[1]
   end
 end

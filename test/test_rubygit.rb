@@ -71,6 +71,14 @@ class TestRubyGit < Test::Unit::TestCase
     assert_match 'index 0000000..2e3b0cb', out
   end
 
+  def test_diff_symlink
+    commit1 = '2d3acf90f35989df8f262dc50beadc4ee3ae1560'
+    commit2 = '2e0f114810c4974a6cb12eeb04026de7b3f599b3'
+    out = @git.diff({}, commit1, commit2)
+    assert_match "--- /dev/null\n+++ b/test/fixtures/symlink", out
+    assert_match "diff --git a/test/fixtures/symlink b/test/fixtures/symlink", out
+    assert_match "index 0000000..7b45d97", out
+  end
 
   def test_cat_file_contents_commit
     out = @git.cat_file({:p => true}, @commit_sha)

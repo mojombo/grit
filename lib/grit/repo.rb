@@ -213,7 +213,12 @@ module Grit
       Head.find_all(self)
     end
 
+    def head_count
+      Head.count_all(self)
+    end
+
     alias_method :branches, :heads
+    alias_method :branch_count, :head_count
 
     def get_head(head_name)
       heads.find { |h| h.name == head_name }
@@ -278,6 +283,10 @@ module Grit
       Tag.find_all(self)
     end
 
+    def tag_count
+      Tag.count_all(self)
+    end
+
     # Finds the most recent annotated tag name that is reachable from a commit.
     #
     #   @repo.recent_tag_name('master')
@@ -308,6 +317,10 @@ module Grit
     # Returns Grit::Remote[] (baked)
     def remotes
       Remote.find_all(self)
+    end
+
+    def remote_count
+      Remote.count_all(self)
     end
 
     def remote_list
@@ -698,6 +711,44 @@ module Grit
       else
         self.git.fs_move('/', "../../#{name}")
       end
+    end
+
+    def grep(searchtext, contextlines = 3, branch = 'master')
+      context_arg = '-C ' + contextlines.to_s
+      result = git.native(:grep, {}, '-n', '-E', '-i', '-z', '--heading', '--break', context_arg, searchtext, branch).encode('UTF-8', invalid: :replace, undef: :replace, replace: '')
+      greps = []
+      filematches = result.split("\n\n")
+      filematches.each do |filematch|
+        binary = false
+        file = ''
+        matches = filematch.split("--\n")
+        matches.each_with_index do |match, i|
+          content = []
+          startline = 0
+          lines = match.split("\n")
+          if i == 0
+            text = lines.first
+            lines.slice!(0)
+            file = text[/^Binary file (.+) matches$/]
+            if file
+              binary = true
+            else
+              text.slice! /^#{branch}:/
+              file = text
+            end
+          end
+          lines.each_with_index do |line, j|
+            line.chomp!
+            number, text = line.split("\0", 2)
+            if j == 0
+              startline = number.to_i
+            end
+            content << text
+          end
+          greps << Grit::Grep.new(self, file, startline, content, binary)
+        end
+      end
+      greps
     end
 
     # Pretty object inspection

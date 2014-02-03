@@ -13,6 +13,10 @@ class TestTag < Test::Unit::TestCase
     assert_equal 5, @r.tags.size
   end
 
+  def test_tag_count
+    assert_equal 5, @r.tag_count
+  end
+
   # list_from_string
 
   def test_list_from_string

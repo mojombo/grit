@@ -1,5 +1,16 @@
-Grit
-====
+## Grit. GitLab fork 
+
+#### Code status
+
+* [![CI](http://ci.gitlab.org/projects/5/status?ref=master)](http://ci.gitlab.org/projects/5?ref=master)
+
+* [![build status](https://secure.travis-ci.org/gitlabhq/grit.png)](https://travis-ci.org/gitlabhq/grit)
+
+* [![Code Climate](https://codeclimate.com/github/gitlabhq/grit.png)](https://codeclimate.com/github/gitlabhq/grit)
+
+* [![Coverage Status](https://coveralls.io/repos/gitlabhq/grit/badge.png?branch=master)](https://coveralls.io/r/gitlabhq/grit)
+
+
 
 **Grit is no longer maintained. Check out [rugged](https://github.com/libgit2/rugged).**
 
@@ -22,7 +33,7 @@ This documentation is accurate as of Grit 2.3.
 
 ## Requirements
 
-* git (http://git-scm.com) tested with 1.7.2.1
+* git (http://git-scm.com) tested with 1.7.4.6
 
 
 ## Install

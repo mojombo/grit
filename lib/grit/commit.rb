@@ -137,11 +137,18 @@ module Grit
     # - it broke when 'encoding' was introduced - not sure what else might show up
     #
     def self.list_from_string(repo, text)
-      lines = text.split("\n")
+      text_gpgless = text.gsub(/gpgsig -----BEGIN PGP SIGNATURE-----[\n\r](.*[\n\r])*? -----END PGP SIGNATURE-----[\n\r]/, "")
+      lines = text_gpgless.split("\n")
 
       commits = []
 
       while !lines.empty?
+        # GITLAB patch
+        # Skip all garbage unless we get real commit
+        while !lines.empty? && lines.first !~ /^commit [a-zA-Z0-9]*$/
+          lines.shift 
+        end
+
         id = lines.shift.split.last
         tree = lines.shift.split.last
 
@@ -158,6 +165,10 @@ module Grit
 
         # not doing anything with this yet, but it's sometimes there
         encoding = lines.shift.split.last if lines.first =~ /^encoding/
+
+        # GITLAB patch
+        # Skip Signature and other raw data
+        lines.shift while lines.first =~ /^ /
 
         lines.shift
 
@@ -203,8 +214,8 @@ module Grit
         diff = @repo.git.show({:full_index => true, :pretty => 'raw'}, @id)
       end
 
-      if diff =~ /diff --git a/
-        diff = diff.sub(/.+?(diff --git a)/m, '\1')
+      if diff =~ /diff --git "?a/
+        diff = diff.sub(/.+?(diff --git "?a)/m, '\1')
       else
         diff = ''
       end

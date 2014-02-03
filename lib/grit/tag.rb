@@ -7,17 +7,6 @@ module Grit
     lazy_reader :tagger
     lazy_reader :tag_date
 
-    def self.find_all(repo, options = {})
-      refs = repo.git.refs(options, prefix)
-      refs.split("\n").map do |ref|
-        name, id = *ref.split(' ')
-        sha = repo.git.commit_from_sha(id)
-        raise "Unknown object type." if sha == ''
-        commit = Commit.create(repo, :id => sha)
-        new(name, commit)
-      end
-    end
-
     # Writes a new tag object from a hash
     #  +repo+ is a Grit repo
     #  +hash+ is the hash of tag values
@@ -96,6 +85,12 @@ module Grit
         @tag_date = parsed[:tag_date]
       end
       self
+    end
+
+    def get_commit
+      sha = @repo_ref.git.commit_from_sha(@commit_id)
+      raise "Unknown object type." if sha == ''
+      Commit.create(@repo_ref, :id => sha)
     end
   end
 

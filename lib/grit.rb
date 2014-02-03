@@ -47,6 +47,7 @@ require 'grit/status'
 require 'grit/submodule'
 require 'grit/blame'
 require 'grit/merge'
+require 'grit/grep'
 
 module Grit
   VERSION = '2.5.0'
@@ -73,3 +74,7 @@ module Grit
     VERSION
   end
 end
+
+# Include grit_ext
+require 'charlock_holmes'
+require 'grit_ext'

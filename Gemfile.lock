@@ -1,0 +1,64 @@
+PATH
+  remote: .
+  specs:
+    grit (2.5.1)
+      charlock_holmes (~> 0.6.9)
+      diff-lcs (~> 1.1)
+      mime-types (~> 1.15)
+      posix-spawn (~> 0.3.6)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    charlock_holmes (0.6.9.4)
+    coderay (1.0.9)
+    colorize (0.5.8)
+    coveralls (0.6.2)
+      colorize
+      multi_json (~> 1.3)
+      rest-client
+      simplecov (>= 0.7)
+      thor
+    diff-lcs (1.1.3)
+    metaclass (0.0.1)
+    method_source (0.8.1)
+    mime-types (1.18)
+    mocha (0.13.2)
+      metaclass (~> 0.0.1)
+    multi_json (1.7.2)
+    posix-spawn (0.3.6)
+    pry (0.9.12.2)
+      coderay (~> 1.0.5)
+      method_source (~> 0.8)
+      slop (~> 3.4)
+    rake (0.9.2.2)
+    rest-client (1.6.7)
+      mime-types (>= 1.16)
+    rspec (2.13.0)
+      rspec-core (~> 2.13.0)
+      rspec-expectations (~> 2.13.0)
+      rspec-mocks (~> 2.13.0)
+    rspec-core (2.13.1)
+    rspec-expectations (2.13.0)
+      diff-lcs (>= 1.1.3, < 2.0)
+    rspec-mocks (2.13.1)
+    simplecov (0.7.1)
+      multi_json (~> 1.0)
+      simplecov-html (~> 0.7.1)
+    simplecov-html (0.7.1)
+    slop (3.4.4)
+    thor (0.18.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  coveralls
+  diff-lcs (~> 1.1)
+  grit!
+  mime-types (~> 1.15)
+  mocha (~> 0.13.2)
+  posix-spawn (~> 0.3.6)
+  pry
+  rake
+  rspec (~> 2.11)

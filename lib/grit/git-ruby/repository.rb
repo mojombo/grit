@@ -467,6 +467,28 @@ module Grit
         '' # one of the trees was bad or lcs isn't there - no diff
       end
 
+      def quick_what_changed(t1, t2, path, type)
+        changed = []
+
+        t1[type].each do |file, hsh|
+          t2_file = t2[type][file] rescue nil
+          full = File.join(path, file)
+          if !t2_file
+            changed << [full, 'added', hsh[:sha], nil]      # not in parent
+          elsif (hsh[:sha] != t2_file[:sha])
+            changed << [full, 'modified', hsh[:sha], t2_file[:sha]]   # file changed
+          end
+        end if t1
+
+        t2[type].each do |file, hsh|
+          if !t1 || !t1[type][file]
+            changed << [File.join(path, file), 'removed', nil, hsh[:sha]]
+          end
+        end if t2
+
+        changed
+      end
+
       # takes 2 tree shas and recursively walks them to find out what
       # files or directories have been modified in them and returns an
       # array of changes
@@ -476,27 +498,14 @@ module Grit
       #  ]
       def quick_diff(tree1, tree2, path = '.', recurse = true)
         # handle empty trees
-        changed = []
         return changed if tree1 == tree2
 
         t1 = list_tree(tree1) if tree1
         t2 = list_tree(tree2) if tree2
 
         # finding files that are different
-        t1['blob'].each do |file, hsh|
-          t2_file = t2['blob'][file] rescue nil
-          full = File.join(path, file)
-          if !t2_file
-            changed << [full, 'added', hsh[:sha], nil]      # not in parent
-          elsif (hsh[:sha] != t2_file[:sha])
-            changed << [full, 'modified', hsh[:sha], t2_file[:sha]]   # file changed
-          end
-        end if t1
-        t2['blob'].each do |file, hsh|
-          if !t1 || !t1['blob'][file]
-            changed << [File.join(path, file), 'removed', nil, hsh[:sha]]
-          end
-        end if t2
+        changed = quick_what_changed(t1, t2, path, 'blob') +
+                  quick_what_changed(t1, t2, path, 'link')
 
         t1['tree'].each do |dir, hsh|
           t2_tree = t2['tree'][dir] rescue nil

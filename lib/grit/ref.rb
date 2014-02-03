@@ -4,6 +4,16 @@ module Grit
 
     class << self
 
+      # Count all Refs
+      #   +repo+ is the Repo
+      #   +options+ is a Hash of options
+      #
+      # Returns int
+      def count_all(repo, options = {})
+        refs = repo.git.refs(options, prefix)
+        refs.split("\n").size
+      end
+
       # Find all Refs
       #   +repo+ is the Repo
       #   +options+ is a Hash of options
@@ -13,8 +23,7 @@ module Grit
         refs = repo.git.refs(options, prefix)
         refs.split("\n").map do |ref|
           name, id = *ref.split(' ')
-          commit = Commit.create(repo, :id => id)
-          self.new(name, commit)
+          self.new(name, repo, id)
         end
       end
 
@@ -27,22 +36,34 @@ module Grit
     end
 
     attr_reader :name
-    attr_reader :commit
 
     # Instantiate a new Head
     #   +name+ is the name of the head
     #   +commit+ is the Commit that the head points to
     #
     # Returns Grit::Head (baked)
-    def initialize(name, commit)
+    def initialize(name, repo, commit_id)
       @name = name
-      @commit = commit
+      @commit_id = commit_id
+      @repo_ref = repo
+      @commit = nil
+    end
+
+    def commit
+      @commit ||= get_commit
     end
 
     # Pretty object inspection
     def inspect
       %Q{#<#{self.class.name} "#{@name}">}
     end
+
+    protected
+
+    def get_commit
+      Commit.create(@repo_ref, :id => @commit_id)
+    end
+
   end # Ref
 
   # A Head is a named reference to a Commit. Every Head instance contains a name
@@ -64,8 +85,7 @@ module Grit
       head = repo.git.fs_read('HEAD').chomp
       if /ref: refs\/heads\/(.*)/.match(head)
         id = repo.git.rev_parse(options, 'HEAD')
-        commit = Commit.create(repo, :id => id)
-        self.new($1, commit)
+        self.new($1, repo, id)
       end
     end
 
