@@ -378,7 +378,7 @@ module Grit
     # Returns an Array of String option arguments.
     def options_to_argv(options)
       argv = []
-      options.each do |key, val|
+      options.sort_by{|key, val| key.to_s.length}.each do |key, val|
         if key.to_s.size == 1
           if val == true
             argv << "-#{key}"
