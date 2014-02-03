@@ -38,21 +38,31 @@ module Grit
     #   a Git repository.
     # Raises Grit::NoSuchPathError if the path does not exist.
     def initialize(path, options = {})
-      epath = File.expand_path(path)
+      git_path = File.expand_path(path)
 
-      if File.exist?(File.join(epath, '.git'))
-        self.working_dir = epath
-        self.path = File.join(epath, '.git')
-        @bare = false
-      elsif File.exist?(epath) && (epath =~ /\.git$/ || options[:is_bare])
-        self.path = epath
-        @bare = true
-      elsif File.exist?(epath)
-        raise InvalidGitRepositoryError.new(epath)
-      else
-        raise NoSuchPathError.new(epath)
+      raise NoSuchPathError.new(git_path) unless File.exist? git_path
+
+      @bare = options[:is_bare]
+
+      unless @bare
+        real_git_path = File.join(git_path, '.git')
+        if File.exist? real_git_path
+          git_path = real_git_path
+        else
+          @bare = true
+        end
       end
 
+      if Dir.entries(git_path).size > 2
+        unless File.exist?(File.join(git_path, 'HEAD')) &&
+           File.stat(File.join(git_path, 'objects')).directory? &&
+           File.stat(File.join(git_path, 'refs')).directory?
+          raise InvalidGitRepositoryError.new(git_path)
+        end
+      end
+
+      self.path = git_path
+      self.working_dir = File.dirname(git_path) if !@bare
       self.git = Git.new(self.path)
     end
 
