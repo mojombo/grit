@@ -77,6 +77,11 @@ module Grit
           ENV['PATH'].split(':').
             map  { |p| File.join(p, 'git') }.
             find { |p| File.exist?(p) }
+        # Windows PATH search
+        @git_binary ||=
+          ENV['PATH'].split(';').
+            map  { |p| File.join(p, 'git.exe') }.
+            find { |p| File.exist?(p) }
       end
       attr_writer :git_binary
     end
