@@ -201,6 +201,7 @@ module Grit
             tree_contents[k + '/'] = str
           when false
             tree_contents.delete(k)
+            tree_contents.delete(k + '/')
         end
       end
 
