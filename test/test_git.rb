@@ -10,7 +10,7 @@ class TestGit < Test::Unit::TestCase
   end
 
   def test_method_missing
-    assert_match(/^git version [\w\.]*$/, @git.version)
+    assert_match(/^git version [\w\.]*[\w\.\-\(\) ]*$/, @git.version)
   end
 
   def test_logs_stderr

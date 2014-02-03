@@ -1,3 +1,4 @@
+# encoding: utf-8
 #
 # converted from the gitrb project
 #
@@ -97,7 +98,7 @@ module Grit
           path = @directory+'/'+sha1[0...2]+'/'+sha1[2..40]
 
           if !File.exists?(path)
-            content = Zlib::Deflate.deflate(store)
+            content = Zlib::Deflate.deflate(store).force_encoding("UTF-8")
 
             FileUtils.mkdir_p(@directory+'/'+sha1[0...2])
             safe_write(path, content)

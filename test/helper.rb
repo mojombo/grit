@@ -3,7 +3,7 @@ require File.join(File.dirname(__FILE__), *%w[.. lib grit])
 require 'rubygems'
 require 'test/unit'
 gem "mocha", ">=0"
-require 'mocha'
+require 'mocha/setup'
 
 GRIT_REPO = ENV["GRIT_REPO"] || File.expand_path(File.join(File.dirname(__FILE__), '..'))
 

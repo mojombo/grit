@@ -24,8 +24,8 @@ rescue LoadError
   end
 end
 
-# ruby 1.9 compatibility
-require 'grit/ruby1.9'
+# ruby 1.9+ compatibility
+require 'grit/ruby'
 
 # internal requires
 require 'grit/lazy'
@@ -49,7 +49,7 @@ require 'grit/blame'
 require 'grit/merge'
 
 module Grit
-  VERSION = '2.5.0'
+  VERSION = '2.5.1'
 
   class << self
     # Set +debug+ to true to log all git calls and responses

@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.rubygems_version = '1.3.5'
 
   s.name              = 'grit'
-  s.version           = '2.5.0'
+  s.version           = '2.5.1'
   s.date              = '2012-04-22'
   s.rubyforge_project = 'grit'
 
@@ -62,7 +62,7 @@ Gem::Specification.new do |s|
     lib/grit/merge.rb
     lib/grit/ref.rb
     lib/grit/repo.rb
-    lib/grit/ruby1.9.rb
+    lib/grit/ruby.rb
     lib/grit/status.rb
     lib/grit/submodule.rb
     lib/grit/tag.rb

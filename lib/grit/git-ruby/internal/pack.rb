@@ -1,3 +1,4 @@
+# encoding: utf-8
 #
 # converted from the gitrb project
 #
@@ -57,7 +58,9 @@ module Grit
           end
 
           # read header
-          sig = idxfile.read(4)
+          # File.read return a ASCII-8BIT encoded string. Since we're comparing
+          # sig against a source file string we force the encoding on it to UTF-8.
+          sig = idxfile.read(4).force_encoding("UTF-8")
           ver = idxfile.read(4).unpack("N")[0]
 
           if sig == PACK_IDX_SIGNATURE
