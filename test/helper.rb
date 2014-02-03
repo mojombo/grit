@@ -20,3 +20,16 @@ end
 def jruby?
   defined?(RUBY_ENGINE) && RUBY_ENGINE =~ /jruby/
 end
+
+# a class which can be compared to Time, but is not Time.
+class DuckTime
+  include Comparable
+
+  def initialize(time)
+    @time = time
+  end
+
+  def <=>(other)
+    @time <=> other
+  end
+end
