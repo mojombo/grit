@@ -318,8 +318,12 @@ module Grit
       self.git.remote({}, 'add', name, url)
     end
 
-    def remote_fetch(name)
-      self.git.fetch({}, name)
+    # Fetch from `name` with options
+    # options that are accepted are for `Git#fetch` such as
+    #
+    # { timeout: false }
+    def remote_fetch(name, options={})
+      self.git.fetch(options, name)
     end
 
     # takes an array of remote names and last pushed dates

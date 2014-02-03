@@ -279,6 +279,22 @@ class TestRepo < Test::Unit::TestCase
     assert_equal 15, diffs.size
   end
 
+  # remote_fetch
+  def test_fetch
+    source = 'origin'
+    Git.any_instance.expects(:fetch).with({}, source)
+
+    @r.remote_fetch(source)
+  end
+
+  def test_fetch_with_options
+    options = { something: true }
+    source = 'origin'
+    Git.any_instance.expects(:fetch).with(options, source)
+
+    @r.remote_fetch(source, options)
+  end
+
   # init bare
 
   # archive
