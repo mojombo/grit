@@ -116,6 +116,10 @@ module Grit
     def refs(options, prefix)
       refs = []
       already = {}
+
+      # submodule
+      @git_dir = File.read(@git_dir)[/gitdir: (.*)/, 1] if File.file?(@git_dir)
+
       Dir.chdir(@git_dir) do
         files = Dir.glob(prefix + '/**/*')
         files.each do |ref|
