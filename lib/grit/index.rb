@@ -173,7 +173,8 @@ module Grit
         k = obj.name
         k += '/' if (obj.class == Grit::Tree)
         tmode = obj.mode.to_i.to_s  ## remove zero-padding
-        tree_contents[k] = "%s %s\0%s" % [tmode, obj.name, sha]
+	str = "%s %s\0%s" % [tmode, obj.name, sha]
+        tree_contents[k] = str.force_encoding('UTF-8')
       end if now_tree
 
       # overwrite with new tree contents
@@ -186,19 +187,21 @@ module Grit
               mode = mode.to_i.to_s  # leading 0s not allowed
               k = k.split('/').last  # slashes not allowed
               str = "%s %s\0%s" % [mode, k, sha]
-              tree_contents[k] = str
+              tree_contents[k] = str.force_encoding("UTF-8")
             end
           when String
+	    p = k.dup
             sha = write_blob(v)
             sha = [sha].pack("H*")
-            str = "%s %s\0%s" % ['100644', k, sha]
-            tree_contents[k] = str
+	    str = "%s %s\0%s" % ['100644', p.force_encoding("UTF-8"), sha.force_encoding("UTF-8")]
+            tree_contents[p] = str
           when Hash
+	    p = k.dup
             ctree = now_tree/k if now_tree
             sha = write_tree(v, ctree)
             sha = [sha].pack("H*")
-            str = "%s %s\0%s" % ['40000', k, sha]
-            tree_contents[k + '/'] = str
+            str = "%s %s\0%s" % ['40000', p.force_encoding("UTF-8"), sha.force_encoding("UTF-8")]
+            tree_contents[p + '/'] = str.force_encoding("UTF-8")
           when false
             tree_contents.delete(k)
         end
