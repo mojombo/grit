@@ -46,6 +46,7 @@ module Grit
         @bare = false
       elsif File.exist?(epath) && (epath =~ /\.git$/ || options[:is_bare])
         self.path = epath
+        self.working_dir = options[:working_dir] if options[:working_dir]
         @bare = true
       elsif File.exist?(epath)
         raise InvalidGitRepositoryError.new(epath)
@@ -53,7 +54,7 @@ module Grit
         raise NoSuchPathError.new(epath)
       end
 
-      self.git = Git.new(self.path)
+      self.git = Git.new(self.path, self.working_dir)
     end
 
     # Public: Initialize a git repository (create it on the filesystem). By
@@ -234,20 +235,44 @@ module Grit
     # Commits current index
     #
     # Returns true/false if commit worked
-    def commit_index(message)
-      self.git.commit({}, '-m', message)
+    def commit_index(message, options = {})
+      self.git.commit(options, '-m', message)
     end
 
     # Commits all tracked and modified files
     #
     # Returns true/false if commit worked
-    def commit_all(message)
-      self.git.commit({}, '-a', '-m', message)
+    def commit_all(message, options = {})
+      self.git.commit(options, '-a', '-m', message)
     end
 
     # Adds files to the index
+    #  
+    # *files - the added multi file name related to working_dir
+    # options - Command line option arguments passed to the git command.
+    #   Single char keys are converted to short options (:a => -a).
+    #   Multi-char keys are converted to long options (:arg => '--arg').
+    #   Underscores in keys are converted to dashes. These special options
+    #   are used to control command execution and are not passed in command
+    #   invocation:
+    #     :timeout - Maximum amount of time the command can run for before
+    #       being aborted. When true, use Grit::Git.git_timeout; when numeric,
+    #       use that number of seconds; when false or 0, disable timeout.
+    #     :base - Set false to avoid passing the --git-dir argument when
+    #       invoking the git command.
+    #     :work - Set true to pass the --work-tree argument when
+    #       invoking the git command if work_tree exists.
+    #     :env - Hash of environment variable key/values that are set on the
+    #       child process.
+    #     :raise - When set true, commands that exit with a non-zero status
+    #       raise a CommandFailed exception. This option is available only on
+    #       platforms that support fork(2).
+    #     :process_info - By default, a single string with output written to
+    #       the process's stdout is returned. Setting this option to true
+    #       results in a [exitstatus, out, err] tuple being returned instead.
     def add(*files)
-      self.git.add({}, *files.flatten)
+      options = files.extract_options!
+      self.git.add(options, *files.flatten)
     end
 
     # Remove files from the index

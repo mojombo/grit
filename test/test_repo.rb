@@ -10,7 +10,7 @@ class TestRepo < Test::Unit::TestCase
     tmp_path = File.join("/tmp/", filename)
     FileUtils.mkdir_p(tmp_path)
     FileUtils.cp_r(clone_path, tmp_path)
-    File.join(tmp_path, 'dot_git')
+    File.join(tmp_path, File.basename(clone_path))
   end
 
   def test_update_refs_packed
@@ -415,5 +415,21 @@ class TestRepo < Test::Unit::TestCase
     before = ['634396b2f541a9f2d58b00be1a07f0c358b999b3', 'deadbeef']
     after = ['634396b2f541a9f2d58b00be1a07f0c358b999b3']
     assert_equal after, @r.git.select_existing_objects(before)
+  end
+
+  def test_bare_repo_add_commit
+#    Grit.debug = true
+    org_dir=File.join(File.dirname(__FILE__), *%w[dot_git_spaces])
+    working_dir = File.join(File.dirname(__FILE__), 'fixtures')
+    gpath = create_temp_repo(org_dir)
+    git = Grit::Repo.new(gpath, :is_bare => true, :working_dir => working_dir)
+    assert_equal working_dir, git.working_dir
+    Dir.chdir(working_dir)
+    git.add 'ls_files', :work => true
+    result = git.commit_index('commit ls_files should ok.', :work => true)
+    assert_match(/commit ls_files should ok.\n 4 files changed, 17 insertions\(\+\), 3 deletions\(-\)\n/, result)
+#    Grit.debug = false
+
+    FileUtils.rm_r(gpath)
   end
 end
