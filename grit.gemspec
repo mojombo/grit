@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
   s.add_dependency('mime-types', "~> 1.15")
   s.add_dependency('diff-lcs', "~> 1.1")
 
+  s.add_development_dependency('rake')
   s.add_development_dependency('mocha')
 
   # = MANIFEST =
