@@ -39,10 +39,21 @@ module Grit
     # Raises Grit::NoSuchPathError if the path does not exist.
     def initialize(path, options = {})
       epath = File.expand_path(path)
+      git_dir_or_file = File.join(epath, '.git')
 
-      if File.exist?(File.join(epath, '.git'))
+      if File.exist?(git_dir_or_file)
+        if File.file?(git_dir_or_file)
+          self.path = parse_gitfile(git_dir_or_file)
+          if self.path && self.path !~ %r[^/]
+            self.path = File.join(epath, self.path)
+          end
+        else
+          self.path = git_dir_or_file
+        end
+        unless self.path && File.directory?(self.path)
+          raise InvalidGitRepositoryError.new(epath)
+        end
         self.working_dir = epath
-        self.path = File.join(epath, '.git')
         @bare = false
       elsif File.exist?(epath) && (epath =~ /\.git$/ || options[:is_bare])
         self.path = epath
@@ -703,6 +714,20 @@ module Grit
     # Pretty object inspection
     def inspect
       %Q{#<Grit::Repo "#{@path}">}
+    end
+
+    private
+
+    # Parse a gitfile (an ASCII file containing the line
+    # "gitdir: <path-to-gitdir>"). See 'man gitrepository-layout' for more
+    # information.
+    def parse_gitfile(path)
+      return nil unless File.file? path
+      pointer_line = File.read(path).split("\n")[0]
+      return nil unless pointer_line
+      matches = pointer_line.match /^gitdir: (.*)$/
+      return nil unless matches && matches.size == 2
+      matches[1]
     end
   end # Repo
 
