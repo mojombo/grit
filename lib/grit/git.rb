@@ -379,7 +379,9 @@ module Grit
     def options_to_argv(options)
       argv = []
       options.each do |key, val|
-        if key.to_s.size == 1
+        if key.kind_of? Integer
+          argv << "-#{key}" if val == true
+        elsif key.to_s.size == 1
           if val == true
             argv << "-#{key}"
           elsif val == false
