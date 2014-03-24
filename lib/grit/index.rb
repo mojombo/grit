@@ -186,6 +186,7 @@ module Grit
               mode = mode.to_i.to_s  # leading 0s not allowed
               k = k.split('/').last  # slashes not allowed
               str = "%s %s\0%s" % [mode, k, sha]
+              k += '/' if mode == "40000"
               tree_contents[k] = str
             end
           when String
