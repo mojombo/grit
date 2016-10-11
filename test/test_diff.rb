@@ -13,6 +13,7 @@ class TestDiff < Test::Unit::TestCase
     diffs = Grit::Diff.list_from_string(@r, output)
     assert_equal 2,   diffs.size
     assert_equal 10,  diffs.first.diff.split("\n").size
+    assert_equal '-', diffs.first.diff[0]
     assert_nil        diffs.last.diff
   end
 
@@ -27,7 +28,7 @@ class TestDiff < Test::Unit::TestCase
     assert_equal 'MIT-LICENSE', diffs[0].b_path
     assert_equal 90,            diffs[0].similarity_index
     assert                      diffs[0].renamed_file
-    assert diffs[0].diff.size > 0
+    assert_equal '-',           diffs[0].diff[0]
 
     # updated file
     assert_equal 'README.md', diffs[1].a_path
@@ -35,11 +36,13 @@ class TestDiff < Test::Unit::TestCase
     assert                   !diffs[1].renamed_file
     assert                   !diffs[1].new_file
     assert                   !diffs[1].deleted_file
+    assert_equal '-',         diffs[0].diff[0]
 
     # deleted file
     assert_equal 'Rakefile', diffs[2].a_path
     assert_equal 'Rakefile', diffs[2].b_path
     assert                   diffs[2].deleted_file
+    assert_equal '-',         diffs[0].diff[0]
 
     # rename w/o update
     assert_equal 'PURE_TODO', diffs[3].a_path
@@ -52,5 +55,6 @@ class TestDiff < Test::Unit::TestCase
     assert_equal 'foobar', diffs[4].a_path
     assert_equal 'foobar', diffs[4].b_path
     assert                 diffs[4].new_file
+    assert_equal '-',         diffs[0].diff[0]
   end
 end

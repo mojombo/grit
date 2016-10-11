@@ -57,11 +57,14 @@ module Grit
         elsif lines.first =~ /^similarity index (\d+)\%/
           sim_index    = $1.to_i
           renamed_file = true
-          2.times { lines.shift } # shift away the 2 `rename from/to ...` lines
+          3.times { lines.shift } # shift away `similarity` and the 2 `rename from/to ...` lines
         end
 
-        m, a_blob, b_blob, b_mode = *lines.shift.match(%r{^index ([0-9A-Fa-f]+)\.\.([0-9A-Fa-f]+) ?(.+)?$})
-        b_mode.strip! if b_mode
+        a_blob, b_blob, b_mode = nil, nil, nil
+        unless lines.empty? || lines.first =~ /^diff --git/
+          m, a_blob, b_blob, b_mode = *lines.shift.match(%r{^index ([0-9A-Fa-f]+)\.\.([0-9A-Fa-f]+) ?(.+)?$})
+          b_mode.strip! if b_mode
+        end
 
         diff_lines = []
         while lines.first && lines.first !~ /^diff/
