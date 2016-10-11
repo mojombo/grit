@@ -187,7 +187,7 @@ class TestCommit < Test::Unit::TestCase
     assert patch.include?('From: tom <tom@taco.(none)>')
     assert patch.include?('Date: Tue, 20 Nov 2007 17:27:42 -0800')
     assert patch.include?('Subject: [PATCH] fix tests on other machines')
-    assert patch.include?('test/test_reality.rb |   30 +++++++++++++++---------------')
+    assert patch.include?('test/test_reality.rb | 30 +++++++++++++++---------------')
     assert patch.include?('@@ -1,17 +1,17 @@')
     assert patch.include?('+#     recurse(t)')
     assert patch.include?("1.7.")
@@ -227,5 +227,15 @@ class TestCommit < Test::Unit::TestCase
     assert_equal expected, @c.to_hash
   ensure
     ENV["TZ"] = old_tz
+  end
+
+  # .list_from_string
+
+  def test_list_from_string
+    repo = Repo.new(File.join(File.dirname(__FILE__), *%w[dot_git_signed_tag_merged]), :is_bare => true)
+    rev_list = repo.git.rev_list({:pretty => "raw", :all => true})
+    commits = Commit.list_from_string(@r, rev_list)
+
+    assert_equal 4, commits.size
   end
 end

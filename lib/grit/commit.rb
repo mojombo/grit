@@ -111,8 +111,6 @@ module Grit
     #
     # Returns Grit::Commit[] (baked)
     def self.find_all(repo, ref, options = {})
-      allowed_options = [:max_count, :skip, :since]
-
       default_options = {:pretty => "raw"}
       actual_options = default_options.merge(options)
 
@@ -158,6 +156,13 @@ module Grit
 
         # not doing anything with this yet, but it's sometimes there
         encoding = lines.shift.split.last if lines.first =~ /^encoding/
+
+        if lines[1] && lines[1][0] == ' ' && lines[1][1] && lines[1][1] != ' '
+          lines.shift
+          while lines[0] && lines[0][0] == ' '
+            lines.shift
+          end
+        end
 
         lines.shift
 
