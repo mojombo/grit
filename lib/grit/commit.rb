@@ -137,35 +137,40 @@ module Grit
     # - it broke when 'encoding' was introduced - not sure what else might show up
     #
     def self.list_from_string(repo, text)
-      lines = text.split("\n")
-
       commits = []
-
-      while !lines.empty?
-        id = lines.shift.split.last
-        tree = lines.shift.split.last
-
+      raw_commits = text.split(/^commit /)
+      raw_commits.shift
+      raw_commits.each do |commit_text|
+        lines = commit_text.split("\n")
+        id = lines.shift
         parents = []
-        parents << lines.shift.split.last while lines.first =~ /^parent/
-
-        author_line = lines.shift
-        author_line << lines.shift if lines[0] !~ /^committer /
-        author, authored_date = self.actor(author_line)
-
-        committer_line = lines.shift
-        committer_line << lines.shift if lines[0] && lines[0] != '' && lines[0] !~ /^encoding/
-        committer, committed_date = self.actor(committer_line)
-
-        # not doing anything with this yet, but it's sometimes there
-        encoding = lines.shift.split.last if lines.first =~ /^encoding/
-
-        lines.shift
-
         message_lines = []
-        message_lines << lines.shift[4..-1] while lines.first =~ /^ {4}/
-
-        lines.shift while lines.first && lines.first.empty?
-
+        author = nil
+        authored_date = nil
+        committer = nil
+        committed_date = nil
+        encoding = nil
+        while lines.present?
+          line = lines.shift
+          if line =~ /^ {4}/
+            message_lines << line[4..-1]
+          else
+            tokens = line.split
+            case tokens.first
+            when 'tree'
+              tree = tokens.last
+            when 'parent'
+              parents << tokens.last
+            when 'author'
+              author, authored_date = self.actor(line)
+            when 'committer'
+              committer, committed_date = self.actor(line)
+            when 'encoding'
+              # not doing anything with this yet, but it's sometimes there
+              encoding = token.last
+            end
+          end
+        end
         commits << Commit.new(repo, id, parents, tree, author, authored_date, committer, committed_date, message_lines)
       end
 
