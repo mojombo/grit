@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require File.dirname(__FILE__) + '/helper'
 
 class TestDiff < Test::Unit::TestCase
@@ -52,5 +53,19 @@ class TestDiff < Test::Unit::TestCase
     assert_equal 'foobar', diffs[4].a_path
     assert_equal 'foobar', diffs[4].b_path
     assert                 diffs[4].new_file
+  end
+
+  def test_list_from_string_quoted_filenames
+    output = fixture('diff_tree_i18n')
+    diffs = Grit::Diff.list_from_string(@r, output)
+
+    assert_equal "Administração-e-Autorização.md", diffs[0].b_path
+  end
+
+  def test_list_from_string_unquoted_filenames
+    output = fixture('diff_tree_i18n')
+    diffs = Grit::Diff.list_from_string(@r, output)
+
+    assert_equal 'unquoted.md', diffs[1].b_path
   end
 end
