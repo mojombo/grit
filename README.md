@@ -1,6 +1,8 @@
 Grit
 ====
 
+**Grit is no longer maintained. Check out [rugged](https://github.com/libgit2/rugged).**
+
 Grit gives you object oriented read/write access to Git repositories via Ruby.
 The main goals are stability and performance. To this end, some of the
 interactions with Git repositories are done by shelling out to the system's

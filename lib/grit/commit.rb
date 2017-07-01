@@ -13,7 +13,6 @@ module Grit
     lazy_reader :committed_date
     lazy_reader :message
     lazy_reader :short_message
-    lazy_reader :author_string
 
     # Parses output from the `git-cat-file --batch'.
     #
@@ -61,7 +60,7 @@ module Grit
       @committer = committer
       @committed_date = committed_date
       @message = message.join("\n")
-      @short_message = message.select { |x| !x.strip.empty? }[0] || ''
+      @short_message = message.find { |x| !x.strip.empty? } || ''
     end
 
     def id_abbrev
@@ -149,8 +148,13 @@ module Grit
         parents = []
         parents << lines.shift.split.last while lines.first =~ /^parent/
 
-        author, authored_date = self.actor(lines.shift)
-        committer, committed_date = self.actor(lines.shift)
+        author_line = lines.shift
+        author_line << lines.shift if lines[0] !~ /^committer /
+        author, authored_date = self.actor(author_line)
+
+        committer_line = lines.shift
+        committer_line << lines.shift if lines[0] && lines[0] != '' && lines[0] !~ /^encoding/
+        committer, committed_date = self.actor(committer_line)
 
         # not doing anything with this yet, but it's sometimes there
         encoding = lines.shift.split.last if lines.first =~ /^encoding/
@@ -194,7 +198,7 @@ module Grit
 
     def show
       if parents.size > 1
-        diff = @repo.git.native("diff #{parents[0].id}...#{parents[1].id}", {:full_index => true})
+        diff = @repo.git.native(:diff, {:full_index => true}, "#{parents[0].id}...#{parents[1].id}")
       else
         diff = @repo.git.show({:full_index => true, :pretty => 'raw'}, @id)
       end
@@ -250,6 +254,21 @@ module Grit
         end
       end
       ret
+    end
+
+    # Calculates the commit's Patch ID. The Patch ID is essentially the SHA1
+    # of the diff that the commit is introducing.
+    #
+    # Returns the 40 character hex String if a patch-id could be calculated
+    #   or nil otherwise.
+    def patch_id
+      show = @repo.git.show({}, @id)
+      patch_line = @repo.git.native(:patch_id, :input => show)
+      if patch_line =~ /^([0-9a-f]{40}) [0-9a-f]{40}\n$/
+        $1
+      else
+        nil
+      end
     end
 
     # Pretty object inspection

@@ -31,6 +31,13 @@ module Grit
         def sha1
           Digest::SHA1.digest("%s %d\0" % [@type, @content.length] + @content)
         end
+
+        def to_hash
+          {
+            :type => @type,
+            :content => @content
+          }
+        end
       end
     end
   end

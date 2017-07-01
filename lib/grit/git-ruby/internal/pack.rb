@@ -30,6 +30,7 @@ module Grit
         SHA1Size = 20
         IdxOffsetSize = 4
         OffsetSize = 4
+        ExtendedOffsetSize = 8
         CrcSize = 4
         OffsetStart = FanOutCount * IdxOffsetSize
         SHA1Start = OffsetStart + OffsetSize
@@ -46,11 +47,13 @@ module Grit
         end
 
         def with_idx(index_file = nil)
-          if !index_file
-            index_file = @name
-            idxfile = File.open(@name[0...-4]+'idx', 'rb')
-          else
+          index_file ||= @name[0...-4] + 'idx'
+
+          begin
             idxfile = File.open(index_file, 'rb')
+          rescue Errno::ENOENT => boom
+            # file went away. bail out without yielding.
+            return
           end
 
           # read header
@@ -70,14 +73,19 @@ module Grit
           yield idx
           idx.unmap
         ensure
-          idxfile.close
+          idxfile.close if idxfile
         end
 
         def with_packfile
-          packfile = File.open(@name, 'rb')
+          begin
+            packfile = File.open(@name, 'rb')
+          rescue Errno::ENOENT
+            # file went away. bail out without yielding.
+            return
+          end
           yield packfile
         ensure
-          packfile.close
+          packfile.close if packfile
         end
 
         def cache_objects
@@ -207,6 +215,12 @@ module Grit
               else
                 pos = OffsetStart + (@size * (SHA1Size + CrcSize)) + (mid * OffsetSize)
                 offset = idx[pos, OffsetSize].unpack('N')[0]
+                if offset & 0x80000000 > 0
+                  offset &= 0x7fffffff
+                  pos = OffsetStart + (@size * (SHA1Size + CrcSize + OffsetSize)) + (offset * ExtendedOffsetSize)
+                  words = idx[pos, ExtendedOffsetSize].unpack('NN')
+                  offset = (words[0] << 32) | words[1]
+                end
                 return offset
               end
             else

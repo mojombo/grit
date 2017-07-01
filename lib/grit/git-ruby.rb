@@ -1,10 +1,9 @@
 require 'grit/git-ruby/repository'
-require 'grit/git-ruby/file_index'
 
 module Grit
 
   # the functions in this module intercept the calls to git binary
-  # made buy the grit objects and attempts to run them in pure ruby
+  # made by the grit objects and attempts to run them in pure ruby
   # if it will be faster, or if the git binary is not available (!!TODO!!)
   module GitRuby
 
@@ -48,32 +47,38 @@ module Grit
       try_run { ruby_git.diff(sha1, sha2, options) }
     end
 
-    def rev_list(options, ref = 'master')
+    def rev_list(options, *refs)
+      refs = ['master'] if refs.empty?
       options.delete(:skip) if options[:skip].to_i == 0
       allowed_options = [:max_count, :since, :until, :pretty]  # this is all I can do right now
-      if ((options.keys - allowed_options).size > 0)
-        return method_missing('rev-list', options, ref)
+      if ((options.keys - allowed_options).size > 0) || refs.size > 1
+        method_missing('rev-list', options, *refs)
       elsif (options.size == 0)
         # pure rev-list
+        ref = refs.first
         begin
-          return file_index.commits_from(rev_parse({}, ref)).join("\n") + "\n"
+          file_index.commits_from(rev_parse({}, ref)).join("\n") + "\n"
         rescue
-          return method_missing('rev-list', options, ref)
+          method_missing('rev-list', options, *refs)
         end
       else
-        aref = rev_parse({}, ref)
+        ref = refs.first
+        aref = rev_parse({:verify => true}, ref)
         if aref.is_a? Array
-          return method_missing('rev-list', options, ref)
+          method_missing('rev-list', options, *refs)
         else
-          return try_run { ruby_git.rev_list(aref, options) }
+          try_run { ruby_git.rev_list(aref, options) }
         end
       end
     end
 
     def rev_parse(options, string)
-      raise RuntimeError, "invalid string: #{string}" unless string.is_a?(String)
+      raise RuntimeError, "invalid string: #{string.inspect}" unless string.is_a?(String)
 
-      if string =~ /\.\./
+      # Split ranges, but don't split when specifying a ref:path.
+      # Don't split HEAD:some/path/in/repo..txt
+      # Do split sha1..sha2
+      if string !~ /:/ && string =~ /\.\./
         (sha1, sha2) = string.split('..')
         return [rev_parse({}, sha1), rev_parse({}, sha2)]
       end
@@ -195,21 +200,6 @@ module Grit
 
     def file_type(ref)
       try_run { ruby_git.cat_file_type(ref).to_s }
-    end
-
-    def blame_tree(commit, path = nil)
-      begin
-        path = [path].join('/').to_s + '/' if (path && path != '')
-        path = '' if !path.is_a? String
-        commits = file_index.last_commits(rev_parse({}, commit), looking_for(commit, path))
-        clean_paths(commits)
-      rescue FileIndex::IndexFileNotFound
-        {}
-      end
-    end
-
-    def file_index
-      @git_file_index ||= FileIndex.new(@git_dir)
     end
 
     def ruby_git
