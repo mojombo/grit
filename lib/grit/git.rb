@@ -176,12 +176,6 @@ module Grit
       []
     end
 
-    def create_tempfile(seed, unlink = false)
-      path = Tempfile.new(seed).path
-      File.unlink(path) if unlink
-      return path
-    end
-
     def commit_from_sha(id)
       git_ruby_repo = GitRuby::Repository.new(self.git_dir)
       object = git_ruby_repo.get_object_by_sha1(id)
@@ -194,7 +188,7 @@ module Grit
         ''
       end
     end
-
+ master
     # Checks if the patch of a commit can be applied to the given head.
     #
     # options     - grit command options hash
@@ -365,6 +359,84 @@ module Grit
 
     # Methods not defined by a library implementation execute the git command
     # using #native, passing the method name as the git command name.
+=======
+    # Checks if a SHA's diff applies against the HEAD of the current 
+    # repository.  This determines if a cherry-pick from a commit in the same
+    # repository would be successful.
+    #
+    # head_sha    - String HEAD SHA of the repository.
+    # applies_sha - String SHA of the commit to cherry-pick.
+    #
+    # Returns the exit status of the commands.  Anything above 0 means there
+    # was an error.
+    def check_applies(head_sha, applies_sha)
+      check_patch_applies(head_sha, get_patch(applies_sha))
+    end
+
+    # Checks if a diff applies against the HEAD of the current repository.
+    #
+    # head_sha - String HEAD SHA of the repository.
+    # patch    - String patch to apply (see #get_patch)
+    #
+    # Returns the exit status of the commands.  Anything above 0 means there
+    # was an error.
+    def check_patch_applies(head_sha, patch)
+      apply_patch(head_sha, patch, :check => true) ? 0 : 1
+    end
+
+    # Gets the patch for a given commit.
+    #
+    # sha1    - String base SHA of the diff.
+    # sha2    - Optional head SHA of the diff.  If not provided, use 
+    #           sha1^...sha1
+    # options - Optional Hash to be passed to the `git diff` command.
+    #
+    # Returns a String of the patch of the commit's parent to the parent.
+    def get_patch(sha1, sha2 = nil, options = {})
+      if sha2.is_a?(Hash)
+        options = sha2
+        sha2    = nil
+      end
+
+      sha1, sha2 = "#{sha1}^", sha1 if sha2.nil?
+      native(:diff, options, sha1, sha2)
+    end
+
+    # Applies a patch against the current repository's INDEX.
+    #
+    # head_sha - String HEAD SHA of the repository to start from.
+    # patch    - The String patch data.
+    #
+    # Returns a String SHA of the written tree, or false if the patch did not
+    # apply cleanly.
+    def apply_patch(head_sha, patch, options = {})
+      options[:cached] = true
+      tree_sha = nil
+      with_custom_index do
+        native(:read_tree, {}, head_sha)
+        cmd = sh_command('', :apply, '', options, [])
+        (ret, err) = sh(cmd) do |stdin|
+          stdin << patch
+          stdin.close
+        end
+        if err =~ /error/
+          tree_sha = false
+        elsif options[:check]
+          tree_sha = true
+        else
+          tree_sha = native(:write_tree)
+          tree_sha.strip!
+        end
+      end
+      tree_sha
+    end
+
+    # Run the given git command with the specified arguments and return
+    # the result as a String
+    #   +cmd+ is the command
+    #   +options+ is a hash of Ruby style options
+    #   +args+ is the list of arguments (to be joined by spaces)
+no_raw_git
     #
     # Examples:
     #   git.rev_list({:max_count => 10, :header => true}, "master")
@@ -422,7 +494,17 @@ module Grit
     def run(prefix, cmd, postfix, options, args, &block)
       timeout  = options.delete(:timeout) rescue nil
       timeout  = true if timeout.nil?
+      call     = sh_command(prefix, cmd, postfix, options, args)
+      Grit.log(call) if Grit.debug
+      response, err = timeout ? sh(call, &block) : wild_sh(call, &block)
+      if Grit.debug
+        Grit.log(response)
+        Grit.log(err)
+      end
+      response
+    end
 
+    def sh_command(prefix, cmd, postfix, options, args)
       base     = options.delete(:base) rescue nil
       base     = true if base.nil?
 
@@ -435,15 +517,16 @@ module Grit
       if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/
         ext_args = args.reject { |a| a.empty? }.map { |a| (a == '--' || a[0].chr == '|' || Grit.no_quote) ? a : "\"#{e(a)}\"" }
         gitdir = base ? "--git-dir=\"#{self.git_dir}\"" : ""
-        call = "#{prefix}#{Git.git_binary} #{gitdir} #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
+        "#{prefix}#{Git.git_binary} #{gitdir} #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
       else
         ext_args = args.reject { |a| a.empty? }.map { |a| (a == '--' || a[0].chr == '|' || Grit.no_quote) ? a : "'#{e(a)}'" }
         gitdir = base ? "--git-dir='#{self.git_dir}'" : ""
-        call = "#{prefix}#{Git.git_binary} #{gitdir} #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
+        "#{prefix}#{Git.git_binary} #{gitdir} #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
       end
 
+
       Grit.log(call) if Grit.debug
-      response, err = timeout ? sh(call, &block) : wild_sh(call, &block)
+      response = callback ? sh(call, &block) : wild_sh(call, &block)
       Grit.log(response) if Grit.debug
       Grit.log(err) if Grit.debug
       response
@@ -496,6 +579,31 @@ module Grit
       end
       args
     end
-  end # Git
 
+    # Creates a temporary file in the filesystem.
+    #
+    # seed   - A string used in the name of the file.
+    # unlink - Determines whether to delete the temp file.  Default: false
+    #
+    # Returns the String path to the Tempfile
+    def create_tempfile(seed, unlink = false)
+      path = Tempfile.new(seed).path
+      File.unlink(path) if unlink
+      return path
+    end
+
+    def with_custom_index(index = nil)
+      index ||= create_tempfile('index', true)
+      tmp     = ENV['GIT_INDEX_FILE']
+      ENV['GIT_INDEX_FILE'] = index
+      return_value = yield
+      after = ENV['GIT_INDEX_FILE'] # someone fucking with us ??
+      if after != index
+        raise 'environment was changed for the git call'
+      end
+      return_value
+    ensure
+      ENV['GIT_INDEX_FILE'] = tmp
+    end
+  end # Git
 end # Grit
