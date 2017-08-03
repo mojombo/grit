@@ -1,7 +1,7 @@
 Grit
 ====
 
-**Grit is no longer maintained. Check out [rugged](https://github.com/libgit2/rugged).**
+**Grit is no longer maintained. Check out [rugged](x-github-client://openRepo/https://github.com/xaxadmin/grit.rubyforge.org?branch=master&filepath=README.md).**
 
 Grit gives you object oriented read/write access to Git repositories via Ruby.
 The main goals are stability and performance. To this end, some of the
@@ -36,11 +36,11 @@ Easiest install is via RubyGems:
 
 Grit's Git repo is available on GitHub, which can be browsed at:
 
-    http://github.com/mojombo/grit
+    x-github-client://openRepo/https://github.com/xaxadmin/grit.rubyforge.org
 
 and cloned with:
 
-    git clone git://github.com/mojombo/grit.git
+    git clone git://github.com/gitlab/grit.git
 
 
 ### Development
