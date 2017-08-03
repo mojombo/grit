@@ -99,6 +99,7 @@ module Grit
       git = Git.new(path)
       git.fs_mkdir('..')
       git.init(git_options)
+      repo_options = {:is_bare => true}.merge(repo_options)
       self.new(path, repo_options)
     end
 
@@ -166,11 +167,7 @@ module Grit
     # Returns an Array of Grit objects (Grit::Commit).
     def batch(*shas)
       shas.flatten!
-      text = git.native(:cat_file, {:batch => true}) do |stdin|
-        stdin.write(shas * "\n")
-        stdin.close
-      end
-
+      text = git.native(:cat_file, {:batch => true, :input => (shas * "\n")})
       parse_batch(text)
     end
 
@@ -186,6 +183,7 @@ module Grit
         sha, type, size = line.split(" ", 3)
         parser = BATCH_PARSERS[type]
         if type == 'missing' || !parser
+          io.seek(size.to_i + 1, IO::SEEK_CUR)
           objects << nil
           next
         end
@@ -348,6 +346,21 @@ module Grit
       [ Head.find_all(self), Tag.find_all(self), Remote.find_all(self) ].flatten
     end
 
+    # returns an array of hashes representing all references
+    def refs_list
+      refs = self.git.for_each_ref
+      refarr = refs.split("\n").map do |line|
+        shatype, ref = line.split("\t")
+        sha, type = shatype.split(' ')
+        [ref, sha, type]
+      end
+      refarr
+    end
+
+    def delete_ref(ref)
+      self.git.native(:update_ref, {:d => true}, ref)
+    end
+
     def commit_stats(start = 'master', max_count = 10, skip = 0)
       options = {:max_count => max_count,
                  :skip => skip}
@@ -376,6 +389,11 @@ module Grit
     # Returns Grit::Commit[] (baked)
     def commits_between(from, to)
       Commit.find_all(self, "#{from}..#{to}").reverse
+    end
+
+    def fast_forwardable?(to, from)
+      mb = self.git.native(:merge_base, {}, [to, from]).strip
+      mb == from
     end
 
     # The Commits objects that are newer than the specified date.
@@ -418,23 +436,20 @@ module Grit
       repo_refs       = self.git.rev_list({}, ref).strip.split("\n")
       other_repo_refs = other_repo.git.rev_list({}, other_ref).strip.split("\n")
 
-      (other_repo_refs - repo_refs).map do |ref|
-        Commit.find_all(other_repo, ref, {:max_count => 1}).first
+      (other_repo_refs - repo_refs).map do |refn|
+        Commit.find_all(other_repo, refn, {:max_count => 1}).first
       end
     end
 
     def objects(refs)
-      Grit.no_quote = true
-      obj = self.git.rev_list({:objects => true, :timeout => false}, refs).split("\n").map { |a| a[0, 40] }
-      Grit.no_quote = false
-      obj
+      refs = refs.split(/\s+/) if refs.respond_to?(:to_str)
+      self.git.rev_list({:objects => true, :timeout => false}, *refs).
+        split("\n").map { |a| a[0, 40] }
     end
 
     def commit_objects(refs)
-      Grit.no_quote = true
-      obj = self.git.rev_list({:timeout => false}, refs).split("\n").map { |a| a[0, 40] }
-      Grit.no_quote = false
-      obj
+      refs = refs.split(/\s+/) if refs.respond_to?(:to_str)
+      self.git.rev_list({:timeout => false}, *refs).split("\n").map { |a| a[0, 40] }
     end
 
     def objects_between(ref1, ref2 = nil)
@@ -451,12 +466,12 @@ module Grit
       Grit.no_quote = true
       if parents
         # PARENTS:
-        cmd = "-r -t -m #{commit_sha}"
-        revs = self.git.diff_tree({:timeout => false}, cmd).strip.split("\n").map{ |a| r = a.split(' '); r[3] if r[1] != '160000' }
+        revs = self.git.diff_tree({:timeout => false, :r => true, :t => true, :m => true}, commit_sha).
+          strip.split("\n").map{ |a| r = a.split(' '); r[3] if r[1] != '160000' }
       else
         # NO PARENTS:
-        cmd = "-r -t #{commit_sha}"
-        revs = self.git.method_missing('ls-tree', {:timeout => false}, "-r -t #{commit_sha}").split("\n").map{ |a| a.split("\t").first.split(' ')[2] }
+        revs = self.git.native(:ls_tree, {:timeout => false, :r => true, :t => true}, commit_sha).
+          split("\n").map{ |a| a.split("\t").first.split(' ')[2] }
       end
       revs << self.commit(commit_sha).tree.id
       Grit.no_quote = false
@@ -465,7 +480,7 @@ module Grit
 
     # The Tree object for the given treeish reference
     #   +treeish+ is the reference (default 'master')
-    #   +paths+ is an optional Array of directory paths to restrict the tree (deafult [])
+    #   +paths+ is an optional Array of directory paths to restrict the tree (default [])
     #
     # Examples
     #   repo.tree('master', ['lib/'])
@@ -473,6 +488,43 @@ module Grit
     # Returns Grit::Tree (baked)
     def tree(treeish = 'master', paths = [])
       Tree.construct(self, treeish, paths)
+    end
+
+    # quick way to get a simple array of hashes of the entries
+    # of a single tree or recursive tree listing from a given
+    # sha or reference
+    #   +treeish+ is the reference (default 'master')
+    #   +options+ is a hash or options - currently only takes :recursive
+    #
+    # Examples
+    #   repo.lstree('master', :recursive => true)
+    #
+    # Returns array of hashes - one per tree entry
+    def lstree(treeish = 'master', options = {})
+      # check recursive option
+      opts = {:timeout => false, :l => true, :t => true}
+      if options[:recursive]
+        opts[:r] = true
+      end
+      # mode, type, sha, size, path
+      revs = self.git.native(:ls_tree, opts, treeish)
+      lines = revs.split("\n")
+      revs = lines.map do |a|
+        stuff, path = a.split("\t")
+        mode, type, sha, size = stuff.split(" ")
+        entry = {:mode => mode, :type => type, :sha => sha, :path => path}
+        entry[:size] = size.strip.to_i if size.strip != '-'
+        entry
+      end
+      revs
+    end
+
+    def object(sha)
+      obj = git.get_git_object(sha)
+      raw = Grit::GitRuby::Internal::RawObject.new(obj[:type], obj[:content])
+      object = Grit::GitRuby::GitObject.from_raw(raw)
+      object.sha = sha
+      object
     end
 
     # The Blob object for the given id
@@ -502,7 +554,7 @@ module Grit
       diff = self.git.native('diff', {}, a, b, '--', *paths)
 
       if diff =~ /diff --git a/
-        diff = diff.sub(/.+?(diff --git a)/m, '\1')
+        diff = diff.sub(/.*?(diff --git a)/m, '\1')
       else
         diff = ''
       end

@@ -4,8 +4,8 @@ Gem::Specification.new do |s|
   s.rubygems_version = '1.3.5'
 
   s.name              = 'grit'
-  s.version           = '2.3.0'
-  s.date              = '2010-09-29'
+  s.version           = '2.4.2.github'
+  s.date              = '2012-04-22'
   s.rubyforge_project = 'grit'
 
   s.summary     = "Ruby Git bindings."
@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--charset=UTF-8"]
   s.extra_rdoc_files = %w[README.md LICENSE]
 
+  s.add_dependency('posix-spawn', "~> 0.3.6")
   s.add_dependency('mime-types', "~> 1.15")
   s.add_dependency('diff-lcs', "~> 1.1")
 
@@ -49,19 +50,16 @@ Gem::Specification.new do |s|
     lib/grit/errors.rb
     lib/grit/git-ruby.rb
     lib/grit/git-ruby/commit_db.rb
-    lib/grit/git-ruby/file_index.rb
     lib/grit/git-ruby/git_object.rb
     lib/grit/git-ruby/internal/file_window.rb
     lib/grit/git-ruby/internal/loose.rb
     lib/grit/git-ruby/internal/pack.rb
     lib/grit/git-ruby/internal/raw_object.rb
-    lib/grit/git-ruby/object.rb
     lib/grit/git-ruby/repository.rb
     lib/grit/git.rb
     lib/grit/index.rb
     lib/grit/lazy.rb
     lib/grit/merge.rb
-    lib/grit/open3_detach.rb
     lib/grit/ref.rb
     lib/grit/repo.rb
     lib/grit/ruby1.9.rb

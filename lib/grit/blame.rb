@@ -4,12 +4,16 @@ module Grit
 
     attr_reader :lines
 
-    def initialize(repo, file, commit)
+    def initialize(repo, file, commit, lines=nil)
       @repo = repo
       @file = file
       @commit = commit
-      @lines = []
-      load_blame
+      if lines.nil?
+        @lines = []
+        load_blame
+      else
+        @lines = lines
+      end
     end
 
     def load_blame
@@ -26,16 +30,21 @@ module Grit
         if line[0, 1] == "\t"
           lines << line[1, line.size]
         elsif m = /^(\w{40}) (\d+) (\d+)/.match(line)
-          if !commits[m[1]]
-            commits[m[1]] = @repo.commit(m[1])
-          end
-          info[m[3].to_i] = [commits[m[1]], m[2].to_i]
+          commit_id, old_lineno, lineno = m[1], m[2].to_i, m[3].to_i
+          commits[commit_id] = nil if !commits.key?(commit_id)
+          info[lineno] = [commit_id, old_lineno]
         end
       end
 
+      # load all commits in single call
+      @repo.batch(*commits.keys).each do |commit|
+        commits[commit.id] = commit
+      end
+
       # get it together
-      info.sort.each do |lineno, commit|
-        final << BlameLine.new(lineno, commit[1], commit[0], lines[lineno - 1])
+      info.sort.each do |lineno, (commit_id, old_lineno)|
+        commit = commits[commit_id]
+        final << BlameLine.new(lineno, old_lineno, commit, lines[lineno - 1])
       end
 
       @lines = final

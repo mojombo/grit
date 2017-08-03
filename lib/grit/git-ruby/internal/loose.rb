@@ -12,6 +12,7 @@
 require 'zlib'
 require 'digest/sha1'
 require 'grit/git-ruby/internal/raw_object'
+require 'tempfile'
 
 module Grit
   module GitRuby
@@ -36,7 +37,7 @@ module Grit
         end
 
         def get_raw_object(buf)
-          if buf.length < 2
+          if buf.bytesize < 2
             raise LooseObjectError, "object file too small"
           end
 
@@ -56,14 +57,37 @@ module Grit
             type, size, used = unpack_object_header_gently(buf)
             content = Zlib::Inflate.inflate(buf[used..-1])
           end
-          raise LooseObjectError, "size mismatch" if content.length != size
+          raise LooseObjectError, "size mismatch" if content.bytesize != size
           return RawObject.new(type, content)
+        end
+
+        # write an object to a temporary file, then atomically rename it
+        # into place; this ensures readers never see a half-written file
+        def safe_write(path, content)
+          f =
+            if RUBY_VERSION >= '1.9'
+              Tempfile.open("tmp_obj_", File.dirname(path), :opt => "wb")
+            else
+              Tempfile.open("tmp_obj_", File.dirname(path))
+            end
+          begin
+            f.write content
+            f.fsync
+            File.link(f.path, path)
+          rescue Errno::EEXIST
+            # The path already exists; we raced with another process,
+            # but it's OK, because by definition the content is the
+            # same. So we can just ignore the error.
+          ensure
+            f.unlink
+            f.close
+          end
         end
 
         # currently, I'm using the legacy format because it's easier to do
         # this function takes content and a type and writes out the loose object and returns a sha
         def put_raw_object(content, type)
-          size = content.length.to_s
+          size = content.bytesize.to_s
           LooseStorage.verify_header(type, size)
 
           header = "#{type} #{size}\0"
@@ -76,16 +100,14 @@ module Grit
             content = Zlib::Deflate.deflate(store)
 
             FileUtils.mkdir_p(@directory+'/'+sha1[0...2])
-            File.open(path, 'wb') do |f|
-              f.write content
-            end
+            safe_write(path, content)
           end
           return sha1
         end
 
         # simply figure out the sha
         def self.calculate_sha(content, type)
-          size = content.length.to_s
+          size = content.bytesize.to_s
           verify_header(type, size)
           header = "#{type} #{size}\0"
           store = header + content
@@ -109,7 +131,7 @@ module Grit
           size = c & 15;
           shift = 4;
           while c & 0x80 != 0
-            if buf.length <= used
+            if buf.bytesize <= used
               raise LooseObjectError, "object file too short"
             end
             c = buf.getord(used)

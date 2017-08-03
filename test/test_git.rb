@@ -20,7 +20,7 @@ class TestGit < Test::Unit::TestCase
     @git.bad
   end
 
-  def testl_logs_stderr_when_skipping_timeout
+  def test_logs_stderr_when_skipping_timeout
     Grit.debug = true
     Grit.stubs(:log)
     Grit.expects(:log).with(includes("git: 'bad' is not a git command"))
@@ -38,17 +38,18 @@ class TestGit < Test::Unit::TestCase
     assert_equal ["-s", "-t"], @git.transform_options({:s => true, :t => true}).sort
   end
 
-  def test_uses_custom_sh_method
-    @git.expects(:sh)
+  def test_uses_native_command_execution
+    @git.expects(:native)
     @git.something
   end
 
   def test_can_skip_timeout
-    @git.expects(:wild_sh)
+    Timeout.expects(:timeout).never
     @git.something(:timeout => false)
   end
 
   def test_raises_if_too_many_bytes
+    fail if jruby?
     assert_raises Grit::Git::GitTimeout do
       @git.sh "yes | head -#{Grit::Git.git_max_size + 1}"
     end
@@ -59,22 +60,31 @@ class TestGit < Test::Unit::TestCase
     assert_raises Grit::Git::GitTimeout do
       @git.version
     end
+  ensure
     Grit::Git.git_timeout = 5.0
+  end
+
+  def test_with_timeout_default_parameter
+    assert_nothing_raised do
+      Git::Git.with_timeout do
+        @git.version
+      end
+    end
   end
 
   def test_it_really_shell_escapes_arguments_to_the_git_shell
     @git.expects(:sh).with("#{Git.git_binary} --git-dir='#{@git.git_dir}' foo --bar='bazz\\'er'")
-    @git.foo(:bar => "bazz'er")
+    @git.run('', :foo, '', {:bar => "bazz'er"}, [])
     @git.expects(:sh).with("#{Git.git_binary} --git-dir='#{@git.git_dir}' bar -x 'quu\\'x'")
-    @git.bar(:x => "quu'x")
+    @git.run('', :bar, '', {:x => "quu'x"}, [])
   end
 
   def test_it_shell_escapes_the_standalone_argument
     @git.expects(:sh).with("#{Git.git_binary} --git-dir='#{@git.git_dir}' foo 'bar\\'s'")
-    @git.foo({}, "bar's")
+    @git.run('', :foo, '', {}, ["bar's"])
 
     @git.expects(:sh).with("#{Git.git_binary} --git-dir='#{@git.git_dir}' foo 'bar' '\\; echo \\'noooo\\''")
-    @git.foo({}, "bar", "; echo 'noooo'")
+    @git.run('', :foo, '', {}, ["bar", "; echo 'noooo'"])
   end
 
   def test_piping_should_work_on_1_9
@@ -99,5 +109,35 @@ class TestGit < Test::Unit::TestCase
   def test_fs_delete
     FileUtils.expects(:rm_rf).with(File.join(@git.git_dir, 'foo'))
     @git.fs_delete('foo')
+  end
+
+  def test_passing_env_to_native
+    args = [
+      { 'A' => 'B' },
+      Grit::Git.git_binary, "--git-dir=#{@git.git_dir}", "help", "-a",
+      {:input => nil, :chdir => nil, :timeout => Grit::Git.git_timeout, :max => Grit::Git.git_max_size}
+    ]
+    p = Grit::Git::Child.new(*args)
+    Grit::Git::Child.expects(:new).with(*args).returns(p)
+    @git.native(:help, {:a => true, :env => { 'A' => 'B' }})
+  end
+
+  def test_native_process_info_option_on_failure
+    exitstatus, out, err = @git.no_such_command({:process_info => true})
+    assert_equal 1, exitstatus
+    assert !err.empty?
+  end
+
+  def test_native_process_info_option_on_success
+    exitstatus, out, err = @git.help({:process_info => true})
+    assert_equal 0, exitstatus
+    assert !out.empty?
+    assert err.empty?
+  end
+
+  def test_raising_exceptions_when_native_git_commands_fail
+    assert_raise Grit::Git::CommandFailed do
+      @git.native(:bad, {:raise => true})
+    end
   end
 end

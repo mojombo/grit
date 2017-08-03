@@ -49,6 +49,7 @@ module Grit
   # base class for all git objects (blob, tree, commit, tag)
   class GitObject
     attr_accessor :repository
+    attr_accessor :sha
 
     def GitObject.from_raw(rawobject, repository = nil)
       case rawobject.type
@@ -122,6 +123,11 @@ module Grit
       if ![S_IFLNK, S_IFDIR, S_IFREG, S_IFGITLINK].include?(@mode & S_IFMT)
         raise RuntimeError, "unknown type for directory entry"
       end
+    end
+
+    # Filenames can have weird characters that throw grit's text parsing
+    def safe_name
+      name.gsub(/[\r\n\0]/, '')
     end
 
     def type
@@ -222,7 +228,7 @@ module Grit
     def raw_content
       # TODO: sort correctly
       #@entry.sort { |a,b| a.name <=> b.name }.
-      @entry.collect { |e| [[e.format_mode, e.format_type, e.sha1].join(' '), e.name].join("\t") }.join("\n")
+      @entry.collect { |e| [[e.format_mode, e.format_type, e.sha1].join(' '), e.safe_name].join("\t") }.join("\n")
     end
 
     def actual_raw
@@ -290,7 +296,8 @@ module Grit
   end
 
   class Tag < GitObject
-    attr_accessor :object, :type, :tag, :tagger, :message
+    attr_accessor :object, :tag, :tagger, :message, :object_type
+    attr_writer :type
 
     def self.from_raw(rawobject, repository=nil)
 
@@ -330,6 +337,7 @@ module Grit
     def initialize(object, type, tag, tagger, message, repository=nil)
       @object = object
       @type = type
+      @object_type = type
       @tag = tag
       @tagger = tagger
       @repository = repository

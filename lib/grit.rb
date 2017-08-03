@@ -9,14 +9,6 @@ require 'timeout'
 require 'logger'
 require 'digest/sha1'
 
-if defined? RUBY_ENGINE && RUBY_ENGINE == 'jruby'
-  require 'open3'
-elsif RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/
-  require 'win32/open3'
-else
-  require 'grit/open3_detach'
-end
-
 # third party
 
 begin
@@ -55,9 +47,10 @@ require 'grit/status'
 require 'grit/submodule'
 require 'grit/blame'
 require 'grit/merge'
+require 'grit/rev_list_parser'
 
 module Grit
-  VERSION = '2.3.0'
+  VERSION = '2.5.0'
 
   class << self
     # Set +debug+ to true to log all git calls and responses

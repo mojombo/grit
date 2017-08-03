@@ -13,7 +13,6 @@ module Grit
     lazy_reader :committed_date
     lazy_reader :message
     lazy_reader :short_message
-    lazy_reader :author_string
 
     # Parses output from the `git-cat-file --batch'.
     #
@@ -61,7 +60,7 @@ module Grit
       @committer = committer
       @committed_date = committed_date
       @message = message.join("\n")
-      @short_message = message.select { |x| !x.strip.empty? }[0] || ''
+      @short_message = message.find { |x| !x.strip.empty? } || ''
     end
 
     def id_abbrev
@@ -138,34 +137,15 @@ module Grit
     # - it broke when 'encoding' was introduced - not sure what else might show up
     #
     def self.list_from_string(repo, text)
-      lines = text.split("\n")
+      parser = RevListParser.new(text)
+      parser.entries.map { |entry| bake_from_parser(repo, entry) }
+    end
 
-      commits = []
-
-      while !lines.empty?
-        id = lines.shift.split.last
-        tree = lines.shift.split.last
-
-        parents = []
-        parents << lines.shift.split.last while lines.first =~ /^parent/
-
-        author, authored_date = self.actor(lines.shift)
-        committer, committed_date = self.actor(lines.shift)
-
-        # not doing anything with this yet, but it's sometimes there
-        encoding = lines.shift.split.last if lines.first =~ /^encoding/
-
-        lines.shift
-
-        message_lines = []
-        message_lines << lines.shift[4..-1] while lines.first =~ /^ {4}/
-
-        lines.shift while lines.first && lines.first.empty?
-
-        commits << Commit.new(repo, id, parents, tree, author, authored_date, committer, committed_date, message_lines)
-      end
-
-      commits
+    def self.bake_from_parser(repo, entry)
+      author, authored_date = actor('author ' + entry.author)
+      committer, committed_date = actor('committer ' + entry.committer)
+      new(repo, entry.commit, entry.parents, entry.tree, author, authored_date,
+        committer, committed_date, entry.message_lines)
     end
 
     # Show diffs between two trees.
@@ -194,7 +174,7 @@ module Grit
 
     def show
       if parents.size > 1
-        diff = @repo.git.native("diff #{parents[0].id}...#{parents[1].id}", {:full_index => true})
+        diff = @repo.git.native(:diff, {:full_index => true}, "#{parents[0].id}...#{parents[1].id}")
       else
         diff = @repo.git.show({:full_index => true, :pretty => 'raw'}, @id)
       end
@@ -250,6 +230,21 @@ module Grit
         end
       end
       ret
+    end
+
+    # Calculates the commit's Patch ID. The Patch ID is essentially the SHA1
+    # of the diff that the commit is introducing.
+    #
+    # Returns the 40 character hex String if a patch-id could be calculated
+    #   or nil otherwise.
+    def patch_id
+      show = @repo.git.show({}, @id)
+      patch_line = @repo.git.native(:patch_id, :input => show)
+      if patch_line =~ /^([0-9a-f]{40}) [0-9a-f]{40}\n$/
+        $1
+      else
+        nil
+      end
     end
 
     # Pretty object inspection

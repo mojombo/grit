@@ -15,7 +15,8 @@ module Grit
     #
     # Returns Grit::Tree (baked)
     def self.construct(repo, treeish, paths = [])
-      output = repo.git.ls_tree({}, treeish, *paths)
+      paths = [] if paths.empty? # paths == ""
+      output = repo.git.ls_tree({:raise => true}, treeish, *paths)
       self.allocate.construct_initialize(repo, treeish, output)
     end
 
@@ -65,7 +66,7 @@ module Grit
     #
     # Returns Grit::Blob or Grit::Tree
     def content_from_string(repo, text)
-      mode, type, id, name = text.split(" ", 4)
+      mode, type, id, name = text.split(/ |\t/, 4)
       case type
         when "tree"
           Tree.create(repo, :id => id, :mode => mode, :name => name)
