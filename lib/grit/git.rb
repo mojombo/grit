@@ -128,7 +128,7 @@ module Grit
     def fs_write(file, contents)
       path = File.join(self.git_dir, file)
       FileUtils.mkdir_p(File.dirname(path))
-      File.open(path, 'w') do |f|
+      File.open(path, 'wb') do |f|
         f.write(contents)
       end
     end
@@ -344,6 +344,10 @@ module Grit
         }]))
       Grit.log(process.out) if Grit.debug
       Grit.log(process.err) if Grit.debug
+
+      if defined? $stats and $stats
+        $stats.timing("git.cmd.#{cmd}", process.runtime * 1000)
+      end
 
       status = process.status
       if raise_errors && !status.success?
