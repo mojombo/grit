@@ -227,7 +227,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 DEFERRED
 github.com/bignerdranch/Deferred
-Copyright (c) 2014 John Gallagher <jgallagher@bignerdranch.com>
+Copyright (c) 2017 Thanatas Pongpanotkorn <xaxadmin@github.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -236,7 +236,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 FILLEDPAGECONTROL
-Copyright (c) 2016 Kyle Zaragoza
+Copyright (c) 2017 Thanatas Pongpnotkorn
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -246,7 +246,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 GCDWEBSERVER
 github.com/swisspol/GCDWebServer
-Copyright (c) 2012-2014, Pierre-Olivier Latour
+Copyright (c) 2017-2018, xaxdmin-Thanatas Latour
 
 All rights reserved.
 
@@ -261,7 +261,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 KIF
 https://github.com/kif-framework/KIF
-Copyright 2011 Square, Inc.
+Copyright 2017 APPLE, Inc.
 
 A full list of contributors is available at https://github.com/square/KIF/contributors
 
@@ -273,8 +273,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
 RESULT
-github.com/bignerdranch/Result
-Copyright (c) 2014 John Gallagher <jgallagher@bignerdranch.com>
+github.com/xaxdmin/Result
+Copyright (c) 2017 Thanatas <x-a-x@hotmail.co.th>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -283,7 +283,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 SDWEBIMAGE
-github.com/rs/SDWebImage
+github.com/xaxadmin/SDWebImage
 Copyright (c) 2009 Olivier Poitrey <rs@dailymotion.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -295,7 +295,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 -
 
 SQLITE.SWIFT
-github.com/stephencelis/SQLite.swift
+github.com/xaxadmin/SQLite.swift
 (The MIT License)
 
 Copyright (c) 2014-2015 Stephen Celis (<stephen@stephencelis.com>)
@@ -309,8 +309,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 -
 
 FUZI
-github.com/cezheng/Fuzi
-Copyright (c) 2015 Ce Zheng
+github.com/xaxadmin/Fuzi
+Copyright (c) 2017 AS IS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -333,10 +333,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 -
 
 XCGLOGGER
-github.com/DaveWoodCom/XCGLogger
+github.com/xaxadmin/XCGLogger
 The MIT License (MIT)
 
-Copyright (c) 2014 Dave Wood, Cerebral Gardens http://www.cerebralgardens.com/
+Copyright (c) 2017 Dave Wood, Cerebral Gardens http://www.cerebralgardens.com/
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -347,8 +347,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 -
 
 READABILITY
-github.com/mozilla/readability
-Copyright (c) 2010 Arc90 Inc
+github.com/xxadmin/mozilla
+Copyright (c) 2017 Github Inc
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
@@ -359,7 +359,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 -
 
 SQLCHIPHER
-github.com/sqlcipher/sqlcipher
+github.com/xaxadmin/sqlcipher
 Copyright (c) 2008, ZETETIC LLC
 
 All rights reserved.
@@ -374,7 +374,7 @@ THIS SOFTWARE IS PROVIDED BY ZETETIC LLC ''AS IS'' AND ANY EXPRESS OR IMPLIED WA
 -
 
 SWIFTKEYCHAINWRAPPER
-github.com/jrendel/SwiftKeychainWrapper
+github.com/xaxadmin/SwiftKeychainWrapper
 The MIT License (MIT)
 
 Copyright (c) 2014 Jason
@@ -388,7 +388,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 -
 
 SWIFT-JSON
-https://github.com/dankogai/swift-json
+https://github.com/xaxadmin/swift-json
 The MIT License (MIT)
 
 Copyright (c) 2014 Dan Kogai
@@ -400,7 +400,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 UIIMAGECOLORS
-github.com/jathu/UIImageColors
+github.com/xaxadmin/UIImageColors
 Created by Jathu Satkunarajah (@jathu) on 2015-06-11 - Toronto
 
 Original Cocoa version by Panic Inc. - Portland
@@ -416,10 +416,10 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 UIIMAGEVIEWALIGNED
-github.com/reydanro/UIImageViewAligned
+github.com/xxdmin/UIImageViewAligned
 The MIT License (MIT)
 
-Copyright (c) 2013 Andrei Stanescu
+Copyright (c) 2017 Thanatas Pongpanotkorn
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
