@@ -41,4 +41,4 @@ module Grit
       end
   end # Config
 
-end # Grit
+end # Gritraise ArgumentError, 'Invalid argument provided' unless key && !key.empty?
